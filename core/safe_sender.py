@@ -13,6 +13,7 @@ ALLOWED_TAGS = [
     "a"
 ]
 
+
 def sanitize_html(text: str) -> str:
     """
     Remove unsupported Telegram HTML tags.
@@ -26,19 +27,18 @@ def sanitize_html(text: str) -> str:
 
         return html.escape(match.group(0))
 
-    text = re.sub(
+    return re.sub(
         r"</?([a-zA-Z0-9]+).*?>",
         repl,
         text
     )
 
-    return text
-
 
 def split_message(text: str):
     """
-    Split long messages into Telegram-safe chunks.
+    Split long Telegram messages.
     """
+
     return [
         text[i:i + MAX_LEN]
         for i in range(0, len(text), MAX_LEN)
@@ -47,18 +47,17 @@ def split_message(text: str):
 
 def safe_reply(bot, message, text, markup=None):
     """
-    Safe Telegram sender:
-    - sanitizes HTML
-    - splits long messages
-    - prevents Telegram crashes
+    Safe Telegram sender.
     """
 
     try:
+
         clean = sanitize_html(str(text))
 
         chunks = split_message(clean)
 
         for chunk in chunks:
+
             bot.reply_to(
                 message,
                 chunk,
@@ -68,11 +67,21 @@ def safe_reply(bot, message, text, markup=None):
 
     except Exception as e:
 
-        fallback = html.escape(str(e))
-
         bot.reply_to(
             message,
-            f"⚠️ Telegram Send Error\n<code>{fallback}</code>",
+            f"⚠️ Error\n<code>{html.escape(str(e))}</code>",
             parse_mode="HTML"
         )
-        
+
+
+def send_terminal_output(bot, message, output, markup=None):
+    """
+    Send terminal output safely.
+    """
+
+    safe_reply(
+        bot,
+        message,
+        f"<pre>{html.escape(str(output))}</pre>",
+        markup=markup
+    )
