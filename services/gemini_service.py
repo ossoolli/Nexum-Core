@@ -7,13 +7,27 @@ class GeminiService:
         self.model = model
         self.url = f'https://generativelanguage.googleapis.com/v1beta/models/{self.model}:generateContent?key={self.api_key}'
 
-    def ask(self, prompt, history=None, system_instruction=None):
+    def ask(self, prompt, history=None, system_instruction=None, file_data=None, mime_type=None):
         """
-        يرسل استفساراً مع دعم كامل لتاريخ المحادثة (History) لإعطاء الوكيل ذاكرة قصيرة المدى.
+        يرسل استفساراً مع دعم كامل لتاريخ المحادثة (History) والملفات المتعددة الوسائط (Multimodal).
         """
         contents = history or []
-        contents.append({'role': 'user', 'parts': [{'text': prompt}]})
         
+        parts = []
+        if prompt:
+            parts.append({'text': prompt})
+        else:
+            parts.append({'text': "الرجاء تحليل هذا الملف."})
+            
+        if file_data and mime_type:
+            parts.append({
+                'inline_data': {
+                    'mime_type': mime_type,
+                    'data': base64.b64encode(file_data).decode('utf-8')
+                }
+            })
+            
+        contents.append({'role': 'user', 'parts': parts})        
         payload = {'contents': contents}
         if system_instruction:
             payload['system_instruction'] = {'parts': [{'text': system_instruction}]}

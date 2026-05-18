@@ -163,6 +163,72 @@ def handle_run(message):
         return
     send_terminal_output(bot, message.chat.id, result['status'], result['output'])
 
+# ===== الرسائل متعددة الوسائط (Photos, Documents, Audio) =====
+@bot.message_handler(content_types=['document', 'photo', 'audio', 'voice'])
+def handle_multimodal(message):
+    if message.from_user.id != ADMIN_ID: return
+    
+    bot.send_chat_action(message.chat.id, 'typing')
+    
+    file_id = None
+    mime_type = None
+    
+    if message.content_type == 'photo':
+        file_id = message.photo[-1].file_id
+        mime_type = 'image/jpeg'
+    elif message.content_type == 'document':
+        file_id = message.document.file_id
+        mime_type = message.document.mime_type
+    elif message.content_type == 'audio':
+        file_id = message.audio.file_id
+        mime_type = message.audio.mime_type
+    elif message.content_type == 'voice':
+        file_id = message.voice.file_id
+        mime_type = message.voice.mime_type
+        
+    if not file_id:
+        return
+        
+    try:
+        file_info = bot.get_file(file_id)
+        downloaded_file = bot.download_file(file_info.file_path)
+    except Exception as e:
+        bot.reply_to(message, f"❌ حدث خطأ أثناء تحميل الملف: {str(e)}")
+        return
+        
+    from core.agent_registry import agent_registry
+    import psutil
+    
+    active_agents = [ag['name'] for ag in agent_registry.agents.values()]
+    cpu = psutil.cpu_percent()
+    ram = psutil.virtual_memory().percent
+    try:
+        project_files = os.listdir(BASE_DIR)
+        files_snapshot = ", ".join(project_files[:15])
+    except:
+        files_snapshot = "تعذر جلب القائمة"
+        
+    system_instr = f"""
+أنت نظام تشغيل ذكاء اصطناعي سيادي (NEXUM OS). أنت الآن بمستوى ذكاء وكيل Antigravity.
+حالة النظام الحقيقية التي "تراها" الآن:
+- الوكلاء النشطون: {', '.join(active_agents) if active_agents else 'لا يوجد'}
+- الموارد: CPU {cpu}%, RAM {ram}%
+- الملفات في الجذر: {files_snapshot}
+
+قدراتك المتعددة (Multimodal):
+أنت ترى الآن الملف المرسل لك. قم بتحليله فوراً, سواء كان نصاً ملف PDF، كوداً، أو صورة أو صوت. اتخذ الإجراء المناسب سواء بتلخيصه أو إعطاء ملاحظات تقنية للمستخدم.
+"""
+    history = get_user_history(message.from_user.id)
+    prompt = message.caption or "الرجاء تحليل هذا الملف والتصرف بناءً على محتواه والمساعدة قدر المستطاع."
+    
+    bot.send_message(message.chat.id, "👁️ <b>NEXUM PRIME:</b> جاري قراءة وتحليل الملف...", parse_mode="HTML")
+    
+    response, new_history = _gemini_svc.ask(prompt, history=history, system_instruction=system_instr, file_data=downloaded_file, mime_type=mime_type)
+    update_user_history(message.from_user.id, new_history)
+    
+    safe_reply(bot, message, response)
+
+
 # ===== الرسائل النصية =====
 @bot.message_handler(content_types=['text'])
 def handle_text(message):
