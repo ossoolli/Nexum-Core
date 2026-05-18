@@ -30,6 +30,26 @@
             "role": "user",
             "content": "ارفع على جيت هب",
             "timestamp": "2026-05-18T05:34:47.568805"
+        },
+        {
+            "role": "assistant",
+            "content": "تم: رفع ملفات إلى مستودع جيت هب",
+            "timestamp": "2026-05-18T05:35:28.799104"
+        },
+        {
+            "role": "user",
+            "content": "ثبت المكتبات `\necho \"Flask==3.0.3\" >> requirements.txt\n```",
+            "timestamp": "2026-05-18T05:48:49.391707"
+        },
+        {
+            "role": "assistant",
+            "content": "تم: Install Flask 3.0.3 from requirements.txt",
+            "timestamp": "2026-05-18T05:49:15.004216"
+        },
+        {
+            "role": "user",
+            "content": "# 🔱 NEXUM CORE — خطة التطوير الشاملة\n\n## 📋 ملخص المشروع الحالي\n- البوت: يعمل بـ pyTelegramBotAPI على مكتبة telebot\n- الذكاء: Gemini 2.5 Flash + OpenAI GPT-4o\n- الوكلاء: Monitor (مراقبة) + Deploy (نشر)\n- الأمان: فحص أوامر + تأكيد للأوامر الحساسة\n- الذاكرة: محلية JSON + Supabase PostgreSQL\n\n---\n\n## 🎯 التطويرات المطلوبة\n\n### 1️⃣ نظام الأزرار الشامل (Inline Keyboards)\n| القسم | الأزرار | الوظيفة |\n|--------|---------|---------|\n| 🏠 القائمة الرئيسية | 6 أزرار | نقطة دخول لكل الأقسام |\n| 📊 المراقبة | CPU, RAM, Disk, Network, Processes | حالة النظام التفصيلية |\n| 🚀 النشر | Git Status, Pull, Push, Deploy | إدارة الكود |\n| 🐳 Docker | Containers, Images, Logs, Restart | إدارة الحاويات |\n| 🤖 الذكاء | Gemini Chat, GPT-4, Code Review | محادثة ذكية |\n| ⚙️ الإعدادات | Memory, Logs, Restart Bot | إعدادات النظام |\n| 💰 المالية | Stars Payment, Subscription Status | إدارة الاشتراكات |\n\n### 2️⃣ Telegram Mini App (WebApp)\n- لوحة تحكم ويب متكاملة تُفتح داخل تلجرام\n- رسوم بيانية حية (CPU, RAM, Disk)\n- سجل الأوامر المنفذة\n- إدارة Docker بصرياً\n- محادثة AI مباشرة\n\n### 3️⃣ تحسين العرض والتحكم\n- رسائل منسقة بـ HTML محسّن\n- أزرار تنقل (Pagination) للقوائم الطويلة\n- إشعارات ذكية تلقائية\n- تقارير مجدولة\n\n---\n\n## 📁 الملفات المطلوب إنشاؤها/تعديلها\n\n### ملفات جديدة:\nwebapp/\n├── index.html          ← Mini App الرئيسية\n├── style.css           ← التنسيقات\n├── app.js              ← المنطق\n└── api_server.py       ← خادم API للـ Mini App\ncore/\n├── keyboards.py        ← جميع لوحات الأزرار\n└── formatters.py       ← تنسيق الرسائل المحسّن\nagents/\n└── docker_agent.py     ← وكيل Docker الجديد\n\n\n### ملفات معدّلة:\n- main.py — إضافة handlers جديدة + ربط الأزرار\n- requirements.txt — إضافة Flask/aiohttp\n\n---\n\n## ⚡ ترتيب التنفيذ\n1. ✅ إنشاء core/keyboards.py — نظام الأزرار الكامل\n2. ✅ إنشاء core/formatters.py — تنسيق الرسائل\n3. ✅ إنشاء agents/docker_agent.py — وكيل Docker\n4. ✅ تحديث main.py — ربط كل شيء\n5. ✅ إنشاء webapp/ — Mini App\n6. ✅ تحديث requirements.txt ما رايك بالخطة التي سوف اضيفها هنا",
+            "timestamp": "2026-05-18T05:50:38.829845"
         }
     ]
 }
