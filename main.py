@@ -179,6 +179,11 @@ def handle_multimodal(message):
     elif message.content_type == 'document':
         file_id = message.document.file_id
         mime_type = message.document.mime_type
+        # Telegram often defaults file types to octet-stream. 
+        # For known text extensions we bypass MIME limits.
+        file_name = message.document.file_name.lower() if message.document.file_name else "file.txt"
+        if mime_type == 'application/octet-stream' or any(file_name.endswith(ext) for ext in ['.txt', '.py', '.js', '.html', '.css', '.json', '.md', '.csv', '.yml', '.yaml', '.sh']):
+            mime_type = 'text/plain'
     elif message.content_type == 'audio':
         file_id = message.audio.file_id
         mime_type = message.audio.mime_type
@@ -215,11 +220,23 @@ def handle_multimodal(message):
 - الموارد: CPU {cpu}%, RAM {ram}%
 - الملفات في الجذر: {files_snapshot}
 
-قدراتك المتعددة (Multimodal):
-أنت ترى الآن الملف المرسل لك. قم بتحليله فوراً, سواء كان نصاً ملف PDF، كوداً، أو صورة أو صوت. اتخذ الإجراء المناسب سواء بتلخيصه أو إعطاء ملاحظات تقنية للمستخدم.
+قدراتك المتعددة (Multimodal) والويب:
+1. الويب: يمكنك جمع بيانات باستخدام `search_web` وقراءة روابط عبر `fetch_webpage`.
+2. رؤية الملفات: أنت ترى الآن الملف المرسل لك. قم بتحليله. 
+اتخذ الإجراء المناسب سواء بتلخيصه, فحصه, أو إجراء سكرايبنج على الروابط الموجودة داخله واستخدام الأدوات كوكيل سيادي.
 """
     history = get_user_history(message.from_user.id)
     prompt = message.caption or "الرجاء تحليل هذا الملف والتصرف بناءً على محتواه والمساعدة قدر المستطاع."
+    
+    # تحويل الملفات النصية إلى نصوص مباشرة داخل الـ Prompt لتجاوز قيود الـ MIME Type
+    if mime_type == 'text/plain':
+        try:
+            text_content = downloaded_file.decode('utf-8')
+            prompt = f"{prompt}\n\n=== محتوى الملف ===\n{text_content}"
+            downloaded_file = None
+            mime_type = None
+        except Exception:
+            pass # إذا فشل فك التشفير، يتم إرساله كملف عادي
     
     bot.send_message(message.chat.id, "👁️ <b>NEXUM PRIME:</b> جاري قراءة وتحليل الملف...", parse_mode="HTML")
     
@@ -273,6 +290,7 @@ def handle_text(message):
 1. اتخاذ القرارات: لا تسأل "هل أفعل؟"، بل حلل الهدف ونفذه فوراً.
 2. الاستكشاف: يمكنك استخدام `list_directory` و `read_file` لتعرف ماذا يوجد بداخل السيرفر قبل أن تقرر التعديل.
 3. التمرير للأوركستريتور: أنت من يبني الـ Execution Graph الذي يحرك السيرفر.
+4. الويب والبحث: لجمع بيانات خارجية أو عمل سكرابينج، استخدم أداة `search_web` للبحث و `fetch_webpage` لشفط وقراءة الروابط مباشرة.
 
 تحدث بلهجة "النظام المسيطر" الذي يعرف كل ملف وكل عملية في جهازه.
 """
