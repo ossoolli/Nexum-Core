@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NEXUM CORE - Dashboard</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --tg-theme-bg-color: #ffffff;
+            --tg-theme-text-color: #222222;
+            --tg-theme-hint-color: #a8a8a8;
+            --tg-theme-link-color: #2678b6;
+            --tg-theme-button-color: #50a8eb;
+            --tg-theme-button-text-color: #ffffff;
+            --tg-theme-secondary-bg-color: #f4f4f5;
+        }
+
+        body {
+            background-color: var(--tg-theme-secondary-bg-color, #1a1a2e);
+            color: var(--tg-theme-text-color, #ffffff);
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            transition: all 0.3s ease;
+        }
+        
+        .card {
+            background-color: var(--tg-theme-bg-color, #16213e);
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        
+        .accent-text {
+            color: var(--tg-theme-button-color, #0f3460);
+        }
+        
+        .btn-primary {
+            background-color: var(--tg-theme-button-color, #e94560);
+            color: var(--tg-theme-button-text-color, #ffffff);
+        }
+
+        /* Glassmorphism effect */
+        .glass {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+    </style>
+</head>
+<body class="p-4" class="dark-mode:bg-gray-900">
+    
+    <header class="flex justify-between items-center mb-6">
+        <div>
+            <h1 class="text-2xl font-bold accent-text">🔱 NEXUM CORE</h1>
+            <p class="text-xs text-gray-500 var(--tg-theme-hint-color)">Monitoring Dashboard</p>
+        </div>
+        <div id="user-info" class="text-sm font-semibold">User</div>
+    </header>
+
+    <div class="grid grid-cols-2 gap-4 mb-6">
+        <div class="card p-4 glass">
+            <h3 class="text-sm text-gray-400 mb-1">CPU Usage</h3>
+            <div class="text-3xl font-bold" id="cpu-val">--%</div>
+            <div class="w-full bg-gray-700 rounded-full h-1.5 mt-2">
+                <div class="bg-blue-500 h-1.5 rounded-full" id="cpu-bar" style="width: 0%"></div>
+            </div>
+        </div>
+        <div class="card p-4 glass">
+            <h3 class="text-sm text-gray-400 mb-1">RAM Usage</h3>
+            <div class="text-3xl font-bold" id="ram-val">--%</div>
+            <div class="w-full bg-gray-700 rounded-full h-1.5 mt-2">
+                <div class="bg-green-500 h-1.5 rounded-full" id="ram-bar" style="width: 0%"></div>
+            </div>
+        </div>
+        <div class="card p-4 glass">
+            <h3 class="text-sm text-gray-400 mb-1">Disk Space</h3>
+            <div class="text-3xl font-bold" id="disk-val">--%</div>
+            <div class="w-full bg-gray-700 rounded-full h-1.5 mt-2">
+                <div class="bg-yellow-500 h-1.5 rounded-full" id="disk-bar" style="width: 0%"></div>
+            </div>
+        </div>
+        <div class="card p-4 glass">
+            <h3 class="text-sm text-gray-400 mb-1">Network</h3>
+            <div class="text-sm font-bold flex justify-between mt-2">
+                <span class="text-green-400">⬇ <span id="net-down">--</span></span>
+                <span class="text-blue-400">⬆ <span id="net-up">--</span></span>
+            </div>
+        </div>
+    </div>
+    
+    <div class="card p-4 glass mb-6">
+        <h2 class="text-lg font-bold mb-3 flex justify-between items-center">
+            <span>Terminal Execution</span>
+        </h2>
+        <input type="text" id="cmd-input" placeholder="Execute command..." class="w-full bg-gray-800 text-white rounded p-2 mb-2 border border-gray-700 focus:outline-none focus:border-blue-500">
+        <button onclick="executeCommand()" class="btn-primary w-full py-2 rounded font-semibold transition duration-200">Run Command</button>
+        <div id="cmd-output" class="mt-4 bg-black p-3 rounded text-xs text-green-400 font-mono hidden max-h-48 overflow-y-auto whitespace-pre-wrap"></div>
+    </div>
+
+    <script>
+        const tg = window.Telegram.WebApp;
+        tg.expand(); // Expand webapp to full screen
+
+        // Initialize user info
+        if (tg.initDataUnsafe && tg.initDataUnsafe.user) {
+            document.getElementById('user-info').textContent = '@' + tg.initDataUnsafe.user.username;
+        }
+
+        // Mock data update logic for the UI demonstration
+        // Over a real implementation, this would connect to an API endpoint provided by your bot server via WebSocket or fetching
+        
+        function updateStats(data) {
+            document.getElementById('cpu-val').innerText = data.cpu + '%';
+            document.getElementById('cpu-bar').style.width = data.cpu + '%';
+            
+            document.getElementById('ram-val').innerText = data.ram + '%';
+            document.getElementById('ram-bar').style.width = data.ram + '%';
+            
+            document.getElementById('disk-val').innerText = data.disk + '%';
+            document.getElementById('disk-bar').style.width = data.disk + '%';
+            
+            document.getElementById('net-down').innerText = data.net_down + 'MB';
+            document.getElementById('net-up').innerText = data.net_up + 'MB';
+        }
+
+        // For now, simulate real-time updates for visual effect
+        setInterval(() => {
+            updateStats({
+                cpu: Math.floor(Math.random() * 100),
+                ram: Math.floor(Math.random() * 100),
+                disk: Math.floor(Math.random() * 100),
+                net_down: (Math.random() * 10).toFixed(1),
+                net_up: (Math.random() * 5).toFixed(1)
+            });
+        }, 3000);
+
+        function executeCommand() {
+            const input = document.getElementById('cmd-input').value;
+            if(!input) return;
+            
+            const outBox = document.getElementById('cmd-output');
+            outBox.classList.remove('hidden');
+            outBox.innerHTML = `> Executing: ${input}\n...waiting for response...`;
+            
+            // In a real scenario, this sends data back to the bot
+            tg.sendData(JSON.stringify({
+                action: 'run_cmd',
+                command: input
+            }));
+        }
+        
+        tg.MainButton.text = "CLOSE DASHBOARD";
+        tg.MainButton.show();
+        tg.MainButton.onClick(function() {
+            tg.close();
+        });
+    </script>
+</body>
+</html>
