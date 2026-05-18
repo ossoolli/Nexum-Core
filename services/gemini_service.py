@@ -32,21 +32,33 @@ class GeminiService:
         if system_instruction:
             payload['system_instruction'] = {'parts': [{'text': system_instruction}]}
 
-        try:
-            response = requests.post(self.url, json=payload, timeout=30)
-            res_json = response.json()
+        import time
+        max_retries = 3
+        retry_delay = 2
 
-            if 'candidates' in res_json and res_json['candidates'][0].get('content'):
-                text_response = res_json['candidates'][0]['content']['parts'][0]['text']
-                # إضافة الرد للتاريخ ليعود للمستخدم
-                contents.append({'role': 'model', 'parts': [{'text': text_response}]})
-                return text_response, contents
-            
-            print(f"⚠️ Google API Error ({self.model}):")
-            print(json.dumps(res_json, indent=2))
-            
-            error_msg = res_json.get('error', {}).get('message', 'Unknown Error')
-            return f"❌ خطأ تقني: {error_msg}", contents
+        for attempt in range(max_retries):
+            try:
+                response = requests.post(self.url, json=payload, timeout=30)
+                res_json = response.json()
 
-        except Exception as e:
-            return f"❌ فشل الاتصال: {str(e)}", history or []
+                if response.status_code == 503:
+                    print(f"📡 [Gemini Service] Model busy (503). Retrying in {retry_delay}s... (Attempt {attempt+1}/{max_retries})")
+                    time.sleep(retry_delay)
+                    retry_delay *= 2
+                    continue
+
+                if 'candidates' in res_json and res_json['candidates'][0].get('content'):
+                    text_response = res_json['candidates'][0]['content']['parts'][0]['text']
+                    contents.append({'role': 'model', 'parts': [{'text': text_response}]})
+                    return text_response, contents
+                
+                error_msg = res_json.get('error', {}).get('message', 'Unknown Error')
+                return f"❌ خطأ تقني: {error_msg}", contents
+
+            except Exception as e:
+                if attempt == max_retries - 1:
+                    return f"❌ فشل الاتصال بعد {max_retries} محاولات: {str(e)}", history or []
+                time.sleep(retry_delay)
+                retry_delay *= 2
+        
+        return "❌ النظام مشغول حالياً، يرجى المحاولة لاحقاً.", history or []

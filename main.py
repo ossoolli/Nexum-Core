@@ -40,16 +40,35 @@ orchestrator.set_planner(_planner)
 pending_commands = {}
 
 
-# === إدارة الذاكرة الحوارية ===
+# === إدارة الذاكرة الحوارية (مع المزامنة السحابية) ===
 def get_user_history(user_id):
+    from services.db_service import db_service
     from core.runtime_state import runtime_state
+    
+    # 1. محاولة الجلب من الذاكرة اللحظية (RAM)
     state = runtime_state.get_agent_state(f"user_{user_id}")
-    return state.get("chat_history", [])
+    history = state.get("chat_history", [])
+    
+    # 2. إذا كانت الذاكرة فارغة، نسحب من قاعدة البيانات (Supabase)
+    if not history:
+        history = db_service.load_chat_history(user_id)
+        if history:
+            runtime_state.update_agent_state(f"user_{user_id}", {"chat_history": history})
+            
+    return history
 
 def update_user_history(user_id, history):
+    from services.db_service import db_service
     from core.runtime_state import runtime_state
-    # الاحتفاظ بآخر 10 رسائل فقط لتوفير التوكينز
-    runtime_state.update_agent_state(f"user_{user_id}", {"chat_history": history[-10:]})
+    
+    # تحديد الحجم الأقصى
+    capped_history = history[-15:] # زيادة السعة قليلاً
+    
+    # 1. تحديث الذاكرة اللحظية
+    runtime_state.update_agent_state(f"user_{user_id}", {"chat_history": capped_history})
+    
+    # 2. المزامنة مع قاعدة البيانات السحابية
+    db_service.save_chat_history(user_id, capped_history)
 
 # === تسجيل Handlers في الـ Callback Router ===
 def _handle_hw_status(cb_data, ctx):
@@ -88,11 +107,19 @@ def _handle_list_agents(cb_data, ctx):
 
 def _handle_audit_logs(cb_data, ctx):
     from core.event_bus import event_bus
+    from services.db_service import db_service
+    
+    # جلب الأحداث من الذاكرة
     history = event_bus.get_history(limit=5)
+    
+    # مزامنة الأحداث الهامة مع DB في الخلفية
+    for ev in history:
+        db_service.save_audit_log(ev['type'], ev)
+
     if not history:
         return "📋 سجل الأحداث فارغ حالياً."
     
-    report = "📋 <b>أحدث سجلات التدقيق (Audit Logs):</b>\n\n"
+    report = "📋 <b>أحدث سجلات التدقيق (Cloud Sync):</b>\n\n"
     for ev in history:
         ts = ev['timestamp'].split('T')[1].split('.')[0]
         report += f"🕒 <code>[{ts}]</code> <b>{ev['type']}</b>\n"
