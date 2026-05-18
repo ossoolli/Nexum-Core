@@ -10,7 +10,14 @@
       "Bash(git pull *)",
       "Bash(git stash *)",
       "Bash(git log *)",
-      "Bash(git diff *)"
+      "Bash(git diff *)",
+      "Bash(xxd)",
+      "Bash(python -c ' *)",
+      "Bash(where py *)",
+      "Bash(py -V)",
+      "Bash(py -c ' *)",
+      "Bash(where python.exe)",
+      "Read(//c/Program Files/**)"
     ]
   },
   "hooks": {
@@ -19,11 +26,11 @@
         "hooks": [
           {
             "type": "command",
-            "shell": "powershell",
             "command": "$changes = git status --porcelain 2>$null; if ($changes) { git add -A 2>$null; git commit -m 'Auto-snapshot from Claude session' --quiet 2>$null; git push origin main --quiet 2>$null }",
-            "async": true,
+            "shell": "powershell",
             "timeout": 60,
-            "statusMessage": "Auto-pushing changes to origin/main"
+            "statusMessage": "Auto-pushing changes to origin/main",
+            "async": true
           }
         ]
       }
