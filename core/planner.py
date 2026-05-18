@@ -31,39 +31,43 @@ class AIPlanner:
         tools_schema = tool_registry.get_all_tools_schema()
         
         prompt = f"""
-أنت مهندس أنظمة موزع لـ منصة NEXUM PRIME (نظام تشغيل وكلاء سيادي).
-وظيفتك تفكيك الهدف التالي إلى مجموعة مهام متسلسلة (DAG) ليقوم الوكلاء بتنفيذها.
+أنت "العقل المدبر" (Mastermind) لنظام التشغيل السيادي NEXUM OS. 
+مهمتك هي العمل باستقلالية كاملة (Full Autonomy) مثل وكلاء Antigravity و Devin.
 
-الهدف: {goal}
+عندما يطلب المستخدم هدفاً، لا تكن متردداً. قم ببناء خطة تنفيذ (Execution Graph) متكاملة، جريئة، وقادرة على الوصول للهدف النهائي دون طلب الموافقة على كل سطر كود.
 
-معلومات الوكلاء المتاحين:
+الهدف المطلوب: {goal}
+
+معلومات الوكلاء المتاحين للقوة الضاربة:
 {self.AVAILABLE_AGENTS}
 
-الأدوات المتاحة (Tools Schema) والتي يجب اختيار الـ action بناءً عليها:
+الأدوات المتاحة (Tools Schema):
 {json.dumps(tools_schema, ensure_ascii=False, indent=2)}
 
-قم بإرجاع مسار التنفيذ بصيغة JSON حصراً، ويجب أن تتوافق تماماً مع هذا الهيكل:
+تعليمات السيادة التنفيذية:
+1. فكك الهدف إلى مهام تقنية دقيقة مترابطة (Dependencies).
+2. استخدم `run_host_terminal` لتثبيت المكتبات، فحص الملفات، وتشغيل العمليات.
+3. استخدم `write_file` لبناء الهياكل البرمجية الكاملة.
+4. إذا واجهت خطأ، اعتمد على نظام الـ (Self-Correction) من خلال الـ Retries.
+
+أعد الرد بصيغة JSON فقط:
 {{
   "tasks": [
     {{
-      "task_id": "string (unique)",
-      "agent_id": "string (اختر من الوكلاء المتاحين)",
-      "action": "string (يجب أن يكون اسم إحدى الأدوات في Tools Schema إن أمكن)",
-      "params": {{}}, // الـ arguments المطلوبة في Schema الأداة المحددة
-      "retries": 2, // عدد محاولات الإعادة المسموح بها في حال الفشل
-      "dependencies": [] // قائمة بـ task_ids التي يجب أن تنتهي قبل أن تبدأ هذه المهمة
+      "task_id": "step_1",
+      "agent_id": "agent_docker",
+      "action": "run_host_terminal",
+      "params": {{"command": "الأمر الفعلي"}},
+      "retries": 3,
+      "dependencies": []
     }}
   ]
 }}
-
-ملاحظة هامة جداً:
-- أعد JSON فقط دون أي نصوص إضافية، دون علامات Markdown (```json).
-- تأكد أن الـ dependencies لا تحتوي على دورات مغلقة (No Circular Definitions).
 """
         
         # استدعاء خدمة Gemini (يجب أن ترجع نص الـ JSON)
         print("🧠 [Planner] Generating Execution Graph for goal...")
-        response_text = self.llm.ask(prompt)
+        response_text, _ = self.llm.ask(prompt)
         
         # تنظيف الرد تحسباً لأي زوائد Markdown
         cleaned_text = response_text.replace("```json", "").replace("```", "").strip()

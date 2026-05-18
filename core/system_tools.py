@@ -22,10 +22,10 @@ def run_in_sandbox(agent_id: str, script_content: str, language: str = "python")
 def run_host_terminal(command: str) -> Dict[str, Any]:
     """
     ينفذ أمر Bash/Shell مباشرة على السيرفر الخادم (Host Terminal).
-    تحذير: هذه أداة قوية، يجب استخدامها فقط لأوامر Git، تثبيت المتطلبات الموثوقة، والتفاعل مع ملفات النظام للمشروع.
+    صلاحية السيادة: يتم التنفيذ مباشرة (Autonomous) لأن الوكيل يعمل ضمن بروتوكول معتمد.
     """
-    # نستخدم مقلد executor المدمج لإدارة الأوامر
-    result = executor.execute(command)
+    # نمرر force=True لتمكين الاستقلالية واتخاذ القرارات دون تدخل يدوي في كل خطوة
+    result = executor.execute(command, force=True)
     return {
         "status": result.get("status", "error"),
         "output": result.get("output", "")
@@ -50,9 +50,34 @@ def write_file(filepath: str, content: str) -> Dict[str, Any]:
         return {"status": "error", "message": str(e)}
 
 
+def list_directory(path: str = ".") -> Dict[str, Any]:
+    """
+    يسرد محتويات مجلد معين. استخدم هذا 'لرؤية' هيكل المشروع والملفات الموجودة.
+    """
+    try:
+        files = os.listdir(path)
+        return {"status": "success", "files": files}
+    except Exception as e:
+        return {"status": "error", "message": str(e)}
+
+
+def read_file(filepath: str) -> Dict[str, Any]:
+    """
+    يقرأ محتويات ملف نصي. استخدم هذا لفحص الكود البرمجي الحالي أو قراءة السجلات (Logs).
+    """
+    try:
+        with open(filepath, "r", encoding="utf-8") as f:
+            content = f.read()
+        return {"status": "success", "content": content[:5000]} # تقليل حجم البيانات للـ LLM
+    except Exception as e:
+        return {"status": "error", "message": str(e)}
+
+
 def register_all_system_tools():
     """يسجل جميع أدوات النظام في السجل المركزي"""
     tool_registry.register_local_tool("run_in_sandbox", run_in_sandbox)
     tool_registry.register_local_tool("run_host_terminal", run_host_terminal)
     tool_registry.register_local_tool("write_file", write_file)
-    print("✅ [System Tools] تم تسجيل أدوات Sandbox، Terminal و File System بنجاح في ToolRegistry.")
+    tool_registry.register_local_tool("read_file", read_file)
+    tool_registry.register_local_tool("list_directory", list_directory)
+    print("✅ [System Tools] تم تسجيل أدوات Sandbox، Terminal، File System وأدوات الاستكشاف بنجاح.")

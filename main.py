@@ -182,12 +182,34 @@ def handle_text(message):
             bot.send_message(message.chat.id, f"❌ <b>فشل في الجدولة:</b> {str(e)}", parse_mode="HTML")
         return
 
-    # محادثة عادية مع ذاكرة
-    bot.send_chat_action(message.chat.id, 'typing')
+    # تجهيز سياق كامل للنظام مع "عين" على الملفات
+    active_agents = [ag['name'] for ag in agent_registry.agents.values()]
+    cpu = psutil.cpu_percent()
+    ram = psutil.virtual_memory().percent
+    
+    # رؤية هيكل المشروع الحالي
+    try:
+        project_files = os.listdir(BASE_DIR)
+        files_snapshot = ", ".join(project_files[:15]) # أول 15 ملف للمعاينة
+    except:
+        files_snapshot = "تعذر جلب القائمة"
+    
+    system_instr = f"""
+أنت نظام تشغيل ذكاء اصطناعي سيادي (NEXUM OS). أنت الآن بمستوى ذكاء وكيل Antigravity.
+حالة النظام الحقيقية التي "تراها" الآن:
+- الوكلاء النشطون: {', '.join(active_agents) if active_agents else 'لا يوجد'}
+- الموارد: CPU {cpu}%, RAM {ram}%
+- الملفات في الجذر: {files_snapshot}
+
+قدراتك السيادية:
+1. اتخاذ القرارات: لا تسأل "هل أفعل؟"، بل حلل الهدف ونفذه فوراً.
+2. الاستكشاف: يمكنك استخدام `list_directory` و `read_file` لتعرف ماذا يوجد بداخل السيرفر قبل أن تقرر التعديل.
+3. التمرير للأوركستريتور: أنت من يبني الـ Execution Graph الذي يحرك السيرفر.
+
+تحدث بلهجة "النظام المسيطر" الذي يعرف كل ملف وكل عملية في جهازه.
+"""
     
     history = get_user_history(message.from_user.id)
-    system_instr = "أنت نظام تشغيل ذكاء اصطناعي سيادي (NEXUM OS). أنت قوي، تقني، وتساعد المستخدم معتز في إدارة سيرفره."
-    
     response, new_history = _gemini_svc.ask(text, history=history, system_instruction=system_instr)
     update_user_history(message.from_user.id, new_history)
     
