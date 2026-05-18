@@ -1,17 +1,12 @@
 import os
 import sys
-import html as html_module
 import telebot
-from telebot import types
 from dotenv import load_dotenv
 
-# === Dynamic Path Setup ===
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, BASE_DIR)
-
 load_dotenv(dotenv_path=os.path.join(BASE_DIR, ".env"))
 
-# === Core Imports ===
 from core.llm_factory import llm
 from core.executor import executor
 from core.safe_sender import send_terminal_output, safe_reply
@@ -19,7 +14,13 @@ from core.planner import AIPlanner
 from core.memory_local import LongTermMemory
 from agents.monitor import monitor_agent
 from agents.deploy import deploy_agent
+from agents.docker_agent import docker_agent
 from services.gemini_service import GeminiService
+from core.keyboards import (
+    main_menu, monitor_menu, deploy_menu, docker_menu, ai_menu, settings_menu, 
+    finance_menu, back_button, MENU_MAP, confirm_action
+)
+from core.formatters import fmt
 
 # === Bot Setup ===
 bot = telebot.TeleBot(os.getenv("TELEGRAM_TOKEN"))
@@ -30,288 +31,193 @@ _gemini_svc = GeminiService(os.getenv("GOOGLE_API_KEY"))
 _planner = AIPlanner(_gemini_svc)
 _memory = LongTermMemory(os.path.join(BASE_DIR, "storage", "memory.json"))
 
-# === State ===
 pending_commands = {}
 
 
-# ===== المترجم والمنسق السيادي =====
-class NexumInterpreter:
-    def process_request(self, user_id, text):
-        clean_text = text.lower().strip()
-
-        if any(w in clean_text for w in ["حالة النظام", "status", "النبض", "pulse"]):
-            return monitor_agent.get_pulse_report()
-
-        if any(w in clean_text for w in ["ارفع الكود", "deploy", "push", "جيت هب", "github"]):
-            return deploy_agent.deploy_updates(f"🔱 NEXUM Deployment: {text[:20]}")
-
-        if any(w in clean_text for w in ["إصلاح", "fix", "debug", "برمجة عميقة"]):
-            return llm.ask_specialist(f"مهمة تطوير وإصلاح كود معقد: {text}")
-
-        return llm.ask_gemini(user_id, text)
-
-
-interpreter = NexumInterpreter()
-
-
-# ===== لوحة التحكم =====
-def get_dashboard_markup():
-    markup = types.InlineKeyboardMarkup()
-    markup.add(
-        types.InlineKeyboardButton("📊 حالة النظام", callback_data="status"),
-        types.InlineKeyboardButton("🛠️ إصلاح شامل", callback_data="fix_all")
-    )
-    markup.add(types.InlineKeyboardButton("⭐ ترقية الحساب (Stars)", callback_data="upgrade"))
-    return markup
-
-
-# ===== Command Handlers =====
-
-@bot.message_handler(commands=['start', 'dashboard'])
-def send_dashboard(message):
-    if message.from_user.id != ADMIN_ID:
-        return
+# ===== القائمة الرئيسية =====
+@bot.message_handler(commands=['start', 'menu', 'dashboard'])
+def cmd_start(message):
+    if message.from_user.id != ADMIN_ID: return
     bot.send_message(
-        message.chat.id,
-        "🔱 <b>NEXUM CORE OS</b>\n\nالأوامر المتاحة:\n"
-        "/run <code>أمر</code> — تنفيذ مباشر\n"
-        "/planx <code>هدف</code> — تخطيط وتنفيذ ذكي\n"
-        "/docker — حالة الحاويات\n"
-        "/status — نبض السيرفر",
-        parse_mode="HTML"
+        message.chat.id, 
+        fmt.welcome_message(), 
+        parse_mode="HTML", 
+        reply_markup=main_menu()
     )
 
 
-@bot.message_handler(commands=['status'])
-def handle_status(message):
-    if message.from_user.id != ADMIN_ID:
-        return
-    report = monitor_agent.get_pulse_report()
-    try:
-        bot.reply_to(message, report, parse_mode="HTML")
-    except Exception:
-        bot.reply_to(message, report.replace('<', '').replace('>', ''))
-
-
-@bot.message_handler(commands=['run'])
-def handle_run(message):
-    if message.from_user.id != ADMIN_ID:
-        return
-    cmd = message.text.replace('/run', '', 1).strip()
-    if not cmd:
-        bot.reply_to(message, "الاستخدام: <code>/run الأمر</code>", parse_mode="HTML")
-        return
-
-    result = executor.execute(cmd)
-
-    if result['status'] == 'confirm':
-        pending_commands[message.from_user.id] = cmd
-        markup = types.InlineKeyboardMarkup()
-        markup.add(
-            types.InlineKeyboardButton("✅ نفّذ", callback_data="confirm_run"),
-            types.InlineKeyboardButton("❌ إلغاء", callback_data="cancel_run")
-        )
-        bot.reply_to(
-            message,
-            f"⚠️ أمر حساس:\n<code>{html_module.escape(cmd)}</code>",
-            reply_markup=markup, parse_mode="HTML"
-        )
-        return
-
-    out = html_module.escape(str(result.get('output', '')))
-    icon = "✅" if result['status'] == 'success' else "❌"
-    try:
-        bot.reply_to(message, f"{icon}\n<pre>{out[:3500]}</pre>", parse_mode="HTML")
-    except Exception:
-        bot.reply_to(message, f"{icon}\n{str(result.get('output', ''))[:3500]}")
-
-
-@bot.message_handler(commands=['planx', 'plan'])
-def handle_planx(message):
-    if message.from_user.id != ADMIN_ID:
-        return
-    goal = message.text.split(' ', 1)[1].strip() if ' ' in message.text else ''
-    if not goal:
-        bot.reply_to(message, "الاستخدام: <code>/planx هدف</code>", parse_mode="HTML")
-        return
-    _run_plan(message, goal)
-
-
-@bot.message_handler(commands=['docker'])
-def handle_docker(message):
-    if message.from_user.id != ADMIN_ID:
-        return
-    args = message.text.split()
-    if len(args) == 1:
-        report = deploy_agent.docker_status()
-    elif len(args) >= 3 and args[1] == 'logs':
-        report = deploy_agent.docker_logs(args[2])
-    else:
-        report = "الاستخدام:\n<code>/docker</code>\n<code>/docker logs اسم_الحاوية</code>"
-    try:
-        bot.reply_to(message, report, parse_mode="HTML")
-    except Exception:
-        bot.reply_to(message, report.replace('<', '').replace('>', ''))
-
-
-# ===== Callback Handlers =====
-
-@bot.callback_query_handler(func=lambda call: True)
-def handle_query(call):
-    if call.from_user.id != ADMIN_ID:
-        return
-    bot.answer_callback_query(call.id, "جاري التنسيق مع الوكلاء...")
-
-    if call.data == "status":
-        response = interpreter.process_request(call.from_user.id, "حالة النظام")
+# ===== Callback Handlers (الملاحة العامة) =====
+@bot.callback_query_handler(func=lambda call: call.data in MENU_MAP or call.data == "back_main")
+def handle_menu_navigation(call):
+    if call.from_user.id != ADMIN_ID: return
+    
+    if call.data == "back_main":
         bot.edit_message_text(
-            response, call.message.chat.id, call.message.message_id,
-            reply_markup=get_dashboard_markup(), parse_mode="HTML"
+            fmt.header("القائمة الرئيسية", "اختر القسم المطلوب"),
+            call.message.chat.id, call.message.message_id,
+            reply_markup=main_menu(), parse_mode="HTML"
         )
-    elif call.data == "fix_all":
-        response = interpreter.process_request(call.from_user.id, "ارفع الكود")
-        bot.edit_message_text(
-            response, call.message.chat.id, call.message.message_id,
-            reply_markup=get_dashboard_markup(), parse_mode="HTML"
-        )
-    elif call.data == "upgrade":
-        prices = [types.LabeledPrice(label="Sovereign Upgrade", amount=500)]
-        bot.send_invoice(
-            call.message.chat.id,
-            title="Sovereign Subscription Upgrade",
-            description="ترقية حسابك لتفعيل وكلاء الذكاء الاصطناعي الفوقيين.",
-            invoice_payload="sovereign_upgrade_payload",
-            provider_token="",
-            currency="XTR",
-            prices=prices
-        )
-    elif call.data == "confirm_run":
-        cmd = pending_commands.pop(call.from_user.id, None)
-        if cmd:
-            result = executor.execute(cmd, force=True)
-            out = html_module.escape(str(result.get('output', '')))
-            bot.send_message(
-                call.message.chat.id,
-                f"✅ تم التنفيذ:\n<pre>{out[:3500]}</pre>",
-                parse_mode="HTML"
-            )
-    elif call.data == "cancel_run":
-        pending_commands.pop(call.from_user.id, None)
-        bot.answer_callback_query(call.id, "تم الإلغاء.")
+        return
 
-
-# ===== Payment Handlers =====
-
-@bot.pre_checkout_query_handler(func=lambda query: True)
-def handle_pre_checkout(pre_checkout_query):
-    bot.answer_pre_checkout_query(pre_checkout_query.id, ok=True)
-
-
-@bot.message_handler(content_types=['successful_payment'])
-def handle_payment_success(message):
-    payment = message.successful_payment
-    bot.send_message(
-        message.chat.id,
-        f"✅ <b>تمت المصادقة المالية بنجاح!</b>\n"
-        f"المبلغ: {payment.total_amount} ⭐\n"
-        f"معرف العملية: <code>{payment.telegram_payment_charge_id}</code>",
-        parse_mode="HTML"
+    text, markup_func = MENU_MAP[call.data]
+    bot.edit_message_text(
+        text,
+        call.message.chat.id, call.message.message_id,
+        reply_markup=markup_func(), parse_mode="HTML"
     )
 
-
-# ===== Smart Text Handler (catch-all) =====
-
-EXEC_KEYWORDS = [
-    'ثبت', 'install', 'تثبيت', 'شغل', 'run', 'ارفع', 'deploy', 'احذف',
-    'remove', 'أنشئ', 'create', 'أوقف', 'stop', 'أعد تشغيل', 'restart',
-    'حدّث', 'update', 'upgrade', 'نفذ', 'execute', 'ابنِ', 'build'
-]
-
-
-@bot.message_handler(func=lambda m: m.from_user.id == ADMIN_ID)
-def handle_smart(message):
-    text = message.text.strip()
-    text_lower = text.lower()
-    is_exec = any(kw in text_lower for kw in EXEC_KEYWORDS)
-
-    if is_exec:
-        _run_plan(message, text)
-    else:
-        try:
-            bot.send_chat_action(message.chat.id, 'typing')
-            response = _gemini_svc.ask(text)
-            bot.reply_to(message, response)
-        except Exception as e:
-            bot.reply_to(message, f"❌ {str(e)}")
-
-
-# ===== Plan Executor =====
-
-def _run_plan(message, goal):
-    status_msg = bot.reply_to(message, "🧠 جاري التخطيط...")
-    _memory.save_context(message.from_user.id, goal, role='user')
-    plan = _planner.create_plan(goal)
-
-    if "error" in plan:
-        bot.edit_message_text(
-            f"❌ {plan['error']}", message.chat.id, status_msg.message_id
+# ===== وظائف الأزرار (الشاشات الفرعية) =====
+@bot.callback_query_handler(func=lambda call: call.data.startswith("mon_"))
+def handle_monitor_cbs(call):
+    if call.from_user.id != ADMIN_ID: return
+    bot.answer_callback_query(call.id, "جاري فحص حالة النظام...")
+    data = monitor_agent.get_system_data()
+    action = call.data
+    
+    if action == "mon_full":
+        report = fmt.system_report(
+            data['cpu'], data['ram'], data['disk'], data['net'], 
+            data['uptime'], data['hostname']
         )
-        return
-
-    steps = plan.get('steps', [])
-    plan_name = plan.get('plan_name', 'خطة تنفيذية')
-    total = len(steps)
+    elif action == "mon_cpu":
+        details = monitor_agent.get_cpu_details()
+        report = fmt.cpu_report(details['percent'], details['count'], details['freq'], details['per_cpu'])
+    elif action == "mon_ram":
+        report = fmt.ram_report(data['ram'])
+    elif action == "mon_disk":
+        report = fmt.disk_report(data['disk'])
+    elif action == "mon_network":
+        report = fmt.network_report(data['net'])
+    else:
+        report = "المؤشر قيد التطوير."
 
     bot.edit_message_text(
-        f"📋 <b>{html_module.escape(plan_name)}</b>\n🔢 الخطوات: {total}",
-        message.chat.id, status_msg.message_id, parse_mode="HTML"
-    )
-
-    for i, step in enumerate(steps, 1):
-        cmd = step.get('command', '')
-        desc = step.get('description', '')
-        bot.send_message(
-            message.chat.id,
-            f"⏳ <b>{i}/{total}</b> — {html_module.escape(desc)}",
-            parse_mode="HTML"
-        )
-        result = executor.execute(cmd)
-
-        if result['status'] == 'confirm':
-            pending_commands[message.from_user.id] = cmd
-            markup = types.InlineKeyboardMarkup()
-            markup.add(
-                types.InlineKeyboardButton("✅ نفّذ", callback_data="confirm_run"),
-                types.InlineKeyboardButton("❌ تخطَّ", callback_data="cancel_run")
-            )
-            bot.send_message(
-                message.chat.id,
-                f"⚠️ <code>{html_module.escape(cmd)}</code>",
-                reply_markup=markup, parse_mode="HTML"
-            )
-            continue
-
-        if result['status'] == 'failed':
-            bot.send_message(message.chat.id, "⚠️ تعثّر — أبحث عن حل...")
-            correction = _planner.create_correction_plan(goal, cmd, result['output'])
-            if "fixed_command" in correction:
-                result = executor.execute(correction['fixed_command'], force=True)
-
-        send_terminal_output(
-            bot, message.chat.id,
-            result['status'], result['output'],
-            f"الخطوة {i}: {desc}"
-        )
-
-    _memory.save_context(message.from_user.id, f"تم: {plan_name}", role='assistant')
-    bot.send_message(
-        message.chat.id,
-        f"🔱 <b>اكتملت:</b> {html_module.escape(plan_name)}",
-        parse_mode="HTML"
+        report, call.message.chat.id, call.message.message_id,
+        reply_markup=monitor_menu(), parse_mode="HTML"
     )
 
 
-# ===== Entry Point =====
+@bot.callback_query_handler(func=lambda call: call.data.startswith("dock_"))
+def handle_docker_cbs(call):
+    if call.from_user.id != ADMIN_ID: return
+    bot.answer_callback_query(call.id, "نظام Docker...")
+    action = call.data
+    
+    if action == "dock_ps":
+        containers = docker_agent.get_containers_list()
+        if not containers:
+            report = fmt.info("لا توجد حاويات تعمل حالياً.")
+        else:
+            cards = [fmt.docker_container_card(c['name'], c['status'], c['ports'], c['image']) for c in containers]
+            report = fmt.header("حاويات Docker") + "\n\n" + "\n\n".join(cards)
+    elif action == "dock_stats":
+        stats = docker_agent.get_stats()
+        report = fmt.header("استهلاك الحاويات") + fmt.code_block(stats)
+    else:
+        report = fmt.info("سيتم إضافة هذه الميزة قريباً في واجهة تلجرام.")
+
+    bot.edit_message_text(
+        report, call.message.chat.id, call.message.message_id,
+        reply_markup=docker_menu(), parse_mode="HTML"
+    )
+
+
+@bot.callback_query_handler(func=lambda call: call.data.startswith("dep_"))
+def handle_deploy_cbs(call):
+    if call.from_user.id != ADMIN_ID: return
+    bot.answer_callback_query(call.id, "جاري فحص المستودع...")
+    
+    if call.data == "dep_status":
+        out = deploy_agent.git_status()
+        bot.edit_message_text(
+            fmt.deploy_report("Git Status", out), 
+            call.message.chat.id, call.message.message_id, 
+            reply_markup=deploy_menu(), parse_mode="HTML"
+        )
+    elif call.data == "dep_pull":
+        out = deploy_agent.git_pull()
+        bot.edit_message_text(
+            fmt.deploy_report("Git Pull", out),
+            call.message.chat.id, call.message.message_id,
+            reply_markup=deploy_menu(), parse_mode="HTML"
+        )
+    elif call.data == "dep_full":
+        out = deploy_agent.deploy_updates("🔱 NEXUM Auto-Deploy from Inline")
+        bot.send_message(call.message.chat.id, out, parse_mode="HTML")
+
+
+@bot.callback_query_handler(func=lambda call: call.data == "open_webapp")
+def handle_webapp(call):
+    # In reality, this requires binding a domain/ngrok URL. Mocking for now.
+    url = "https://your-public-url.com" 
+    report = fmt.info("لفتح لوحة التحكم عبر WebApp، يلزم ربط رابط حقيقي بالبوت.")
+    bot.send_message(call.message.chat.id, report, parse_mode="HTML")
+
+
+@bot.callback_query_handler(func=lambda call: call.data in ["confirm_run", "cancel_action", "cancel_run"])
+def handle_commands_confirm(call):
+    if call.from_user.id != ADMIN_ID: return
+    if call.data == "cancel_run" or call.data == "cancel_action":
+        pending_commands.pop(call.from_user.id, None)
+        bot.edit_message_text("❌ تم الإلغاء.", call.message.chat.id, call.message.message_id)
+        return
+        
+    cmd = pending_commands.pop(call.from_user.id, None)
+    if cmd:
+        res = executor.execute(cmd, force=True)
+        bot.edit_message_text(
+            fmt.deploy_report("أمر التيرمينال", res['output'], res['status']),
+            call.message.chat.id, call.message.message_id, parse_mode="HTML"
+        )
+
+
+# ===== الرسائل النصية والأوامر المباشرة =====
+@bot.message_handler(commands=['run'])
+def handle_run(message):
+    if message.from_user.id != ADMIN_ID: return
+    cmd = message.text.replace('/run', '', 1).strip()
+    if not cmd:
+        bot.reply_to(message, "استخدام: <code>/run الأمر</code>", parse_mode="HTML")
+        return
+    
+    result = executor.execute(cmd)
+    if result['status'] == 'confirm':
+        pending_commands[message.from_user.id] = cmd
+        bot.reply_to(
+            message, 
+            fmt.warning(f"أمر حساس يحتاج لتأكيد:\n<code>{cmd}</code>"), 
+            reply_markup=confirm_action("run"), parse_mode="HTML"
+        )
+        return
+    
+    send_terminal_output(bot, message.chat.id, result['status'], result['output'])
+
+
+@bot.message_handler(content_types=['text'])
+def handle_text(message):
+    if message.from_user.id != ADMIN_ID: return
+    text = message.text.strip().lower()
+    
+    # لو كان الأمر عبارة عن توجيه ذكي للتنفيذ
+    EXEC_KW = ['ثبت', 'شغل', 'نفذ']
+    if any(k in text for k in EXEC_KW):
+        bot.reply_to(message, fmt.info("يتم حاليا إعداد التخطيط الذكي لهذا الأمر..."))
+        plan = _planner.create_plan(text)
+        if "error" in plan:
+            bot.send_message(message.chat.id, fmt.error(plan['error']), parse_mode="HTML")
+        else:
+            bot.send_message(message.chat.id, fmt.success(f"تم إعداد الخطة:\n{plan.get('plan_name')}"), parse_mode="HTML")
+        return
+
+    # التحدث مع الذكاء الاصطناعي كالمعتاد
+    bot.send_chat_action(message.chat.id, 'typing')
+    response = _gemini_svc.ask(message.text)
+    safe_reply(bot, message, response)
+
+
 if __name__ == "__main__":
-    print("🔱 NEXUM CORE is Online and Listening...")
-    bot.infinity_polling()
+    print("🔱 NEXUM CORE UI/UX System IS ONLINE...")
+    try:
+        bot.infinity_polling()
+    except Exception as e:
+        print(f"Error starting bot: {e}")

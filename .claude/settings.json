@@ -1,0 +1,7 @@
+{
+  "permissions": {
+    "allow": [
+      "PowerShell($j = Get-Content .claude/settings.local.json -Raw | ConvertFrom-Json; $j.hooks.Stop[0].hooks[0].command)"
+    ]
+  }
+}
