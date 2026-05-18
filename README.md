@@ -1,98 +1,225 @@
-# 🔱 NEXUM PRIME | منصة تشغيل الوكلاء السيادية המوزعة
-> **مستقبل الحضارة البرمجية المستقلة.** NEXUM PRIME ليست مجرد بوت، بل هي بيئة تنفيذ لامركزية ومنصة تشغيل ديناميكية حيث يقوم وكلاء الذكاء الاصطناعي بتخطيط، بناء، ونشر أنظمة برمجية متكاملة بشكل مستقل تماماً.
+# 🔱 NEXUM PRIME | Sovereign Agentic Operating System
+
+> **نظام تشغيل سيادي للوكلاء المستقلين.** NEXUM PRIME ليس مجرد بوت — بل هو بيئة تنفيذ ذكية حيث يقوم وكلاء AI بتخطيط، بناء، ونشر أنظمة برمجية بشكل مستقل تماماً عبر واجهة تفاعلية بالكامل.
+
+[![Deploy](https://img.shields.io/badge/Live-GitHub%20Pages-blue?style=for-the-badge&logo=github)](https://ossoolli.github.io/Nexum-Core/)
+[![Python](https://img.shields.io/badge/Python-3.10+-green?style=for-the-badge&logo=python)](https://python.org)
+[![Telegram](https://img.shields.io/badge/Telegram-Bot%20API-blue?style=for-the-badge&logo=telegram)](https://core.telegram.org/bots/api)
+[![License](https://img.shields.io/badge/License-Proprietary-red?style=for-the-badge)](LICENSE)
 
 ---
 
-## 🌌 الرؤية: "كود يُطوّر نفسه بنفسه"
-انتقلت Nexum من مجرد بوت تليجرام إلى **منصة تشغيل وكلاء سيادية موزعة (Distributed Sovereign Agent Runtime)**. من خلال دمج الوكلاء المتخصصين في بنية لا مركزية تعتمد على الأحداث (Event-Driven)، تسمح المنصة بتوليد المشاريع البرمجية ونشرها بطريقة مستقلة يمكن إدارتها والتحكم فيها عبر واجهة تشغيل مركزية.
+## 🌌 الرؤية
+
+```
+Command Bot  →  Interactive Sovereign Control System
+```
+
+NEXUM تحوّل من بوت تليجرام تقليدي إلى **نظام تشغيل سيادي تفاعلي** يعمل بالكامل عبر النقر، البطاقات، والقوائم الديناميكية بدلاً من الأوامر النصية.
 
 ---
 
-## 🏗️ المعمارية الموزعة (The 9-Engine System)
-تم بناء Nexum على معمارية معقدة لضمان القابلية للتوسع الأفقي والأمان المطلق:
+## 🏗️ المعمارية (9-Layer Architecture)
 
-1. **🧠 محرك الأوركستريتور والجدولة (`orchestrator.py` & `execution_graph.py`)**: 
-   - محرك تنفيذ يعمل بنظام (DAG - Directed Acyclic Graph) لتحديد تتابع المهام، حل التبعيات، إدارة استعادة العمل بعد الفشل (Retry Policies)، وتوزيع المهام على الوكلاء في الخلفية (Background Scheduling). 
-   - يستعين بـ **المخطط الذكي (AI Planner)** لتحليل الهدف وتوليد مسار التنفيذ ديناميكياً.
-2. **🌐 شبكة الأحداث الموزعة (`event_bus_distributed.py`)**: 
-   - النظام العصبي للمنصة مدعوم بـ **Redis Pub/Sub**. يتوسع أفقياً عبر عدة نسخ من السيرفر (FastAPI Replicas) لبث الأحداث اللحظية.
-3. **🔄 مدير دورة الحياة التفاعلي (`lifecycle.py`)**: 
-   - آلة حالة دقيقة لتتبع حالة كل وكيل من البداية وحتى الانتهاء.
-4. **🔐 نظام حوكمة الصلاحيات (`permission_manager.py`)**: 
-   - نظام حماية (Role-Based Access Control) لمنع الأوامر الخاطئة أو التنفيذ غير المصرح به.
-5. **🪪 طبقة الجلسات والهوية (`session_manager_redis.py` & `client_registry.py`)**: 
-   - نظام JWT تمكين اتصال متعدد الأجهزة والمصادر (Multi-device WebSockets).
-6. **📊 السجل المركزي للبيئة (`runtime_state.py`)**: 
-   - مصدر الحقيقة الوحيد لتخزين الجلسات، الحاويات النشطة، وحالات سير عمل الوكلاء.
-7. **🔀 موجه الطلبات السيادي (`callback_router.py`)**: 
-   - نظام توجيه لجميع أحداث وأزرار تليجرام يعتمد على مساحات الأسماء (`namespace:action:param`).
-8. **🧠 قاعدة المعرفة والمهارات (`knowledge_base.py`)**: 
-   - ذاكرة حية تحتفظ بالحقائق، المعارف، والبروتوكولات (Skills) في نظام تخزين خارجي لاستخدامها المستقبلي لزيادة كفاءة الوكلاء (Long-term memory).
-9. **🛠️ ترسانة الأدوات و (MCP) (`tool_registry.py` & `system_tools.py`)**: 
-   - نقطة التقاء العقل المدبر بالسيرفر! وحدة تسجل قدرات التعامل مع الملفات `write_file`، الأوامر `run_host_terminal`، وحاويات العزل `run_in_sandbox` ديناميكياً باستخدام (Function Calling). يتم قراءة الـ Schema بواسطة الأوركستريتور والذكاء الاصطناعي لتمكين الوكيل من تنفيذ الأوامر بدقة وواقعية على الخادم متصلاً بكل قوة ببروتوكولات MCP للمصادر الخارجية.
+```
+Telegram (Control Plane)
+    ↓
+Interactive Click-first UX Layer
+    ↓
+FastAPI (Runtime Gateway)
+    ↓
+Event Bus (Nervous System)
+    ↓
+Runtime State (Source of Truth)
+    ↓
+Agents (Autonomous Workers)
+    ↓
+Orchestrator (Executive Brain)
+    ↓
+Mini App (Visual Operating System)
+    ↓
+Protocol Engine (Self-Evolving Infrastructure)
+```
+
+### المحركات الأساسية
+
+| # | المحرك | الوصف |
+|---|--------|-------|
+| 1 | 🧠 **Orchestrator & DAG** | تنفيذ المهام بنظام الرسم البياني الموجه مع إعادة المحاولة |
+| 2 | 🌐 **Distributed Event Bus** | النظام العصبي — Redis Pub/Sub للبث اللحظي |
+| 3 | 🔄 **Agent Lifecycle** | آلة حالة: `CREATED → READY → RUNNING → TERMINATED` |
+| 4 | 🔐 **Permission Manager** | نظام صلاحيات RBAC |
+| 5 | 📊 **Runtime State** | مصدر الحقيقة الموحد في الذاكرة + السحابة |
+| 6 | 🔀 **Callback Router** | موجه تفاعلي لجميع الأزرار والقوائم |
+| 7 | 🧠 **AI Planner** | مخطط ذكي يولّد Execution Graphs تلقائياً |
+| 8 | 🛠️ **System Tools** | أدوات: Terminal, Files, Web Search, Scraping |
+| 9 | ☁️ **Cloud Memory** | ذاكرة دائمة عبر Supabase PostgreSQL |
 
 ---
 
-## 📱 نظام التشغيل المرئي (Telegram Mini App)
-تطبيق مصغر كامل داخل تليجرام يتصل بخوادم النظام بطريقة آمنة، يقدم تجربة توازي أنظمة تشغيل الحواسيب:
+## 🎮 لوحة التحكم التفاعلية (Click-first UX)
 
-- **🤖 لوحة تحكم الوكلاء**: بطاقات حية لكل وكيل تظهر حالته الراهنة في الـ Lifecycle وقدراته والأدوار المسموحة له.
-- **📈 مراقب النظام اللحظي**: وصول مباشر ومستمر (عبر SSE) لمراقبة استهلاك المعالج، الذاكرة، وقرص التخزين.
-- **⚡ سطر الأوامر (Command Palette)**: واجهة أوامر ذكية مشابهة لـ VSCode لبدء مسارات عمل الوكلاء وتوزيع المهام معمارياً.
-- **📊 شريط الأحداث الحي**: بث حي لكافة أعمال النظام، من خطأ في كود الذكاء الاصطناعي إلى نجاح نشر التطبيق.
-- **🐙 إدارة النشر والأتمتة**: مسارات آلية لنشر الكود المطور مباشرة عبر GitHub Pages أو رفع التحديثات الجديدة.
+النظام يعمل بالكامل عبر **النقر** — لا حاجة للكتابة:
+
+```
+/start → القائمة الرئيسية
+  ├── ⚡ Runtime       → حالة النظام، مقاييس حية، Event Bus
+  ├── 🤖 Agents        → بطاقة تحكم لكل وكيل (Start/Stop/Restart/Logs/Memory)
+  ├── 🧬 Protocols     → البروتوكولات + Execution Graph
+  ├── 🚀 Deployments   → Git Status / Push / GitHub Pages / Cloud Run
+  ├── 🧠 AI Brain      → Chat / Web Search / Scrape / Code Generation
+  ├── 🛡️ Security      → Lockdown / Audit / Integrity Check
+  ├── 💾 Memory        → DB Status / Cloud Sync / Clear History
+  ├── 🐳 Docker        → Containers / Images / Stats / Prune
+  └── ⚙️ Settings      → System Info / AI Model / Restart Bot
+```
+
+### مميزات الـ UX
+
+- **Inline Keyboards** في كل شاشة — 9 قوائم فرعية متداخلة
+- **Agent Cards** — بطاقة تحكم لكل وكيل مع أزرار مباشرة
+- **Confirmation Dialogs** — تأكيد قبل الإجراءات الخطيرة
+- **Visual Progress Bars** — أشرطة تقدم نصية للـ CPU/RAM/Disk
+- **Quick Actions Panel** — إجراءات سريعة بنقرة واحدة
+- **Smart Error Handling** — أخطاء مغلفة بـ HTML آمن
 
 ---
 
-## 🚀 دليل التثبيت والتشغيل
+## 📱 Mini App Dashboard
 
-### 1. المتطلبات الأساسية
-- خادم Redis (تم تفعيله لضمان سلامة شبكة الأحداث والجلسات).
-- Python 3.10+ للتوافق العميق.
-- Docker & Docker Compose (لتشغيل حاويات البيئة المعزولة للوكلاء مستقبلا).
+تطبيق ويب مصغر داخل تليجرام بتصميم فاخر:
+
+- **Dark Futuristic UI** مع Glassmorphism وتدرجات Neon
+- **Live Terminal Feed** — سجل أحداث حي بنمط التيرمينال
+- **Swarm Control** — إدارة الوكلاء مع مؤشرات حية
+- **Cloud Intelligence** — لوحة حالة الذاكرة السحابية
+- **Quick Protocols** — بروتوكولات جاهزة بنقرة واحدة
+- **WebSocket Live** — اتصال حي مع السيرفر
+
+🔗 **رابط المعاينة:** [https://ossoolli.github.io/Nexum-Core/](https://ossoolli.github.io/Nexum-Core/)
+
+---
+
+## 🧠 القدرات الذكية
+
+### الإدراك متعدد الحواس (Multimodal)
+- 📷 **الصور** — تحليل ومعالجة
+- 📄 **PDF & المستندات** — قراءة وتلخيص
+- 🎵 **الصوت** — استقبال ومعالجة
+- 📝 **الكود** — فحص وتعديل أي ملف برمجي
+
+### البحث والويب (Web Intelligence)
+- 🔍 **`/search`** — بحث حي في الإنترنت عبر DuckDuckGo
+- 🕸️ **`/scrape`** — شفط وقراءة محتوى أي رابط
+- 📝 **`/code`** — توليد كود بالذكاء الاصطناعي
+
+### الاستقلالية (Sovereign Autonomy)
+- اتخاذ القرارات دون توقف
+- Exponential Backoff ضد أخطاء 503
+- وعي لحظي بحالة السيرفر (CPU/RAM/Files)
+- ذاكرة سحابية دائمة (Supabase)
+
+---
+
+## 🚀 التثبيت والتشغيل
+
+### 1. المتطلبات
+- Python 3.10+
+- حساب Telegram Bot ([@BotFather](https://t.me/BotFather))
+- مفتاح Google Gemini API
+- PostgreSQL / Supabase (اختياري — للذاكرة السحابية)
 
 ### 2. إعدادات البيئة (`.env`)
 ```env
-# إعدادات البوت والتحكم
-TELEGRAM_TOKEN=your_bot_token_here
-ADMIN_ID=user_id_here
-WEBAPP_URL=https://your-mini-app-domain.com
-
-# مفاتيح الدماغ الاصطناعي
+TELEGRAM_TOKEN=your_bot_token
+ADMIN_ID=your_telegram_user_id
 GOOGLE_API_KEY=your_gemini_api_key
+WEBAPP_URL=https://ossoolli.github.io/Nexum-Core/
 
-# إعدادات الشبكة الموزعة (JWT & Redis)
-JWT_SECRET_KEY=super_secure_sha256_private_key
-JWT_TTL_SECONDS=120
-REDIS_URL=redis://localhost:6379/0
-SESSION_TTL_SECONDS=600
+# اختياري — للذاكرة السحابية
+DB_CONNECTION=postgresql://user:pass@host:5432/db
+SUPABASE_URL=https://your-project.supabase.co
+SUPABASE_KEY=your_key
 ```
 
-### 3. بناء المنصة
+### 3. التثبيت
 ```bash
-# استنساخ المستودع
-git clone https://github.com/YourOrg/Nexum-Core.git
+git clone https://github.com/ossoolli/Nexum-Core.git
 cd Nexum-Core
 
-# تفعيل البيئة المعزولة وتثبيت المكتبات
 python3 -m venv venv
 source venv/bin/activate
 pip install -r requirements.txt
 ```
 
-### 4. الإقلاع السيادي (Booting The OS)
-يجب تشغيل المحركين معاً لضمان تشغيل النظام:
+### 4. الإقلاع
 ```bash
-# الواجهة الطرفية 1 (القلب النابض للنظام واستقبال التليجرام)
+# المحرك الأساسي (Bot + AI)
 python main.py
 
-# الواجهة الطرفية 2 (خادم الأوركستريتور والواجهة المرئية)
+# خادم الواجهة المرئية (اختياري)
 python webapp/api_server.py
 ```
 
 ---
-## 👨‍💻 المطور
-تم تطوير هذا المشروع بواسطة **معتز اسماعيل تيلخ (Mutaz Tailakh)**.
+
+## 📁 هيكل المشروع
+
+```
+Nexum-Core/
+├── main.py                    # القلب النابض — Interactive Control System
+├── requirements.txt           # التبعيات
+├── .env                       # المتغيرات البيئية
+├── core/
+│   ├── keyboards.py           # 9 قوائم تفاعلية + بطاقات وكلاء
+│   ├── callback_router.py     # موجه الأحداث
+│   ├── orchestrator.py        # المنسق التنفيذي (DAG)
+│   ├── planner.py             # المخطط الذكي (AI Planner)
+│   ├── lifecycle.py           # مدير دورة حياة الوكلاء
+│   ├── event_bus.py           # ناقل الأحداث
+│   ├── runtime_state.py       # حالة النظام اللحظية
+│   ├── system_tools.py        # أدوات: Terminal, Files, Web, Search
+│   ├── safe_sender.py         # طبقة أمان الرسائل
+│   ├── executor.py            # منفذ الأوامر
+│   └── agent_registry.py      # سجل الوكلاء
+├── services/
+│   ├── gemini_service.py      # Gemini AI مع Retry Logic
+│   └── db_service.py          # ذاكرة سحابية (PostgreSQL/Supabase)
+├── agents/
+│   ├── monitor.py             # وكيل المراقبة
+│   ├── deploy.py              # وكيل النشر
+│   └── docker_agent.py        # وكيل الحاويات
+├── webapp/
+│   ├── api_server.py          # FastAPI + WebSocket + SSE
+│   └── index.html             # Mini App Dashboard
+└── storage/
+    └── memory.json            # ذاكرة محلية
+```
 
 ---
-*🔱 أهلًا بك في NEXUM PRIME — حضارة البنية التحتية المستقلة.*
+
+## 🛣️ خارطة الطريق
+
+- [x] نظام وكلاء مستقل (Autonomous Agents)
+- [x] واجهة تفاعلية Click-first (9 قوائم)
+- [x] إدراك متعدد الحواس (Multimodal)
+- [x] بحث وسكرابينج من الويب
+- [x] ذاكرة سحابية دائمة (Supabase)
+- [x] Mini App Dashboard (Glassmorphism)
+- [x] Exponential Backoff للـ API
+- [ ] Runtime Visual Graph (Cytoscape.js / React Flow)
+- [ ] Real-time Notifications System
+- [ ] Command Palette (CMD+K style)
+- [ ] Multi-View System (System/Agent/Protocol/Security)
+
+---
+
+## 👨‍💻 المطور
+
+تم تطوير هذا المشروع بواسطة **معتز اسماعيل تيلخ (Mutaz Tailakh)**.
+
+[![GitHub](https://img.shields.io/badge/GitHub-ossoolli-black?style=flat-square&logo=github)](https://github.com/ossoolli)
+
+---
+
+*🔱 NEXUM PRIME — Sovereign Agentic OS v2.2-STABLE*

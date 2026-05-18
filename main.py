@@ -194,8 +194,8 @@ def handle_all_callbacks(call):
         elif data == "pr_list":
             _send_protocols_list(chat_id)
         elif data == "pr_create":
-            bot.send_message(chat_id, "🆕 <b>أرسل وصف البروتوكول الجديد كرسالة نصية:</b>\nمثل: <code>ابن واجهة React جديدة</code>",
-                             parse_mode="HTML")
+            msg = bot.send_message(chat_id, "🆕 <b>أرسل وصف البروتوكول الجديد الآن لتكوين مسار التنفيذ:</b>\n<i>مثال: ابن واجهة React وتأكد من عملها</i>", parse_mode="HTML")
+            bot.register_next_step_handler(msg, process_pr_create)
         elif data == "pr_graph":
             _send_execution_graph(chat_id)
 
@@ -210,17 +210,17 @@ def handle_all_callbacks(call):
 
         # ═══ AI ACTIONS ═══
         elif data == "ai_chat":
-            bot.send_message(chat_id, "💬 <b>وضع المحادثة الذكية:</b>\nأرسل أي رسالة نصية وسأتعامل معها بذكاء سيادي.",
-                             parse_mode="HTML")
+            msg = bot.send_message(chat_id, "💬 <b>وضع المحادثة الذكية:</b>\nأرسل رسالتك الآن للنظام السيادي.", parse_mode="HTML")
+            bot.register_next_step_handler(msg, handle_text)
         elif data == "ai_search":
-            bot.send_message(chat_id, "🔍 <b>بحث الويب:</b>\nأرسل ما تريد البحث عنه:\n<code>/search استعلام البحث</code>",
-                             parse_mode="HTML")
+            msg = bot.send_message(chat_id, "🔍 <b>بحث الويب:</b>\nأرسل الكلمة المفتاحية أو السؤال:", parse_mode="HTML")
+            bot.register_next_step_handler(msg, process_ai_search)
         elif data == "ai_scrape":
-            bot.send_message(chat_id, "🕸️ <b>Web Scraping:</b>\nأرسل الرابط:\n<code>/scrape https://example.com</code>",
-                             parse_mode="HTML")
+            msg = bot.send_message(chat_id, "🕸️ <b>Web Scraping:</b>\nأرسل الرابط (URL) المطلوب سحبه:", parse_mode="HTML")
+            bot.register_next_step_handler(msg, process_ai_scrape)
         elif data == "ai_codegen":
-            bot.send_message(chat_id, "📝 <b>توليد الكود:</b>\nأرسل وصف ما تريد برمجته:\n<code>/code أنشئ سكريبت بايثون لتحليل CSV</code>",
-                             parse_mode="HTML")
+            msg = bot.send_message(chat_id, "📝 <b>توليد الكود:</b>\nأرسل وصف الكود البرمجي الذي تريد بناءه:", parse_mode="HTML")
+            bot.register_next_step_handler(msg, process_ai_codegen)
 
         # ═══ SECURITY ACTIONS ═══
         elif data == "sec_audit":
@@ -280,6 +280,34 @@ def handle_all_callbacks(call):
 # ╔══════════════════════════════════════════════════════════════╗
 # ║            HANDLER HELPER FUNCTIONS                         ║
 # ╚══════════════════════════════════════════════════════════════╝
+
+def process_pr_create(message):
+    """معالجة استجابة الوصف لإنشاء بروتوكول جديد"""
+    if message.from_user.id != ADMIN_ID: return
+    text = message.text.strip()
+    if not text: return
+    bot.reply_to(message, "🧠 <b>NEXUM:</b> جاري بناء Execution Graph للبروتوكول...", parse_mode="HTML")
+    event_bus.emit(event_bus.TASK_STARTED, {"goal": text})
+    try:
+        result = orchestrator.execute_goal(text)
+        protocol_id = result.get('protocol_id', 'PR-ALPHA')
+        msg = f"⚙️ <b>Protocol:</b> <code>{protocol_id}</code>\nالنظام ينفذ التسلسل المطلوب."
+        bot.send_message(message.chat.id, msg, parse_mode="HTML", reply_markup=ui_builder.build_quick_actions())
+    except Exception as e:
+        safe_error = html.escape(str(e))[:500]
+        bot.send_message(message.chat.id, f"❌ <b>فشل:</b>\n<pre>{safe_error}</pre>", parse_mode="HTML")
+
+def process_ai_search(message):
+    message.text = f"/search {message.text}"
+    cmd_search(message)
+
+def process_ai_scrape(message):
+    message.text = f"/scrape {message.text}"
+    cmd_scrape(message)
+
+def process_ai_codegen(message):
+    message.text = f"/code {message.text}"
+    cmd_code(message)
 
 def _edit_to_main_menu(chat_id, msg_id):
     """العودة للقائمة الرئيسية عبر تعديل الرسالة"""
