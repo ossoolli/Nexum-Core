@@ -20,22 +20,39 @@ REDIS_URL = os.getenv("REDIS_URL", "")
 NEXUM_CHANNEL = "nexum:events"
 
 class DistributedEventBus:
+    # Event Types as direct class attributes for backwards compatibility
+    SYSTEM_ALERT = "system.alert"
+    AGENT_SPAWNED = "agent.spawned"
+    AGENT_STOPPED = "agent.stopped"
+    AGENT_FAILED = "agent.failed"
+    TASK_STARTED = "task.started"
+    TASK_COMPLETED = "task.completed"
+    TASK_FAILED = "task.failed"
+    BUILD_STARTED = "build.started"
+    BUILD_COMPLETED = "build.completed"
+    DEPLOY_STARTED = "deploy.started"
+    DEPLOY_COMPLETED = "deploy.completed"
+    DEPLOY_FAILED = "deploy.failed"
+    SANDBOX_SPAWNED = "sandbox.spawned"
+    SANDBOX_CRASHED = "sandbox.crashed"
+    PROTOCOL_COMPILED = "protocol.compiled"
+
     EVENT_TYPES = {
-        "SYSTEM_ALERT": "system.alert",
-        "AGENT_SPAWNED": "agent.spawned",
-        "AGENT_STOPPED": "agent.stopped",
-        "AGENT_FAILED": "agent.failed",
-        "TASK_STARTED": "task.started",
-        "TASK_COMPLETED": "task.completed",
-        "TASK_FAILED": "task.failed",
-        "BUILD_STARTED": "build.started",
-        "BUILD_COMPLETED": "build.completed",
-        "DEPLOY_STARTED": "deploy.started",
-        "DEPLOY_COMPLETED": "deploy.completed",
-        "DEPLOY_FAILED": "deploy.failed",
-        "SANDBOX_SPAWNED": "sandbox.spawned",
-        "SANDBOX_CRASHED": "sandbox.crashed",
-        "PROTOCOL_COMPILED": "protocol.compiled",
+        "SYSTEM_ALERT": SYSTEM_ALERT,
+        "AGENT_SPAWNED": AGENT_SPAWNED,
+        "AGENT_STOPPED": AGENT_STOPPED,
+        "AGENT_FAILED": AGENT_FAILED,
+        "TASK_STARTED": TASK_STARTED,
+        "TASK_COMPLETED": TASK_COMPLETED,
+        "TASK_FAILED": TASK_FAILED,
+        "BUILD_STARTED": BUILD_STARTED,
+        "BUILD_COMPLETED": BUILD_COMPLETED,
+        "DEPLOY_STARTED": DEPLOY_STARTED,
+        "DEPLOY_COMPLETED": DEPLOY_COMPLETED,
+        "DEPLOY_FAILED": DEPLOY_FAILED,
+        "SANDBOX_SPAWNED": SANDBOX_SPAWNED,
+        "SANDBOX_CRASHED": SANDBOX_CRASHED,
+        "PROTOCOL_COMPILED": PROTOCOL_COMPILED,
     }
 
     def __init__(self, max_history=500):
