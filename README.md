@@ -20,35 +20,33 @@
 
 ---
 
+## 📱 Mobile-First Sovereign Control Plane
+يتمتع النظام بـ واجهة تحكم هجينة متطورة:
+- **Layer 1: Quick Controls (Telegram Chat)**: أزرار مضمنة لاتخاذ قرارات سريعة واستدعاء لوحة التحكم السيادية.
+- **Layer 2: Telegram Mini App Dashboard**: تطبيق ويب مصغر (WebApp) مبني بـ Tailwind و Alpine.js يوفر (Agent Control Center, Sandbox Runtime Monitor, Command Palette).
+- **Layer 3: Live Event Stream**: نقل بيانات استهلاك הסيرفر في الوقت الفعلي (CPU, RAM) من البايثون للـ WebApp بشكل حي عبر (SSE).
+
+---
+
 ## 🚀 دليل التشغيل السريع (Quick Start)
 
-### 1️⃣ تثبيت المكتبات
+### 1️⃣ تثبيت المكتبات (نظام Cloud Shell / Linux)
 ```bash
+python3 -m venv venv
+source venv/bin/activate
 pip install -r requirements.txt
 ```
 
-### 2️⃣ تفعيل البيئة الافتراضية (Virtual Environment)
-يختلف الأمر حسب نظام التشغيل الخاص بك:
-
-*   **على Linux / Google Cloud Shell:**
-    ```bash
-    source venv/bin/activate
-    ```
-*   **على Windows (PowerShell):**
-    ```powershell
-    .\venv\Scripts\activate
-    ```
-
-### 3️⃣ تشغيل النظام
-يجب تشغيل البوت الأساسي أولاً، ثم خادم الـ API لوحة التحكم:
-
+### 2️⃣ التشغيل الحقيقي (تفعيل الواجهة الهجينة)
+النظام يعتمد الآن على محركين معاً:
 ```bash
-# تشغيل البوت (NEXUM CORE)
+# 1. شغل البوت السيادي (NEXUM CORE) في تيرمينال
 python main.py
 
-# تشغيل خادم الـ WebApp (في نافذة منفصلة)
+# 2. افتح تيرمينال آخر وشغل خادم الربط اللحظي (API Server)
 python webapp/api_server.py
 ```
+*(ملاحظة: لكي يعمل الـ WebApp داخل التلجرام، يجب توفير رابط HTTPS وتحديده كمتغير `WEBAPP_URL` داخل ملف `.env`)*
 
 ---
 
@@ -61,9 +59,9 @@ python webapp/api_server.py
 ---
 
 ## ⚙️ المتطلبات التقنية
-- **Python**: 3.10 or higher.
-- **Docker**: مطلوب لإدارة الحاويات والعزل.
-- **API Keys**: (Google Gemini, OpenAI, Telegram Token) تُوضع في ملف `.env`.
+- **Python**: 3.10+
+- **Docker**
+- **API Keys**: (Google Gemini, Telegram Token)
 
 ---
 🔱 **NEXUM PRIME** — تمكين الحضارة البرمجية المستقلة.
