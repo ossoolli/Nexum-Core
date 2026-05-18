@@ -45,6 +45,12 @@ class RuntimeState:
         with self._lock:
             self.state["agents"][agent_id] = data
 
+    def del_agent(self, agent_id: str):
+        """حذف وكيل من الذاكرة"""
+        with self._lock:
+            if agent_id in self.state["agents"]:
+                del self.state["agents"][agent_id]
+
     def get_agent_state(self, agent_id: str) -> dict:
         with self._lock:
             return self.state["agents"].get(agent_id, {})
