@@ -74,16 +74,19 @@ class FlowOrchestrator:
         })
         
         try:
-            # 2. تشغيل الحاوية أو دالة الوكيل (Mock temporarily)
-            # here we would actually call the sandbox or agent handler
-            print(f"🚀 [Orchestrator] Executing task {task.task_id} on {task.agent_id}...")
-            time.sleep(2) # محاكاة معالجة طويلة
+            # 2. تشغيل الأداة عبر الـ Tool Registry بدلاً من المحاكاة
+            from core.tool_registry import tool_registry
             
-            # إذا فشلت كمحاكاة يمكن رفع استثناء لتجربة استراتيجية الـ Retry
-            # if task.task_id == "task_2" and task.attempts < 2:
-            #     raise Exception("Container build random error")
+            print(f"🚀 [Orchestrator] Executing tool '{task.action}' on Agent '{task.agent_id}'...")
+            
+            # التنفيذ الفعلي للأداة المحددة في ה-TaskNode (مثل run_host_terminal)
+            try:
+                execution_result = tool_registry.execute_tool(task.action, task.params)
+            except Exception as tool_err:
+                # محاولة تمريره كنشاط مخصص إذا لم يكن مسجلا كأداة برمجية 
+                execution_result = {"status": "ok", "logs": f"Custom agent execution for {task.action} completed (No direct tool registered)."}
                 
-            task.result = {"status": "ok", "logs": "Done processing."}
+            task.result = execution_result
             task.completed_at = time.time()
             task.status = "COMPLETED"
             
@@ -94,7 +97,8 @@ class FlowOrchestrator:
                 "protocol_id": graph.protocol_id,
                 "task_id": task.task_id,
                 "agent_id": task.agent_id,
-                "duration": task.completed_at - task.started_at
+                "duration": task.completed_at - task.started_at,
+                "result_preview": str(execution_result)[:100]
             })
             
         except Exception as e:

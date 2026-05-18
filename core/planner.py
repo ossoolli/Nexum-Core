@@ -25,7 +25,10 @@ class AIPlanner:
         """
 
     def generate_execution_graph(self, goal: str, protocol_id: str) -> ExecutionGraph:
-        """يولد مسار تنفيذ (Graph) من خلال الذكاء الاصطناعي بناءً على الهدف"""
+        """يولد مسار تنفيذ (Graph) من خلال الذكاء الاصطناعي بناءً على الهدف والأدوات المتاحة"""
+        
+        from core.tool_registry import tool_registry
+        tools_schema = tool_registry.get_all_tools_schema()
         
         prompt = f"""
 أنت مهندس أنظمة موزع لـ منصة NEXUM PRIME (نظام تشغيل وكلاء سيادي).
@@ -33,8 +36,11 @@ class AIPlanner:
 
 الهدف: {goal}
 
-معلومات الوكلاء:
+معلومات الوكلاء المتاحين:
 {self.AVAILABLE_AGENTS}
+
+الأدوات المتاحة (Tools Schema) والتي يجب اختيار الـ action بناءً عليها:
+{json.dumps(tools_schema, ensure_ascii=False, indent=2)}
 
 قم بإرجاع مسار التنفيذ بصيغة JSON حصراً، ويجب أن تتوافق تماماً مع هذا الهيكل:
 {{
@@ -42,8 +48,8 @@ class AIPlanner:
     {{
       "task_id": "string (unique)",
       "agent_id": "string (اختر من الوكلاء المتاحين)",
-      "action": "string (اسم الفعل, مثلا: init_project, build_image, deploy)",
-      "params": {{}}, // أي بيانات إضافية
+      "action": "string (يجب أن يكون اسم إحدى الأدوات في Tools Schema إن أمكن)",
+      "params": {{}}, // الـ arguments المطلوبة في Schema الأداة المحددة
       "retries": 2, // عدد محاولات الإعادة المسموح بها في حال الفشل
       "dependencies": [] // قائمة بـ task_ids التي يجب أن تنتهي قبل أن تبدأ هذه المهمة
     }}

@@ -147,6 +147,11 @@ def handle_text(message):
 
 if __name__ == "__main__":
     print("🔱 NEXUM PRIME Sovereign OS — ONLINE")
+    
+    # تسجيل أدوات النظام الأساسية (Sandbox, Terminal, Filesystem) ليستخدمها الذكاء الاصطناعي
+    from core.system_tools import register_all_system_tools
+    register_all_system_tools()
+    
     # تهيئة دورة حياة الوكلاء الأساسيين
     from core.agent_registry import agent_registry
     for agent_id in agent_registry.agents:
