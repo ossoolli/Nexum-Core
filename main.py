@@ -38,53 +38,95 @@ orchestrator.set_planner(_planner)
 pending_commands = {}
 
 
+# === إدارة الذاكرة الحوارية ===
+def get_user_history(user_id):
+    from core.runtime_state import runtime_state
+    state = runtime_state.get_agent_state(f"user_{user_id}")
+    return state.get("chat_history", [])
+
+def update_user_history(user_id, history):
+    from core.runtime_state import runtime_state
+    # الاحتفاظ بآخر 10 رسائل فقط لتوفير التوكينز
+    runtime_state.update_agent_state(f"user_{user_id}", {"chat_history": history[-10:]})
+
 # === تسجيل Handlers في الـ Callback Router ===
 def _handle_hw_status(cb_data, ctx):
-    data = monitor_agent.get_system_data()
-    return fmt.system_report(
-        data['cpu'], data['ram'], data['disk'], data['net'],
-        data['uptime'], data['hostname']
-    )
+    import psutil, platform
+    from datetime import datetime
+    cpu = psutil.cpu_percent()
+    ram = psutil.virtual_memory().percent
+    disk = psutil.disk_usage('/').percent
+    uptime = datetime.fromtimestamp(psutil.boot_time()).strftime("%Y-%m-%d %H:%M:%S")
+    
+    report = f"📊 <b>تقرير حالة النظام (Real-time)</b>\n"
+    report += f"━━━━━━━━━━━━━━━━━━━━\n"
+    report += f"🖥 <b>نظام التشغيل:</b> {platform.system()} {platform.release()}\n"
+    report += f"🔥 <b>المعالج (CPU):</b> {cpu}%\n"
+    report += f"🧠 <b>الرام (RAM):</b> {ram}%\n"
+    report += f"💾 <b>القرص (Disk):</b> {disk}%\n"
+    report += f"⏱ <b>وقت الإقلاع:</b> {uptime}\n"
+    report += f"━━━━━━━━━━━━━━━━━━━━"
+    return report
 
 def _handle_list_agents(cb_data, ctx):
     from core.agent_registry import agent_registry
     agents = agent_registry.agents
     if not agents:
-        return "لا يوجد وكلاء مسجلين حالياً."
-    report = fmt.header("Agents Registry") + "\n\n"
+        return "⚠️ لا يوجد وكلاء نشطون حالياً في النظام."
+    
+    report = f"🤖 <b>قائمة الوكلاء النشطين (Roster)</b>\n\n"
     for _, ag in agents.items():
-        state = lifecycle.get_state(ag['agent_id'])
-        status = state.get('state', ag.get('status', 'UNKNOWN'))
-        report += f"🤖 <b>{ag['name']}</b> ({status})\n⚙️ {ag['role']}\n\n"
+        state_info = lifecycle.get_state(ag['agent_id'])
+        status = state_info.get('state', 'OFFLINE')
+        emoji = "🟢" if status in ["READY", "RUNNING"] else "🔴"
+        report += f"{emoji} <b>{ag['name']}</b>\n"
+        report += f"└ 🎭 <b>الدور:</b> {ag['role']}\n"
+        report += f"└ 📡 <b>الحالة:</b> {status}\n\n"
+    return report
+
+def _handle_audit_logs(cb_data, ctx):
+    from core.event_bus import event_bus
+    history = event_bus.get_history(limit=5)
+    if not history:
+        return "📋 سجل الأحداث فارغ حالياً."
+    
+    report = "📋 <b>أحدث سجلات التدقيق (Audit Logs):</b>\n\n"
+    for ev in history:
+        ts = ev['timestamp'].split('T')[1].split('.')[0]
+        report += f"🕒 <code>[{ts}]</code> <b>{ev['type']}</b>\n"
     return report
 
 def _handle_github_deploy(cb_data, ctx):
+    from agents.deploy import deploy_agent
     return deploy_agent.deploy_updates("🔱 NEXUM Auto-Deploy")
 
-def _handle_agent_approve(cb_data, ctx):
-    agent_name = ctx.get('param', 'unknown')
-    return f"✅ تمت الموافقة للوكيل: {agent_name}"
-
-def _handle_agent_deny(cb_data, ctx):
-    agent_name = ctx.get('param', 'unknown')
-    return f"❌ تم الرفض للوكيل: {agent_name}"
-
-# تسجيل المسارات
+# تسجيل المسارات الجديدة
 router.register("hw_status", _handle_hw_status)
 router.register("list_agents", _handle_list_agents)
+router.register("audit_logs", _handle_audit_logs)
 router.register("github_deploy", _handle_github_deploy)
-router.register("agent:approve", _handle_agent_approve)
-router.register("agent:deny", _handle_agent_deny)
-
 
 # ===== القائمة الرئيسية =====
 @bot.message_handler(commands=['start', 'menu', 'dashboard'])
 def cmd_start(message):
     if message.from_user.id != ADMIN_ID: return
-    event_bus.emit(event_bus.SYSTEM_ALERT, {"action": "start", "user": ADMIN_ID})
+    
+    # تحديث الحالة في الـ Runtime State
+    from core.runtime_state import runtime_state
+    runtime_state.update_agent_state(f"user_{ADMIN_ID}", {"last_seen": datetime.now().isoformat()})
+    
+    event_bus.emit(event_bus.SYSTEM_ALERT, {"action": "dashboard_access", "user": ADMIN_ID})
+    
+    text = (
+        f"🔱 <b>مرحباً بك في NEXUM PRIME META-OS</b>\n"
+        f"لقد تم تفعيل نظام التشغيل السيادي. جميع الأنظمة تحت سيطرتك الآن.\n\n"
+        f"⚡ <b>الحالة:</b> <code>System Online</code>\n"
+        f"🛠 <b>الأدوات المتاحة:</b> Sandbox, Terminal, Planner, Multi-Agent DAG\n"
+    )
+    
     bot.send_message(
         message.chat.id,
-        fmt.header("NEXUM PRIME META-OS"),
+        text,
         parse_mode="HTML",
         reply_markup=ui_builder.build_main_control_plane()
     )
@@ -111,6 +153,7 @@ def handle_run(message):
     if not cmd:
         bot.reply_to(message, "استخدام: <code>/run الأمر</code>", parse_mode="HTML")
         return
+    
     result = executor.execute(cmd)
     if result['status'] == 'confirm':
         pending_commands[message.from_user.id] = cmd
@@ -118,45 +161,53 @@ def handle_run(message):
         return
     send_terminal_output(bot, message.chat.id, result['status'], result['output'])
 
-
 # ===== الرسائل النصية =====
 @bot.message_handler(content_types=['text'])
 def handle_text(message):
     if message.from_user.id != ADMIN_ID: return
-    text = message.text.strip().lower()
+    text = message.text.strip()
 
-    EXEC_KW = ['ثبت', 'شغل', 'نفذ', 'ابن', 'build', 'create', 'أنشئ', 'صمم']
-    if any(k in text for k in EXEC_KW):
-        bot.reply_to(message, fmt.info("🧠 NEXUM PRIME: جاري توزيع المهام عبر الأوركستريتور..."))
+    # كلمات مفتاحية للتنفيذ المباشر (Orchestration)
+    EXEC_KW = ['ثبت', 'شغل', 'نفذ', 'ابن', 'build', 'create', 'أنشئ', 'صمم', 'spawn']
+    if any(k in text.lower() for k in EXEC_KW):
+        bot.reply_to(message, "🧠 <b>NEXUM PRIME:</b> جاري تحليل المهمة وبناء الـ Execution Graph...")
         event_bus.emit(event_bus.TASK_STARTED, {"goal": text})
         try:
+            # مناداة Planner لتوليد الخطة ثم الأوركستريتور للتنفيذ
             result = orchestrator.execute_goal(text)
-            protocol_id = result.get('protocol_id', 'unknown')
-            event_bus.emit(event_bus.TASK_COMPLETED, {"protocol_id": protocol_id})
-            msg = f"✅ <b>تم التخطيط | بروتوكول:</b> {protocol_id}\nجاري التنفيذ ديناميكياً عبر المجدول الخلفي..."
-            bot.send_message(message.chat.id, fmt.success(msg), parse_mode="HTML")
+            protocol_id = result.get('protocol', {}).get('protocol_id', 'PR-ALPHA')
+            msg = f"⚙️ <b>بروتوكول التنفيذ المفعل:</b> <code>{protocol_id}</code>\nالنظام يبدأ الآن بتشغيل الحاويات وتنفيذ التسلسل المطلوب."
+            bot.send_message(message.chat.id, msg, parse_mode="HTML")
         except Exception as e:
-            event_bus.emit(event_bus.TASK_FAILED, {"error": str(e)})
-            bot.send_message(message.chat.id, fmt.error(f"❌ خطأ: {str(e)}"), parse_mode="HTML")
+            bot.send_message(message.chat.id, f"❌ <b>فشل في الجدولة:</b> {str(e)}", parse_mode="HTML")
         return
 
+    # محادثة عادية مع ذاكرة
     bot.send_chat_action(message.chat.id, 'typing')
-    response = _gemini_svc.ask(message.text)
+    
+    history = get_user_history(message.from_user.id)
+    system_instr = "أنت نظام تشغيل ذكاء اصطناعي سيادي (NEXUM OS). أنت قوي، تقني، وتساعد المستخدم معتز في إدارة سيرفره."
+    
+    response, new_history = _gemini_svc.ask(text, history=history, system_instruction=system_instr)
+    update_user_history(message.from_user.id, new_history)
+    
     safe_reply(bot, message, response)
 
 
 if __name__ == "__main__":
-    print("🔱 NEXUM PRIME Sovereign OS — ONLINE")
+    from datetime import datetime
+    print(f"🔱 NEXUM PRIME OS [DEPLOYED AT {datetime.now().strftime('%H:%M:%S')}]")
     
-    # تسجيل أدوات النظام الأساسية (Sandbox, Terminal, Filesystem) ليستخدمها الذكاء الاصطناعي
+    # تسجيل أدوات النظام
     from core.system_tools import register_all_system_tools
     register_all_system_tools()
     
-    # تهيئة دورة حياة الوكلاء الأساسيين
+    # تهيئة الوكلاء
     from core.agent_registry import agent_registry
     for agent_id in agent_registry.agents:
         lifecycle.init_agent(agent_id)
+        
     try:
         bot.infinity_polling()
     except Exception as e:
-        print(f"Error: {e}")
+        print(f"Main Error: {e}")

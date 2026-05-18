@@ -2,19 +2,17 @@ import os
 import requests, base64, json
 
 class GeminiService:
-    def __init__(self, api_key=None):
+    def __init__(self, api_key=None, model="gemini-3.1-flash-lite"):
         self.api_key = api_key or os.getenv("GOOGLE_API_KEY")
-        self.url = f'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key={self.api_key}'
+        self.model = model
+        self.url = f'https://generativelanguage.googleapis.com/v1beta/models/{self.model}:generateContent?key={self.api_key}'
 
-    def ask(self, prompt, image_data=None, system_instruction=None):
-        contents = [{'parts': [{'text': prompt}]}]
-        if image_data:
-            contents[0]['parts'].append({
-                'inline_data': {
-                    'mime_type': 'image/jpeg',
-                    'data': base64.b64encode(image_data).decode('utf-8')
-                }
-            })
+    def ask(self, prompt, history=None, system_instruction=None):
+        """
+        يرسل استفساراً مع دعم كامل لتاريخ المحادثة (History) لإعطاء الوكيل ذاكرة قصيرة المدى.
+        """
+        contents = history or []
+        contents.append({'role': 'user', 'parts': [{'text': prompt}]})
         
         payload = {'contents': contents}
         if system_instruction:
@@ -25,14 +23,16 @@ class GeminiService:
             res_json = response.json()
 
             if 'candidates' in res_json and res_json['candidates'][0].get('content'):
-                return res_json['candidates'][0]['content']['parts'][0]['text']
+                text_response = res_json['candidates'][0]['content']['parts'][0]['text']
+                # إضافة الرد للتاريخ ليعود للمستخدم
+                contents.append({'role': 'model', 'parts': [{'text': text_response}]})
+                return text_response, contents
             
-            print("⚠️ Google API Response Error:")
+            print(f"⚠️ Google API Error ({self.model}):")
             print(json.dumps(res_json, indent=2))
             
-            if 'error' in res_json:
-                return f"❌ خطأ من جوجل: {res_json['error']['message']}"
-            return "❌ الرد محجوب أو غير مكتمل"
+            error_msg = res_json.get('error', {}).get('message', 'Unknown Error')
+            return f"❌ خطأ تقني: {error_msg}", contents
 
         except Exception as e:
-            return f"❌ فشل الاتصال: {str(e)}"
+            return f"❌ فشل الاتصال: {str(e)}", history or []
