@@ -3,31 +3,28 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>NEXUM PRIME | Sovereign Control Plane</title>
-    <!-- Tailwind CSS -->
+    <title>NEXUM PRIME | Sovereign OS</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Telegram Mini App SDK -->
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
-    <!-- Alpine.js for lightweight reactivity -->
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.13.3/dist/cdn.min.js"></script>
-    <!-- Lucide Icons -->
     <script src="https://unpkg.com/lucide@latest"></script>
-
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <script>
         tailwind.config = {
             darkMode: 'class',
             theme: {
                 extend: {
+                    fontFamily: { sans: ['Inter'], mono: ['JetBrains Mono'] },
                     colors: {
-                        tg_bg: 'var(--tg-theme-bg-color, #0f172a)',
-                        tg_text: 'var(--tg-theme-text-color, #f8fafc)',
-                        tg_hint: 'var(--tg-theme-hint-color, #94a3b8)',
-                        tg_link: 'var(--tg-theme-link-color, #3b82f6)',
-                        tg_btn: 'var(--tg-theme-button-color, #2563eb)',
-                        tg_btn_text: 'var(--tg-theme-button-text-color, #ffffff)',
-                        brand: {
-                            glow: '#00f2fe',
-                            dark: '#0a0f1d'
+                        nx: {
+                            bg: '#0a0e1a',
+                            card: '#111827',
+                            border: '#1e293b',
+                            glow: '#00f0ff',
+                            warn: '#f59e0b',
+                            danger: '#ef4444',
+                            success: '#10b981',
+                            accent: '#6366f1',
                         }
                     }
                 }
@@ -35,192 +32,361 @@
         }
     </script>
     <style>
-        body {
-            background-color: theme('colors.tg_bg');
-            color: theme('colors.tg_text');
-            -webkit-tap-highlight-color: transparent;
-        }
-        .glass-card {
-            background: rgba(30, 41, 59, 0.7);
-            backdrop-filter: blur(12px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-        }
-        .agent-status-glow {
-            box-shadow: 0 0 15px rgba(0, 242, 254, 0.3);
-        }
+        body { background: #0a0e1a; color: #e2e8f0; font-family: 'Inter', sans-serif; }
+        .glass { background: rgba(17,24,39,0.85); backdrop-filter: blur(16px); border: 1px solid rgba(30,41,59,0.8); }
+        .glow-border { box-shadow: 0 0 20px rgba(0,240,255,0.15), inset 0 0 20px rgba(0,240,255,0.05); }
+        .status-pulse { animation: pulse-glow 2s infinite; }
+        @keyframes pulse-glow { 0%,100% { opacity: 1; } 50% { opacity: 0.5; } }
+        .fade-in { animation: fadeIn 0.3s ease-out; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+        .event-feed::-webkit-scrollbar { width: 4px; }
+        .event-feed::-webkit-scrollbar-thumb { background: #1e293b; border-radius: 4px; }
     </style>
 </head>
-<body class="antialiased min-h-screen" x-data="nexumApp()">
+<body class="antialiased min-h-screen" x-data="nexumOS()" x-init="init()">
 
-    <!-- Header Navigation -->
-    <header class="sticky top-0 z-50 glass-card border-b border-slate-800 p-4 flex justify-between items-center">
-        <div class="flex items-center gap-2">
-            <div class="w-8 h-8 rounded-full bg-brand-glow/20 flex items-center justify-center border border-brand-glow/50">
-                <i data-lucide="cpu" class="w-4 h-4 text-brand-glow"></i>
+    <!-- === TOP BAR === -->
+    <header class="sticky top-0 z-50 glass border-b border-nx-border px-4 py-3">
+        <div class="flex justify-between items-center">
+            <div class="flex items-center gap-2.5">
+                <div class="w-8 h-8 rounded-lg bg-nx-glow/10 flex items-center justify-center border border-nx-glow/30">
+                    <i data-lucide="cpu" class="w-4 h-4 text-nx-glow"></i>
+                </div>
+                <div>
+                    <h1 class="text-sm font-bold tracking-wide">NEXUM PRIME</h1>
+                    <p class="text-[10px] text-slate-500 font-mono">SOVEREIGN OS v2.0</p>
+                </div>
             </div>
-            <h1 class="font-bold tracking-wider text-sm">NEXUM PRIME</h1>
-        </div>
-        <div class="flex gap-3">
-            <button @click="currentTab = 'agents'" :class="currentTab === 'agents' ? 'text-brand-glow' : 'text-tg_hint'">
-                <i data-lucide="network" class="w-5 h-5"></i>
-            </button>
-            <button @click="currentTab = 'sandbox'" :class="currentTab === 'sandbox' ? 'text-brand-glow' : 'text-tg_hint'">
-                <i data-lucide="box" class="w-5 h-5"></i>
-            </button>
-            <button @click="currentTab = 'terminal'" :class="currentTab === 'terminal' ? 'text-brand-glow' : 'text-tg_hint'">
-                <i data-lucide="terminal" class="w-5 h-5"></i>
-            </button>
+            <!-- Live Indicators -->
+            <div class="flex items-center gap-3">
+                <div class="flex items-center gap-1.5">
+                    <span class="w-2 h-2 rounded-full bg-nx-success status-pulse"></span>
+                    <span class="text-[10px] font-mono text-slate-400" x-text="agentCount + ' agents'"></span>
+                </div>
+                <div class="text-[10px] font-mono text-slate-500" x-text="clock"></div>
+            </div>
         </div>
     </header>
 
-    <!-- Main Content -->
-    <main class="p-4 space-y-6 pb-24">
-        
-        <!-- Tab: Agents Control Center -->
-        <div x-show="currentTab === 'agents'" x-transition>
-            <h2 class="text-xs font-semibold text-tg_hint uppercase tracking-widest mb-4">Agent Control Center</h2>
-            
-            <div class="space-y-4">
-                <template x-for="agent in agents" :key="agent.id">
-                    <div class="glass-card rounded-xl p-4 transition-all duration-300 hover:agent-status-glow">
-                        <div class="flex justify-between items-start mb-3">
-                            <div class="flex items-center gap-3">
-                                <div class="w-10 h-10 rounded-lg bg-slate-800 flex items-center justify-center relative">
-                                    <i :data-lucide="agent.icon" class="w-5 h-5 text-slate-300"></i>
-                                    <span class="absolute -top-1 -right-1 w-3 h-3 rounded-full border-2 border-slate-900"
-                                          :class="agent.status === 'ACTIVE' ? 'bg-green-500' : 'bg-amber-500'"></span>
-                                </div>
-                                <div>
-                                    <h3 class="font-medium text-sm text-tg_text" x-text="agent.name"></h3>
-                                    <p class="text-xs text-tg_hint" x-text="agent.role"></p>
-                                </div>
+    <!-- === NAVIGATION TABS === -->
+    <nav class="sticky top-[57px] z-40 glass border-b border-nx-border">
+        <div class="flex overflow-x-auto gap-0 px-2">
+            <template x-for="tab in tabs" :key="tab.id">
+                <button @click="currentTab = tab.id; haptic()"
+                    :class="currentTab === tab.id ? 'text-nx-glow border-b-2 border-nx-glow bg-nx-glow/5' : 'text-slate-500 border-b-2 border-transparent'"
+                    class="px-3 py-2.5 text-[11px] font-medium whitespace-nowrap transition-all flex items-center gap-1.5">
+                    <i :data-lucide="tab.icon" class="w-3.5 h-3.5"></i>
+                    <span x-text="tab.label"></span>
+                </button>
+            </template>
+        </div>
+    </nav>
+
+    <!-- === MAIN CONTENT === -->
+    <main class="px-4 pt-4 pb-28 space-y-4">
+
+        <!-- TAB: Agents -->
+        <div x-show="currentTab === 'agents'" x-transition class="space-y-3 fade-in">
+            <div class="flex justify-between items-center">
+                <h2 class="text-xs font-semibold text-slate-400 uppercase tracking-widest">Active Agents</h2>
+                <button @click="spawnAgent()" class="text-[10px] bg-nx-accent/20 text-nx-accent px-2.5 py-1 rounded-full border border-nx-accent/30 font-medium">+ Spawn</button>
+            </div>
+            <template x-for="agent in agents" :key="agent.agent_id">
+                <div class="glass rounded-xl p-4 fade-in" :class="agent.status === 'RUNNING' ? 'glow-border' : ''">
+                    <div class="flex justify-between items-start mb-3">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 rounded-lg bg-slate-800/80 flex items-center justify-center relative">
+                                <i data-lucide="bot" class="w-5 h-5 text-slate-300"></i>
+                                <span class="absolute -top-1 -right-1 w-3 h-3 rounded-full border-2 border-nx-bg"
+                                    :class="{
+                                        'bg-nx-success': agent.status === 'RUNNING' || agent.status === 'active',
+                                        'bg-nx-warn': agent.status === 'WAITING' || agent.status === 'CREATED',
+                                        'bg-nx-danger': agent.status === 'FAILED',
+                                        'bg-slate-600': agent.status === 'TERMINATED'
+                                    }"></span>
                             </div>
-                            <span class="text-[10px] px-2 py-1 rounded bg-slate-800 text-slate-300 font-mono" x-text="agent.runtime"></span>
+                            <div>
+                                <h3 class="text-sm font-semibold" x-text="agent.name"></h3>
+                                <p class="text-[11px] text-slate-500" x-text="agent.role"></p>
+                            </div>
                         </div>
-                        
-                        <!-- Capabilities -->
-                        <div class="flex flex-wrap gap-1.5 mb-4">
-                            <template x-for="cap in agent.capabilities">
-                                <span class="text-[9px] uppercase tracking-wider px-1.5 py-0.5 rounded border border-slate-700 text-slate-400" x-text="cap"></span>
-                            </template>
-                        </div>
-                        
-                        <!-- Actions -->
-                        <div class="flex gap-2 border-t border-slate-800 pt-3">
-                            <button class="flex-1 bg-tg_btn text-tg_btn_text py-1.5 rounded text-xs font-medium flex justify-center items-center gap-1" @click="tg.HapticFeedback.impactOccurred('light')">
-                                <i data-lucide="play" class="w-3 h-3"></i> Deploy
-                            </button>
-                            <button class="flex-1 bg-slate-800 text-slate-300 py-1.5 rounded text-xs font-medium flex justify-center items-center gap-1" @click="tg.HapticFeedback.impactOccurred('light')">
-                                <i data-lucide="list-video" class="w-3 h-3"></i> Logs
-                            </button>
-                        </div>
+                        <span class="text-[9px] font-mono px-2 py-0.5 rounded-full border"
+                            :class="{
+                                'border-nx-success/40 text-nx-success bg-nx-success/10': agent.status === 'RUNNING' || agent.status === 'active',
+                                'border-nx-warn/40 text-nx-warn bg-nx-warn/10': agent.status === 'WAITING',
+                                'border-nx-danger/40 text-nx-danger bg-nx-danger/10': agent.status === 'FAILED',
+                            }"
+                            x-text="agent.status"></span>
                     </div>
-                </template>
+                    <!-- Capabilities -->
+                    <div class="flex flex-wrap gap-1 mb-3">
+                        <template x-for="cap in (agent.capabilities || []).slice(0, 4)">
+                            <span class="text-[9px] uppercase tracking-wider px-1.5 py-0.5 rounded bg-slate-800 text-slate-400 border border-slate-700/50" x-text="cap"></span>
+                        </template>
+                    </div>
+                    <!-- Restrictions -->
+                    <div class="flex flex-wrap gap-1 mb-3">
+                        <template x-for="r in (agent.restrictions || []).slice(0, 2)">
+                            <span class="text-[9px] uppercase tracking-wider px-1.5 py-0.5 rounded bg-nx-danger/10 text-nx-danger/70 border border-nx-danger/20" x-text="'🔒 ' + r"></span>
+                        </template>
+                    </div>
+                    <!-- Actions -->
+                    <div class="flex gap-2 border-t border-nx-border pt-3">
+                        <button class="flex-1 bg-nx-accent text-white py-1.5 rounded-lg text-[11px] font-medium">▶ Deploy</button>
+                        <button class="flex-1 bg-slate-800 text-slate-300 py-1.5 rounded-lg text-[11px] font-medium">📋 Logs</button>
+                        <button class="flex-1 bg-slate-800 text-slate-300 py-1.5 rounded-lg text-[11px] font-medium">⏹ Stop</button>
+                    </div>
+                </div>
+            </template>
+        </div>
+
+        <!-- TAB: Runtime -->
+        <div x-show="currentTab === 'runtime'" x-transition class="space-y-3 fade-in">
+            <h2 class="text-xs font-semibold text-slate-400 uppercase tracking-widest">Sandbox Runtime</h2>
+            <div class="glass rounded-xl overflow-hidden">
+                <div class="grid grid-cols-3 gap-px bg-nx-border">
+                    <div class="bg-nx-bg p-4 text-center">
+                        <p class="text-[10px] text-slate-500 uppercase mb-1">CPU</p>
+                        <p class="text-2xl font-bold font-mono" :class="sys.cpu > 80 ? 'text-nx-danger' : 'text-nx-glow'" x-text="sys.cpu + '%'"></p>
+                    </div>
+                    <div class="bg-nx-bg p-4 text-center">
+                        <p class="text-[10px] text-slate-500 uppercase mb-1">RAM</p>
+                        <p class="text-2xl font-bold font-mono" :class="sys.ram > 80 ? 'text-nx-danger' : 'text-nx-glow'" x-text="sys.ram + '%'"></p>
+                    </div>
+                    <div class="bg-nx-bg p-4 text-center">
+                        <p class="text-[10px] text-slate-500 uppercase mb-1">Disk</p>
+                        <p class="text-2xl font-bold font-mono" x-text="sys.disk + '%'"></p>
+                    </div>
+                </div>
+            </div>
+            <!-- Kernel Status -->
+            <div class="glass rounded-xl p-4">
+                <div class="flex justify-between items-center mb-3">
+                    <span class="text-xs font-mono text-slate-400">Kernel Status</span>
+                    <span class="text-[10px] font-mono text-nx-success flex items-center gap-1">
+                        <span class="w-1.5 h-1.5 rounded-full bg-nx-success status-pulse"></span> ONLINE
+                    </span>
+                </div>
+                <div class="space-y-2">
+                    <div class="flex justify-between text-[11px]">
+                        <span class="text-slate-500">Orchestrator</span><span class="text-slate-300">Ready</span>
+                    </div>
+                    <div class="flex justify-between text-[11px]">
+                        <span class="text-slate-500">Event Bus</span><span class="text-slate-300" x-text="events.length + ' events'"></span>
+                    </div>
+                    <div class="flex justify-between text-[11px]">
+                        <span class="text-slate-500">WebSocket</span><span class="text-nx-success">Connected</span>
+                    </div>
+                </div>
             </div>
         </div>
 
-        <!-- Tab: Sandbox / Hardware -->
-        <div x-show="currentTab === 'sandbox'" x-transition style="display: none;">
-            <h2 class="text-xs font-semibold text-tg_hint uppercase tracking-widest mb-4">Sandbox & Hardware</h2>
-            <div class="glass-card rounded-xl border border-slate-800 overflow-hidden">
-                <div class="p-4 border-b border-slate-800 flex justify-between items-center bg-slate-800/50">
-                    <span class="text-xs font-mono text-tg_hint">Kernel Status</span>
-                    <span class="text-xs font-medium text-green-400">ONLINE</span>
-                </div>
-                <div class="grid grid-cols-2 gap-px bg-slate-800">
-                    <div class="bg-tg_bg p-4 flex flex-col items-center justify-center">
-                        <span class="text-[10px] text-tg_hint uppercase mb-1">CPU Load</span>
-                        <span class="text-xl font-bold font-mono" :class="sysStats.cpu > 80 ? 'text-red-400' : 'text-tg_text'" x-text="sysStats.cpu + '%'"></span>
+        <!-- TAB: Events -->
+        <div x-show="currentTab === 'events'" x-transition class="space-y-3 fade-in">
+            <h2 class="text-xs font-semibold text-slate-400 uppercase tracking-widest">Live Event Feed</h2>
+            <div class="event-feed space-y-2 max-h-[60vh] overflow-y-auto">
+                <template x-for="evt in events.slice().reverse()" :key="evt.id">
+                    <div class="glass rounded-lg p-3 fade-in">
+                        <div class="flex justify-between items-start">
+                            <div class="flex items-center gap-2">
+                                <span class="w-2 h-2 rounded-full"
+                                    :class="{
+                                        'bg-nx-success': evt.type.includes('completed') || evt.type.includes('spawned'),
+                                        'bg-nx-danger': evt.type.includes('failed') || evt.type.includes('crashed'),
+                                        'bg-nx-warn': evt.type.includes('started'),
+                                        'bg-nx-accent': evt.type.includes('compiled'),
+                                    }"></span>
+                                <span class="text-[11px] font-mono text-slate-300" x-text="evt.type"></span>
+                            </div>
+                            <span class="text-[9px] text-slate-600 font-mono" x-text="evt.timestamp ? evt.timestamp.split('T')[1].split('.')[0] : ''"></span>
+                        </div>
+                        <p class="text-[10px] text-slate-500 mt-1 font-mono" x-text="JSON.stringify(evt.data).slice(0, 80)"></p>
                     </div>
-                    <div class="bg-tg_bg p-4 flex flex-col items-center justify-center">
-                        <span class="text-[10px] text-tg_hint uppercase mb-1">RAM (Iso)</span>
-                        <span class="text-xl font-bold font-mono" :class="sysStats.ram > 80 ? 'text-red-400' : 'text-tg_text'" x-text="sysStats.ram + '%'"></span>
-                    </div>
+                </template>
+                <div x-show="events.length === 0" class="text-center py-8 text-slate-600 text-sm">No events yet</div>
+            </div>
+        </div>
+
+        <!-- TAB: Protocols -->
+        <div x-show="currentTab === 'protocols'" x-transition class="space-y-3 fade-in">
+            <h2 class="text-xs font-semibold text-slate-400 uppercase tracking-widest">Protocol Studio</h2>
+            <div class="glass rounded-xl p-6 text-center">
+                <div class="w-16 h-16 mx-auto mb-4 rounded-2xl bg-nx-accent/10 flex items-center justify-center border border-nx-accent/20">
+                    <i data-lucide="workflow" class="w-8 h-8 text-nx-accent"></i>
                 </div>
+                <h3 class="text-sm font-semibold mb-2">Visual Workflow Builder</h3>
+                <p class="text-[11px] text-slate-500 mb-4">Build orchestration graphs visually.<br>Drag agents, connect protocols, deploy.</p>
+                <button @click="cmdPalette()" class="bg-nx-accent text-white px-4 py-2 rounded-lg text-xs font-medium">Open Command Palette</button>
+            </div>
+        </div>
+
+        <!-- TAB: GitHub -->
+        <div x-show="currentTab === 'github'" x-transition class="space-y-3 fade-in">
+            <h2 class="text-xs font-semibold text-slate-400 uppercase tracking-widest">GitHub Operations</h2>
+            <div class="glass rounded-xl p-4 space-y-3">
+                <button @click="dispatch('deploy_pages')" class="w-full bg-slate-800 hover:bg-slate-700 text-slate-200 py-3 rounded-lg text-xs font-medium flex items-center justify-center gap-2 transition-colors">
+                    <i data-lucide="rocket" class="w-4 h-4"></i> Deploy GitHub Pages
+                </button>
+                <button @click="dispatch('git_status')" class="w-full bg-slate-800 hover:bg-slate-700 text-slate-200 py-3 rounded-lg text-xs font-medium flex items-center justify-center gap-2 transition-colors">
+                    <i data-lucide="git-branch" class="w-4 h-4"></i> Git Status
+                </button>
+                <button @click="dispatch('auto_deploy')" class="w-full bg-nx-accent hover:bg-nx-accent/80 text-white py-3 rounded-lg text-xs font-medium flex items-center justify-center gap-2 transition-colors">
+                    <i data-lucide="zap" class="w-4 h-4"></i> Auto-Deploy Pipeline
+                </button>
             </div>
         </div>
 
     </main>
 
-    <!-- Floating Command Palette Activator -->
-    <div class="fixed bottom-6 right-6">
-        <button @click="openCommandPalette()" class="w-14 h-14 rounded-full bg-tg_btn shadow-lg shadow-tg_btn/50 flex items-center justify-center text-white transition-transform active:scale-95">
+    <!-- === COMMAND PALETTE FAB === -->
+    <div class="fixed bottom-6 right-6 z-50">
+        <button @click="cmdPalette()" class="w-14 h-14 rounded-2xl bg-nx-accent shadow-lg shadow-nx-accent/30 flex items-center justify-center text-white active:scale-95 transition-transform">
             <i data-lucide="terminal-square" class="w-6 h-6"></i>
         </button>
     </div>
 
-    <!-- Initialization Script -->
-    <script>
-        function nexumApp() {
-            return {
-                tg: window.Telegram.WebApp,
-                currentTab: 'agents',
-                sysStats: { cpu: 0, ram: 0, disk: 0 },
-                agents: [], // سيتم جلبهم من الباك إند
-                
-                async fetchAgents() {
-                    try {
-                        let res = await fetch('/api/agents');
-                        let data = await res.json();
-                        // أضف أيقونات افتراضية بناء للمسمى
-                        this.agents = data.map(a => ({
-                            ...a,
-                            icon: a.name.includes('Frontend') ? 'layout-template' : (a.name.includes('Infra') ? 'server' : 'cpu')
-                        }));
-                    } catch (e) {
-                        console.error('Failed to fetch agents:', e);
-                    }
-                },
-                
-                startRealtimeStream() {
-                    const evtSource = new EventSource('/api/system/stream');
-                    evtSource.onmessage = (event) => {
-                        this.sysStats = JSON.parse(event.data);
-                    };
-                },
+    <!-- === BOTTOM STATUS BAR === -->
+    <div class="fixed bottom-0 left-0 right-0 z-40 glass border-t border-nx-border px-4 py-2 flex justify-between items-center">
+        <span class="text-[9px] font-mono text-slate-600">NEXUM PRIME v2.0 | <span :class="wsConnected ? 'text-nx-success' : 'text-nx-danger'" x-text="wsConnected ? 'WS:LIVE' : 'WS:OFFLINE'"></span></span>
+        <span class="text-[9px] font-mono text-slate-600" x-text="'CPU:' + sys.cpu + '% RAM:' + sys.ram + '%'"></span>
+    </div>
 
-                init() {
-                    this.tg.expand();
-                    this.tg.ready();
-                    this.fetchAgents();
-                    this.startRealtimeStream();
-                    setTimeout(() => lucide.createIcons(), 100);
-                },
-                openCommandPalette() {
-                    this.tg.HapticFeedback.impactOccurred('medium');
-                    this.tg.showPopup({
-                        title: 'Command Palette',
-                        message: 'Select an action to dispatch to the Orchestrator:',
-                        buttons: [
-                            {id: 'deploy_front', type: 'default', text: '⚡ Spawn Frontend Builder'},
-                            {id: 'run_audit', type: 'default', text: '🛡️ Run Security Audit'},
-                            {type: 'cancel'}
-                        ]
-                    }, async (buttonId) => {
-                        if (buttonId === 'deploy_front') {
-                            this.triggerOrchestrator('ابن واجهة تفاعلية جديدة');
-                        } else if (buttonId === 'run_audit') {
-                            this.triggerOrchestrator('قم بعمل فحص أمني للنظام');
-                        }
-                    });
-                },
-                
-                async triggerOrchestrator(goal) {
-                    this.tg.HapticFeedback.impactOccurred('rigid');
-                    try {
-                        let res = await fetch('/api/orchestrate', {
-                            method: 'POST',
-                            headers: {'Content-Type': 'application/json'},
-                            body: JSON.stringify({ goal })
-                        });
-                        let data = await res.json();
-                        this.tg.showAlert(`✅ تم بدء البروتوكول: ${data.protocol_id || 'Success'}`);
-                    } catch (e) {
-                        this.tg.showAlert(`❌ فشل الاتصال بالأوركستريتور`);
+    <script>
+    function nexumOS() {
+        return {
+            tg: window.Telegram?.WebApp,
+            currentTab: 'agents',
+            wsConnected: false,
+            ws: null,
+            clock: '',
+            agents: [],
+            events: [],
+            sys: { cpu: 0, ram: 0, disk: 0 },
+            tabs: [
+                { id: 'agents', label: 'Agents', icon: 'bot' },
+                { id: 'runtime', label: 'Runtime', icon: 'activity' },
+                { id: 'events', label: 'Events', icon: 'radio' },
+                { id: 'protocols', label: 'Protocols', icon: 'workflow' },
+                { id: 'github', label: 'GitHub', icon: 'github' },
+            ],
+
+            get agentCount() { return this.agents.length; },
+
+            async init() {
+                if (this.tg) { this.tg.expand(); this.tg.ready(); }
+                this.startClock();
+                await this.fetchAgents();
+                this.connectWebSocket();
+                this.connectSSE();
+                setTimeout(() => lucide.createIcons(), 200);
+            },
+
+            startClock() {
+                setInterval(() => {
+                    this.clock = new Date().toLocaleTimeString('en-US', { hour12: false });
+                }, 1000);
+            },
+
+            async fetchAgents() {
+                try {
+                    let res = await fetch('/api/agents');
+                    this.agents = await res.json();
+                } catch(e) { console.error('Agent fetch failed:', e); }
+            },
+
+            connectWebSocket() {
+                const proto = location.protocol === 'https:' ? 'wss:' : 'ws:';
+                this.ws = new WebSocket(`${proto}//${location.host}/ws`);
+                this.ws.onopen = () => { this.wsConnected = true; };
+                this.ws.onclose = () => {
+                    this.wsConnected = false;
+                    setTimeout(() => this.connectWebSocket(), 3000);
+                };
+                this.ws.onmessage = (e) => {
+                    const msg = JSON.parse(e.data);
+                    if (msg.type === 'init') {
+                        this.agents = msg.agents || this.agents;
+                        this.events = msg.events || [];
+                    } else if (msg.type === 'event') {
+                        this.events.push(msg.event);
+                        if (this.events.length > 100) this.events.shift();
+                        this.fetchAgents(); // refresh agents on events
                     }
+                };
+            },
+
+            connectSSE() {
+                const evtSource = new EventSource('/api/system/stream');
+                evtSource.onmessage = (e) => {
+                    this.sys = JSON.parse(e.data);
+                };
+            },
+
+            haptic() {
+                if (this.tg?.HapticFeedback) this.tg.HapticFeedback.impactOccurred('light');
+            },
+
+            cmdPalette() {
+                this.haptic();
+                if (this.tg?.showPopup) {
+                    this.tg.showPopup({
+                        title: '⌘ Command Palette',
+                        message: 'Dispatch a command to the Orchestrator:',
+                        buttons: [
+                            { id: 'cmd_spawn', type: 'default', text: '⚡ Spawn Frontend Agent' },
+                            { id: 'cmd_deploy', type: 'default', text: '🚀 Deploy GitHub Pages' },
+                            { id: 'cmd_audit', type: 'default', text: '🛡️ Security Audit' },
+                            { type: 'cancel' }
+                        ]
+                    }, async (id) => {
+                        const goals = {
+                            cmd_spawn: 'ابن واجهة تفاعلية React جديدة',
+                            cmd_deploy: 'انشر المشروع على GitHub Pages',
+                            cmd_audit: 'افحص أمان النظام بالكامل',
+                        };
+                        if (goals[id]) await this.orchestrate(goals[id]);
+                    });
                 }
-            }
+            },
+
+            async orchestrate(goal) {
+                try {
+                    let res = await fetch('/api/orchestrate', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ goal })
+                    });
+                    let data = await res.json();
+                    if (this.tg?.showAlert) this.tg.showAlert(`✅ Protocol: ${data.result?.protocol?.protocol_id || 'Done'}`);
+                } catch(e) {
+                    if (this.tg?.showAlert) this.tg.showAlert('❌ Orchestration failed');
+                }
+            },
+
+            async dispatch(action) {
+                this.haptic();
+                await this.orchestrate(action);
+            },
+
+            spawnAgent() {
+                this.haptic();
+                if (this.tg?.showPopup) {
+                    this.tg.showPopup({
+                        title: 'Spawn Agent',
+                        message: 'Choose an agent type to spawn:',
+                        buttons: [
+                            { id: 'sp_front', type: 'default', text: '🎨 Frontend Builder' },
+                            { id: 'sp_infra', type: 'default', text: '🔧 Infrastructure' },
+                            { type: 'cancel' }
+                        ]
+                    }, async (id) => {
+                        if (id === 'sp_front') await this.orchestrate('spawn frontend builder agent');
+                        if (id === 'sp_infra') await this.orchestrate('spawn infrastructure agent');
+                    });
+                }
+            },
         }
+    }
     </script>
 </body>
 </html>
