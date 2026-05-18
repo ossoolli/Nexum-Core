@@ -40,6 +40,11 @@ class RuntimeState:
                 self.state["agents"][agent_id] = {}
             self.state["agents"][agent_id].update(data)
             
+    def set_agent(self, agent_id: str, data: dict):
+        """تحديث بيانات وحالة الوكيل بالكامل"""
+        with self._lock:
+            self.state["agents"][agent_id] = data
+
     def get_agent_state(self, agent_id: str) -> dict:
         with self._lock:
             return self.state["agents"].get(agent_id, {})
