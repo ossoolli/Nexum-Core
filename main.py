@@ -17,11 +17,13 @@ from core.keyboards import ui_builder
 from core.callback_router import router
 from core.event_bus import event_bus
 from core.lifecycle import lifecycle
+from services.gemini_service import GeminiService
+from core.formatters import fmt
+from core.agent_registry import agent_registry
 from agents.monitor import monitor_agent
 from agents.deploy import deploy_agent
 from agents.docker_agent import docker_agent
-from services.gemini_service import GeminiService
-from core.formatters import fmt
+import psutil
 
 # === Bot Setup ===
 bot = telebot.TeleBot(os.getenv("TELEGRAM_TOKEN"))
