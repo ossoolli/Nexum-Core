@@ -7,7 +7,7 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.13.3/dist/cdn.min.js"></script>
-    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://unpkg.com/cytoscape@3.24.0/dist/cytoscape.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
     <script>
         tailwind.config = {
@@ -223,7 +223,11 @@
             </div>
         </div>
 
-    </main>
+        <!-- TAB: Execution Graph -->
+        <div x-show="currentTab === 'graph'" x-transition class="space-y-4">
+            <h2 class="text-xl font-bold px-1 text-nx-glow">Execution Graph</h2>
+            <div id="graph-container" class="glass rounded-3xl h-[60vh] w-full overflow-hidden"></div>
+        </div>
 
     <!-- === FAB CONTROL === -->
     <div class="fixed bottom-10 left-1/2 -translate-x-1/2 z-50">
@@ -259,7 +263,7 @@
             tabs: [
                 { id: 'agents', label: 'Swarm', icon: 'zap' },
                 { id: 'logs', label: 'Terminal', icon: 'terminal' },
-                { id: 'data', label: 'Intelligence', icon: 'database' }
+                { id: 'graph', label: 'Graph', icon: 'layout-grid' }
             ],
 
             init() {

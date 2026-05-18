@@ -2,54 +2,43 @@ import os
 import yaml
 from datetime import datetime
 
-class ProtocolCompiler:
+def _graph_to_dict(graph):
+    """Convert ExecutionGraph (custom class) to a plain dict suitable for YAML serialization.
+    Expected attributes on graph:
+        - protocol_id (str)
+        - nodes (list of TaskNode)
+    Each TaskNode is expected to have:
+        - task_id
+        - action
+        - params (dict)
+        - dependencies (list of task_id)
     """
-    Autonomous Protocol Compiler (Layer 3)
-    يحول مسارات التنفيذ (Execution Graphs) العابرة التي يولدها الذكاء الاصطناعي
-    إلى بروتوكولات دائمة بصيغة YAML يمكن إعادة تدويرها وتحليلها وعرضها كنظام تشغيلي.
-    """
-    def __init__(self):
-        self.protocols_dir = os.path.join(os.path.dirname(__file__), "..", "protocols")
-        os.makedirs(self.protocols_dir, exist_ok=True)
-        
-    def compile_graph_to_yaml(self, graph, goal: str):
-        """
-        The Blueprint of Sovereign Execution.
-        """
-        protocol = {
-            "api_version": "nexum/v1alpha",
-            "kind": "Protocol",
-            "metadata": {
-                "id": graph.protocol_id,
-                "created_at": datetime.now().isoformat(),
-                "goal": goal,
-                "status": "compiled"
-            },
-            "spec": {
-                "tasks": []
-            }
+    result = {
+        "protocol_id": getattr(graph, "protocol_id", "unknown"),
+        "generated_at": datetime.utcnow().isoformat() + "Z",
+        "tasks": [],
+    }
+    for node in getattr(graph, "nodes", []):
+        task_dict = {
+            "task_id": getattr(node, "task_id", None),
+            "action": getattr(node, "action", None),
+            "params": getattr(node, "params", {}),
+            "dependencies": getattr(node, "dependencies", []),
         }
-        
-        for task in graph.nodes.values():
-            task_dict = {
-                "id": task.task_id,
-                "agent": task.agent_id,
-                "action": task.action,
-                "params": task.params,
-                "retries": task.max_retries,
-                "depends_on": task.dependencies
-            }
-            protocol["spec"]["tasks"].append(task_dict)
-            
-        yaml_path = os.path.join(self.protocols_dir, f"{graph.protocol_id}.yaml")
-        with open(yaml_path, 'w', encoding='utf-8') as f:
-            yaml.dump(protocol, f, allow_unicode=True, sort_keys=False, default_flow_style=False)
-            
-        return yaml_path
-        
-    def load_protocol_from_yaml(self, yaml_path: str):
-        with open(yaml_path, 'r', encoding='utf-8') as f:
-            return yaml.safe_load(f)
+        result["tasks"].append(task_dict)
+    return result
 
-# Singleton
-protocol_compiler = ProtocolCompiler()
+def compile_graph_to_yaml(graph, protocol_name: str):
+    """Serialize an ExecutionGraph to a YAML file under the `protocols/` directory.
+    The file will be named `<protocol_name>.yaml`.
+    """
+    # Ensure the protocols directory exists
+    base_dir = os.path.dirname(os.path.abspath(__file__))
+    protocols_dir = os.path.join(base_dir, "..", "protocols")
+    os.makedirs(protocols_dir, exist_ok=True)
+
+    yaml_content = _graph_to_dict(graph)
+    file_path = os.path.join(protocols_dir, f"{protocol_name}.yaml")
+    with open(file_path, "w", encoding="utf-8") as f:
+        yaml.safe_dump(yaml_content, f, allow_unicode=True, sort_keys=False)
+    print(f"📄 [Protocol Compiler] Saved YAML blueprint to {file_path}")

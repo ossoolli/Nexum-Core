@@ -51,13 +51,37 @@ async def serve_ui():
 
 
 @app.get("/api/agents")
-async def get_agents():
-    """جلب سجل الوكلاء مع حالات دورة الحياة"""
-    agents = list(agent_registry.agents.values())
+async def get_agents(capability: str = None):
+    """جلب سجل الوكلاء مع حالات دورة الحياة.
+    إذا تم تمرير capability، يتم إرجاع الوكلاء الذين يمتلكون هذه القدرة.
+    """
+    if capability:
+        agents = agent_registry.get_agents_by_capability(capability)
+    else:
+        agents = list(agent_registry.agents.values())
     for ag in agents:
         state_info = lifecycle.get_state(ag["agent_id"])
         ag["lifecycle"] = state_info
     return agents
+
+
+@app.get("/api/graph")
+async def get_graph():
+    """Return the current active execution graph for visualization.
+    If multiple graphs exist, the first one is returned.
+    """
+    if orchestrator.active_graphs:
+        # pick the first active graph
+        graph = next(iter(orchestrator.active_graphs.values()))
+        # Build a simple dict compatible with Cytoscape (nodes & edges)
+        nodes = []
+        edges = []
+        for node in getattr(graph, "nodes", []):
+            nodes.append({"data": {"id": getattr(node, "task_id", ""), "label": getattr(node, "action", "")}})
+            for dep in getattr(node, "dependencies", []):
+                edges.append({"data": {"source": dep, "target": getattr(node, "task_id", "")}})
+        return {"protocol_id": getattr(graph, "protocol_id", "unknown"), "nodes": nodes, "edges": edges}
+    return {"protocol_id": None, "nodes": [], "edges": []}
 
 
 @app.get("/api/events")
