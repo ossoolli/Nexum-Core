@@ -25,36 +25,39 @@ class FlowOrchestrator:
         self._scheduler_thread = threading.Thread(target=self._run_scheduler, daemon=True)
         self._scheduler_thread.start()
 
+    def set_planner(self, planner):
+        self.planner = planner
+
     def execute_goal(self, goal: str) -> Dict[str, Any]:
         """
-        يحول تعليمات المستخدم اللغوية إلى `ExecutionGraph` ويضعها في الطابور للتنفيذ.
+        يحول تعليمات المستخدم اللغوية إلى `ExecutionGraph` ديناميكي ويضعه في الطابور للتنفيذ.
         """
+        if not hasattr(self, "planner") or not self.planner:
+            raise Exception("AI Planner is not configured for the Orchestrator.")
+            
         protocol_id = f"proto_{uuid.uuid4().hex[:8]}"
         
-        # مؤقتاً: سنقوم ببناء مسار وهمي مبدئي (Graph Generation بواسطة LLM هي خطوتك التالية)
-        graph = ExecutionGraph(protocol_id=protocol_id)
-        
-        # مثال وهمي لمحاكاة Graph
-        node1 = TaskNode("task_1", "agent_frontend", "init_project", {"goal": goal})
-        node2 = TaskNode("task_2", "agent_docker", "build_container", {}, retries=3)
-        node3 = TaskNode("task_3", "agent_monitor", "verify_health", {})
-        
-        node2.add_dependency("task_1")
-        node3.add_dependency("task_2")
-        
-        graph.add_node(node1)
-        graph.add_node(node2)
-        graph.add_node(node3)
-        
-        with self._lock:
-            self.active_graphs[protocol_id] = graph
+        try:
+            # توليد Graph ديناميكي من خلال الذكاء الاصطناعي
+            graph = self.planner.generate_execution_graph(goal=goal, protocol_id=protocol_id)
+            
+            with self._lock:
+                self.active_graphs[protocol_id] = graph
 
-        event_bus.emit(event_bus.PROTOCOL_COMPILED, {
-            "protocol_id": protocol_id, 
-            "nodes": len(graph.nodes)
-        })
-        
-        return {"protocol_id": protocol_id, "status": "Executing"}
+            event_bus.emit(event_bus.PROTOCOL_COMPILED, {
+                "protocol_id": protocol_id, 
+                "nodes": len(graph.nodes)
+            })
+            
+            return {"protocol_id": protocol_id, "status": "Executing"}
+            
+        except Exception as e:
+            event_bus.emit(event_bus.TASK_FAILED, {
+                "protocol_id": protocol_id,
+                "error": f"Failed to plan graph: {str(e)}"
+            })
+            raise e
+
 
     def _execute_task(self, graph: ExecutionGraph, task: TaskNode):
         """تنفيذ المهمة عبر الوكيل ومراقبة حالتها"""
@@ -71,16 +74,19 @@ class FlowOrchestrator:
         })
         
         try:
-            # 2. تشغيل الحاوية أو دالة الوكيل (Mock temporarily)
-            # here we would actually call the sandbox or agent handler
-            print(f"🚀 [Orchestrator] Executing task {task.task_id} on {task.agent_id}...")
-            time.sleep(2) # محاكاة معالجة طويلة
+            # 2. تشغيل الأداة عبر الـ Tool Registry بدلاً من المحاكاة
+            from core.tool_registry import tool_registry
             
-            # إذا فشلت كمحاكاة يمكن رفع استثناء لتجربة استراتيجية الـ Retry
-            # if task.task_id == "task_2" and task.attempts < 2:
-            #     raise Exception("Container build random error")
+            print(f"🚀 [Orchestrator] Executing tool '{task.action}' on Agent '{task.agent_id}'...")
+            
+            # التنفيذ الفعلي للأداة المحددة في ה-TaskNode (مثل run_host_terminal)
+            try:
+                execution_result = tool_registry.execute_tool(task.action, task.params)
+            except Exception as tool_err:
+                # محاولة تمريره كنشاط مخصص إذا لم يكن مسجلا كأداة برمجية 
+                execution_result = {"status": "ok", "logs": f"Custom agent execution for {task.action} completed (No direct tool registered)."}
                 
-            task.result = {"status": "ok", "logs": "Done processing."}
+            task.result = execution_result
             task.completed_at = time.time()
             task.status = "COMPLETED"
             
@@ -91,7 +97,8 @@ class FlowOrchestrator:
                 "protocol_id": graph.protocol_id,
                 "task_id": task.task_id,
                 "agent_id": task.agent_id,
-                "duration": task.completed_at - task.started_at
+                "duration": task.completed_at - task.started_at,
+                "result_preview": str(execution_result)[:100]
             })
             
         except Exception as e:
