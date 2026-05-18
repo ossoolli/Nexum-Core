@@ -69,8 +69,13 @@ class AIPlanner:
         print("🧠 [Planner] Generating Execution Graph for goal...")
         response_text, _ = self.llm.ask(prompt)
         
-        # تنظيف الرد تحسباً لأي زوائد Markdown
-        cleaned_text = response_text.replace("```json", "").replace("```", "").strip()
+        # استخراج كتلة الـ JSON باستخدام التعابير النمطية لتجاهل أي نص حواري يسبقه
+        import re
+        match = re.search(r'(\{.*\})', response_text, re.DOTALL)
+        if match:
+            cleaned_text = match.group(1)
+        else:
+            cleaned_text = response_text.replace("```json", "").replace("```", "").strip()
         
         try:
             plan_data = json.loads(cleaned_text)

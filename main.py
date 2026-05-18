@@ -264,7 +264,9 @@ def handle_text(message):
             msg = f"⚙️ <b>بروتوكول التنفيذ المفعل:</b> <code>{protocol_id}</code>\nالنظام يبدأ الآن بتشغيل الحاويات وتنفيذ التسلسل المطلوب."
             bot.send_message(message.chat.id, msg, parse_mode="HTML")
         except Exception as e:
-            bot.send_message(message.chat.id, f"❌ <b>فشل في الجدولة:</b> {str(e)}", parse_mode="HTML")
+            import html
+            safe_error = html.escape(str(e))
+            bot.send_message(message.chat.id, f"❌ <b>فشل في الجدولة:</b>\n<pre>{safe_error}</pre>", parse_mode="HTML")
         return
 
     # تجهيز سياق كامل للنظام مع "عين" على الملفات
