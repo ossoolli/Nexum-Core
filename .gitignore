@@ -1,2 +1,11 @@
 .env
 .env*
+venv/
+__pycache__/
+*.pyc
+*.pyo
+storage/
+*.bak
+*.log
+.idea/
+.vscode/

@@ -3,7 +3,9 @@ from google import genai
 from openai import OpenAI
 from dotenv import load_dotenv
 
-load_dotenv(dotenv_path="/home/madarmutaz/Mutaz-dev/.env")
+load_dotenv(dotenv_path=os.path.join(
+    os.path.dirname(os.path.dirname(os.path.abspath(__file__))), ".env"
+))
 
 class LLMFactory:
     def __init__(self):

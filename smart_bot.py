@@ -2,13 +2,16 @@ import logging
 import subprocess
 import html
 import os
+import sys
 from dotenv import load_dotenv
 from telegram import Update
 from telegram.ext import ApplicationBuilder, ContextTypes, CommandHandler, MessageHandler, filters
 from services.gemini_service import GeminiService
 from telegram_agent import agent
 
-load_dotenv(dotenv_path="/home/madarmutaz/Mutaz-dev/.env")
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+sys.path.insert(0, BASE_DIR)
+load_dotenv(dotenv_path=os.path.join(BASE_DIR, ".env"))
 
 TELEGRAM_TOKEN     = os.getenv("TELEGRAM_TOKEN")
 GEMINI_API_KEY     = os.getenv("GOOGLE_API_KEY")

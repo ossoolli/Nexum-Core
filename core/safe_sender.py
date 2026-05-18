@@ -1,4 +1,5 @@
 import html as html_module
+import re
 import telebot
 
 def send_terminal_output(bot, chat_id, status: str, output: str, step_info: str = ""):

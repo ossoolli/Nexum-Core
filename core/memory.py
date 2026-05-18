@@ -4,12 +4,13 @@ import psycopg2
 from psycopg2.extras import RealDictCursor
 from dotenv import load_dotenv
 
-load_dotenv(dotenv_path="/home/madarmutaz/Mutaz-dev/.env")
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+load_dotenv(dotenv_path=os.path.join(BASE_DIR, ".env"))
 
 class NexumMemory:
     def __init__(self):
         self.db_url = os.getenv("DB_CONNECTION")
-        self.local_db_path = "/home/madarmutaz/Mutaz-dev/storage/database.json"
+        self.local_db_path = os.path.join(BASE_DIR, "storage", "database.json")
         self.conn = None
         self.connect()
 

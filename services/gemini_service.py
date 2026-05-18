@@ -1,9 +1,10 @@
+import os
 import requests, base64, json
 
 class GeminiService:
-    def __init__(self, api_key):
-        self.api_key = api_key
-        self.url = f'https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-lite:generateContent?key={self.api_key}'
+    def __init__(self, api_key=None):
+        self.api_key = api_key or os.getenv("GOOGLE_API_KEY")
+        self.url = f'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key={self.api_key}'
 
     def ask(self, prompt, image_data=None, system_instruction=None):
         contents = [{'parts': [{'text': prompt}]}]

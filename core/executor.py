@@ -1,7 +1,10 @@
+import os
 import subprocess
 import html
 import sys
-sys.path.append('/home/madarmutaz/Mutaz-dev')
+
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+sys.path.insert(0, BASE_DIR)
 from core.security import validator
 
 DANGEROUS_PATTERNS = ["rm -rf /", "mkfs", "dd if=", "reboot", "shutdown"]

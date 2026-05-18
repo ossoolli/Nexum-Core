@@ -1,11 +1,14 @@
+import os
 import html
 import sys
-sys.path.append('/home/madarmutaz/Mutaz-dev')
+
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+sys.path.insert(0, BASE_DIR)
 from core.executor import executor
 
 class DeployAgent:
     def __init__(self):
-        self.repo_path = "/home/madarmutaz/Mutaz-dev"
+        self.repo_path = BASE_DIR
 
     def _run(self, cmd: str) -> str:
         """تشغيل أمر وإرجاع المخرجات كنص آمن"""

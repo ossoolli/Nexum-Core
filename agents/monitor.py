@@ -1,9 +1,12 @@
+import os
 import psutil
 import platform
 import html
 from datetime import datetime
 import sys
-sys.path.append('/home/madarmutaz/Mutaz-dev')
+
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+sys.path.insert(0, BASE_DIR)
 from core.executor import executor
 
 class MonitorAgent:
