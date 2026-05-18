@@ -103,4 +103,8 @@ class AIPlanner:
                 
             graph.add_node(node)
             
+        from core.yaml_compiler import protocol_compiler
+        print(f"📄 [Protocol Compiler] Compiling Blueprint {protocol_id}.yaml ...")
+        protocol_compiler.compile_graph_to_yaml(graph, goal)
+            
         return graph

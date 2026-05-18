@@ -719,7 +719,7 @@ def handle_text(message):
         event_bus.emit(event_bus.TASK_STARTED, {"goal": text})
         try:
             result = orchestrator.execute_goal(text)
-            protocol_id = result.get('protocol', {}).get('protocol_id', 'PR-ALPHA')
+            protocol_id = result.get('protocol_id', 'PR-ALPHA')
             msg = f"⚙️ <b>Protocol:</b> <code>{protocol_id}</code>\nالنظام ينفذ التسلسل المطلوب."
             bot.send_message(message.chat.id, msg, parse_mode="HTML",
                              reply_markup=ui_builder.build_quick_actions())

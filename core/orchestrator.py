@@ -27,6 +27,8 @@ class FlowOrchestrator:
 
     def set_planner(self, planner):
         self.planner = planner
+        from core.reflection import reflection_engine
+        reflection_engine.set_llm(planner.llm)
 
     def execute_goal(self, goal: str) -> Dict[str, Any]:
         """
@@ -101,6 +103,18 @@ class FlowOrchestrator:
                 "result_preview": str(execution_result)[:100]
             })
             
+            # Cognitive Reflection
+            from core.reflection import reflection_engine
+            reflection_engine.reflect_async(
+                task_id=task.task_id,
+                agent_id=task.agent_id,
+                action=task.action,
+                params=task.params,
+                result=execution_result,
+                error=None,
+                duration=task.completed_at - task.started_at
+            )
+            
         except Exception as e:
             # 3. إدارة الفشل ومحاولات الإعادة
             task.error = str(e)
@@ -123,6 +137,18 @@ class FlowOrchestrator:
                     "agent_id": task.agent_id,
                     "error": str(e)
                 })
+                
+                # Cognitive Reflection on Failure
+                from core.reflection import reflection_engine
+                reflection_engine.reflect_async(
+                    task_id=task.task_id,
+                    agent_id=task.agent_id,
+                    action=task.action,
+                    params=task.params,
+                    result=None,
+                    error=str(e),
+                    duration=time.time() - task.started_at
+                )
 
     def _run_scheduler(self):
         """مجدول غير متزامن يعمل في الخلفية لمراقبة Graphs وتنفيذها"""
