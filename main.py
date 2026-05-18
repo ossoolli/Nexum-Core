@@ -32,6 +32,9 @@ _gemini_svc = GeminiService(os.getenv("GOOGLE_API_KEY"))
 _planner = AIPlanner(_gemini_svc)
 _memory = LongTermMemory(os.path.join(BASE_DIR, "storage", "memory.json"))
 
+# === ربط العقل المدبر بمحرك التنفيذ ===
+orchestrator.set_planner(_planner)
+
 pending_commands = {}
 
 
@@ -128,10 +131,9 @@ def handle_text(message):
         event_bus.emit(event_bus.TASK_STARTED, {"goal": text})
         try:
             result = orchestrator.execute_goal(text)
-            protocol_id = result['protocol']['protocol_id']
-            steps = len(result['protocol']['execution_graph'])
+            protocol_id = result.get('protocol_id', 'unknown')
             event_bus.emit(event_bus.TASK_COMPLETED, {"protocol_id": protocol_id})
-            msg = f"✅ <b>بروتوكول:</b> {protocol_id}\nتم تنفيذ {steps} خطوة عبر الوكلاء."
+            msg = f"✅ <b>تم التخطيط | بروتوكول:</b> {protocol_id}\nجاري التنفيذ ديناميكياً عبر المجدول الخلفي..."
             bot.send_message(message.chat.id, fmt.success(msg), parse_mode="HTML")
         except Exception as e:
             event_bus.emit(event_bus.TASK_FAILED, {"error": str(e)})
