@@ -22,14 +22,15 @@ class TaskExecutor:
             return {'status': 'confirm', 'output': command}
 
         try:
-            process = subprocess.run(
-                command,
+            run_kwargs = dict(
                 shell=True,
                 capture_output=True,
                 text=True,
                 timeout=self.timeout,
-                executable='/bin/bash'
             )
+            if os.name != 'nt' and os.path.exists('/bin/bash'):
+                run_kwargs['executable'] = '/bin/bash'
+            process = subprocess.run(command, **run_kwargs)
             raw = process.stdout + process.stderr
             output = html.escape(raw) if raw else '✅ Done.'
             return {

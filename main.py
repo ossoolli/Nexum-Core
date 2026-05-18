@@ -5,6 +5,7 @@ Interactive Runtime Console — Click-first, Type-never.
 كل شيء يعمل بالنقر والبطاقات والقوائم الديناميكية.
 """
 import os
+import re
 import sys
 import html
 import telebot
@@ -229,7 +230,7 @@ def handle_all_callbacks(call):
             bot.send_message(chat_id, "🔒 <b>Lockdown Mode:</b> تم تفعيل وضع الحماية القصوى.\nجميع الأوامر الخطيرة معطلة.",
                              parse_mode="HTML", reply_markup=ui_builder.build_security_menu())
         elif data == "sec_integrity":
-            _run_and_send(chat_id, "find . -name '*.py' | head -20 && echo '---' && wc -l *.py", "🧬 Integrity Check")
+            _send_integrity_check(chat_id)
 
         # ═══ MEMORY ACTIONS ═══
         elif data == "mem_status":
@@ -244,11 +245,11 @@ def handle_all_callbacks(call):
 
         # ═══ DOCKER ACTIONS ═══
         elif data == "dk_containers":
-            _run_and_send(chat_id, "docker ps -a --format 'table {{.Names}}\t{{.Status}}\t{{.Image}}' 2>/dev/null || echo 'Docker غير متوفر'", "📦 Containers")
+            _run_and_send(chat_id, "docker ps -a --format \"table {{.Names}}\\t{{.Status}}\\t{{.Image}}\"", "📦 Containers")
         elif data == "dk_images":
-            _run_and_send(chat_id, "docker images --format 'table {{.Repository}}\t{{.Tag}}\t{{.Size}}' 2>/dev/null || echo 'Docker غير متوفر'", "🖼️ Images")
+            _run_and_send(chat_id, "docker images --format \"table {{.Repository}}\\t{{.Tag}}\\t{{.Size}}\"", "🖼️ Images")
         elif data == "dk_stats":
-            _run_and_send(chat_id, "docker stats --no-stream --format 'table {{.Name}}\t{{.CPUPerc}}\t{{.MemUsage}}' 2>/dev/null || echo 'Docker غير متوفر'", "📊 Stats")
+            _run_and_send(chat_id, "docker stats --no-stream --format \"table {{.Name}}\\t{{.CPUPerc}}\\t{{.MemUsage}}\"", "📊 Stats")
         elif data == "dk_prune":
             bot.send_message(chat_id, "🧹 تنظيف Docker؟", parse_mode="HTML", reply_markup=ui_builder.build_confirm("dk_prune"))
 
@@ -536,6 +537,49 @@ def _send_audit_logs(chat_id):
                      reply_markup=ui_builder.build_quick_actions())
 
 
+_EXEC_AR = ('ثبت', 'شغل', 'نفذ', 'نفّذ', 'ابن', 'ابني', 'أنشئ', 'انشئ', 'صمم', 'صمّم')
+_EXEC_EN_RE = re.compile(r'(?<![A-Za-z])(build|create|spawn|deploy)(?![A-Za-z])', re.IGNORECASE)
+
+def _is_execution_request(text: str) -> bool:
+    """تحديد ما إذا كانت الرسالة طلب تنفيذ صريح للأوركيستراتر.
+    يتطلب فعل أمر عربي صريح أو كلمة إنجليزية كاملة (وليس substring)."""
+    if not text:
+        return False
+    if _EXEC_EN_RE.search(text):
+        return True
+    tokens = text.split()
+    return any(tok.strip('.,!؟?:؛;') in _EXEC_AR for tok in tokens)
+
+
+def _send_integrity_check(chat_id):
+    """فحص سلامة عابر للمنصات: عدّ ملفات .py وأسطرها"""
+    py_files = []
+    total_lines = 0
+    for root, dirs, files in os.walk(BASE_DIR):
+        dirs[:] = [d for d in dirs if not d.startswith('.') and d not in ('__pycache__', 'node_modules', 'venv', '.venv')]
+        for f in files:
+            if f.endswith('.py'):
+                full = os.path.join(root, f)
+                rel = os.path.relpath(full, BASE_DIR)
+                try:
+                    with open(full, 'r', encoding='utf-8', errors='ignore') as fp:
+                        n = sum(1 for _ in fp)
+                except OSError:
+                    n = 0
+                py_files.append((rel, n))
+                total_lines += n
+    py_files.sort()
+    report = f"🧬 <b>Integrity Check</b>\n────────────────────\n"
+    report += f"📁 Files: <b>{len(py_files)}</b> | 📏 Lines: <b>{total_lines}</b>\n────────────────────\n"
+    for rel, n in py_files[:20]:
+        report += f"  • <code>{html.escape(rel)}</code> — {n}\n"
+    if len(py_files) > 20:
+        report += f"  … +{len(py_files) - 20} more\n"
+    report += "────────────────────"
+    bot.send_message(chat_id, report, parse_mode="HTML",
+                     reply_markup=ui_builder.build_security_menu())
+
+
 def _run_and_send(chat_id, cmd, title):
     """تنفيذ أمر وإرسال النتيجة"""
     bot.send_chat_action(chat_id, 'typing')
@@ -571,7 +615,7 @@ def _execute_confirmed_action(action_id, chat_id):
         runtime_state.update_agent_state(f"user_{ADMIN_ID}", {"chat_history": []})
         bot.send_message(chat_id, "🗑️ <b>تم مسح الذاكرة الحوارية.</b>", parse_mode="HTML")
     elif action_id == "dk_prune":
-        _run_and_send(chat_id, "docker system prune -f 2>/dev/null || echo 'Docker غير متوفر'", "🧹 Docker Prune")
+        _run_and_send(chat_id, "docker system prune -f", "🧹 Docker Prune")
     elif action_id.startswith("spawn_"):
         agent_type = action_id.replace("spawn_", "")
         bot.send_message(chat_id, f"⚡ <b>جاري إنشاء وكيل {agent_type}...</b>", parse_mode="HTML")
@@ -644,9 +688,36 @@ def handle_run(message):
     result = executor.execute(cmd)
     if result['status'] == 'confirm':
         pending_commands[message.from_user.id] = cmd
-        bot.reply_to(message, fmt.warning(f"أمر حساس:\n<code>{cmd}</code>"), parse_mode="HTML")
+        safe_cmd = html.escape(cmd)
+        bot.reply_to(
+            message,
+            fmt.warning(f"أمر حساس:\n<code>{safe_cmd}</code>\n\nأرسل /confirm للتنفيذ أو /cancel للإلغاء."),
+            parse_mode="HTML",
+        )
         return
     send_terminal_output(bot, message.chat.id, result['status'], result['output'])
+
+
+@bot.message_handler(commands=['confirm'])
+def handle_confirm(message):
+    if message.from_user.id != ADMIN_ID: return
+    cmd = pending_commands.pop(message.from_user.id, None)
+    if not cmd:
+        bot.reply_to(message, "ℹ️ لا يوجد أمر معلّق بانتظار التأكيد.", parse_mode="HTML")
+        return
+    result = executor.execute(cmd, force=True)
+    send_terminal_output(bot, message.chat.id, result['status'], result['output'])
+
+
+@bot.message_handler(commands=['cancel'])
+def handle_cancel(message):
+    if message.from_user.id != ADMIN_ID: return
+    cmd = pending_commands.pop(message.from_user.id, None)
+    if cmd:
+        safe_cmd = html.escape(cmd)
+        bot.reply_to(message, f"❌ أُلغي:\n<code>{safe_cmd}</code>", parse_mode="HTML")
+    else:
+        bot.reply_to(message, "ℹ️ لا يوجد أمر معلّق.", parse_mode="HTML")
 
 
 # ╔══════════════════════════════════════════════════════════════╗
@@ -713,8 +784,7 @@ def handle_text(message):
     if message.from_user.id != ADMIN_ID: return
     text = message.text.strip()
 
-    EXEC_KW = ['ثبت', 'شغل', 'نفذ', 'ابن', 'build', 'create', 'أنشئ', 'صمم', 'spawn']
-    if any(k in text.lower() for k in EXEC_KW):
+    if _is_execution_request(text):
         bot.reply_to(message, "🧠 <b>NEXUM:</b> جاري بناء Execution Graph...", parse_mode="HTML")
         event_bus.emit(event_bus.TASK_STARTED, {"goal": text})
         try:
