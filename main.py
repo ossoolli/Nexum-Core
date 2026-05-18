@@ -11,15 +11,16 @@ from core.llm_factory import llm
 from core.executor import executor
 from core.safe_sender import send_terminal_output, safe_reply
 from core.planner import AIPlanner
+from core.orchestrator import orchestrator
 from core.memory_local import LongTermMemory
+from core.keyboards import ui_builder
+from core.callback_router import router
+from core.event_bus import event_bus
+from core.lifecycle import lifecycle
 from agents.monitor import monitor_agent
 from agents.deploy import deploy_agent
 from agents.docker_agent import docker_agent
 from services.gemini_service import GeminiService
-from core.keyboards import (
-    main_menu, monitor_menu, deploy_menu, docker_menu, ai_menu, settings_menu, 
-    finance_menu, back_button, MENU_MAP, confirm_action
-)
 from core.formatters import fmt
 
 # === Bot Setup ===
@@ -34,144 +35,72 @@ _memory = LongTermMemory(os.path.join(BASE_DIR, "storage", "memory.json"))
 pending_commands = {}
 
 
+# === تسجيل Handlers في الـ Callback Router ===
+def _handle_hw_status(cb_data, ctx):
+    data = monitor_agent.get_system_data()
+    return fmt.system_report(
+        data['cpu'], data['ram'], data['disk'], data['net'],
+        data['uptime'], data['hostname']
+    )
+
+def _handle_list_agents(cb_data, ctx):
+    from core.agent_registry import agent_registry
+    agents = agent_registry.agents
+    if not agents:
+        return "لا يوجد وكلاء مسجلين حالياً."
+    report = fmt.header("Agents Registry") + "\n\n"
+    for _, ag in agents.items():
+        state = lifecycle.get_state(ag['agent_id'])
+        status = state.get('state', ag.get('status', 'UNKNOWN'))
+        report += f"🤖 <b>{ag['name']}</b> ({status})\n⚙️ {ag['role']}\n\n"
+    return report
+
+def _handle_github_deploy(cb_data, ctx):
+    return deploy_agent.deploy_updates("🔱 NEXUM Auto-Deploy")
+
+def _handle_agent_approve(cb_data, ctx):
+    agent_name = ctx.get('param', 'unknown')
+    return f"✅ تمت الموافقة للوكيل: {agent_name}"
+
+def _handle_agent_deny(cb_data, ctx):
+    agent_name = ctx.get('param', 'unknown')
+    return f"❌ تم الرفض للوكيل: {agent_name}"
+
+# تسجيل المسارات
+router.register("hw_status", _handle_hw_status)
+router.register("list_agents", _handle_list_agents)
+router.register("github_deploy", _handle_github_deploy)
+router.register("agent:approve", _handle_agent_approve)
+router.register("agent:deny", _handle_agent_deny)
+
+
 # ===== القائمة الرئيسية =====
 @bot.message_handler(commands=['start', 'menu', 'dashboard'])
 def cmd_start(message):
     if message.from_user.id != ADMIN_ID: return
+    event_bus.emit(event_bus.SYSTEM_ALERT, {"action": "start", "user": ADMIN_ID})
     bot.send_message(
-        message.chat.id, 
-        fmt.welcome_message(), 
-        parse_mode="HTML", 
-        reply_markup=main_menu()
+        message.chat.id,
+        fmt.header("NEXUM PRIME META-OS"),
+        parse_mode="HTML",
+        reply_markup=ui_builder.build_main_control_plane()
     )
 
 
-# ===== Callback Handlers (الملاحة العامة) =====
-@bot.callback_query_handler(func=lambda call: call.data in MENU_MAP or call.data == "back_main")
-def handle_menu_navigation(call):
+# ===== Callback Handler الموحد (يمرر للـ Router) =====
+@bot.callback_query_handler(func=lambda call: True)
+def handle_all_callbacks(call):
     if call.from_user.id != ADMIN_ID: return
     
-    if call.data == "back_main":
-        bot.edit_message_text(
-            fmt.header("القائمة الرئيسية", "اختر القسم المطلوب"),
-            call.message.chat.id, call.message.message_id,
-            reply_markup=main_menu(), parse_mode="HTML"
-        )
-        return
-
-    text, markup_func = MENU_MAP[call.data]
-    bot.edit_message_text(
-        text,
-        call.message.chat.id, call.message.message_id,
-        reply_markup=markup_func(), parse_mode="HTML"
-    )
-
-# ===== وظائف الأزرار (الشاشات الفرعية) =====
-@bot.callback_query_handler(func=lambda call: call.data.startswith("mon_"))
-def handle_monitor_cbs(call):
-    if call.from_user.id != ADMIN_ID: return
-    bot.answer_callback_query(call.id, "جاري فحص حالة النظام...")
-    data = monitor_agent.get_system_data()
-    action = call.data
+    result = router.dispatch(call.data, {"chat_id": call.message.chat.id})
     
-    if action == "mon_full":
-        report = fmt.system_report(
-            data['cpu'], data['ram'], data['disk'], data['net'], 
-            data['uptime'], data['hostname']
-        )
-    elif action == "mon_cpu":
-        details = monitor_agent.get_cpu_details()
-        report = fmt.cpu_report(details['percent'], details['count'], details['freq'], details['per_cpu'])
-    elif action == "mon_ram":
-        report = fmt.ram_report(data['ram'])
-    elif action == "mon_disk":
-        report = fmt.disk_report(data['disk'])
-    elif action == "mon_network":
-        report = fmt.network_report(data['net'])
-    else:
-        report = "المؤشر قيد التطوير."
-
-    bot.edit_message_text(
-        report, call.message.chat.id, call.message.message_id,
-        reply_markup=monitor_menu(), parse_mode="HTML"
-    )
+    if isinstance(result, str):
+        bot.send_message(call.message.chat.id, result, parse_mode="HTML")
+    elif isinstance(result, dict) and "error" not in result:
+        bot.send_message(call.message.chat.id, str(result), parse_mode="HTML")
 
 
-@bot.callback_query_handler(func=lambda call: call.data.startswith("dock_"))
-def handle_docker_cbs(call):
-    if call.from_user.id != ADMIN_ID: return
-    bot.answer_callback_query(call.id, "نظام Docker...")
-    action = call.data
-    
-    if action == "dock_ps":
-        containers = docker_agent.get_containers_list()
-        if not containers:
-            report = fmt.info("لا توجد حاويات تعمل حالياً.")
-        else:
-            cards = [fmt.docker_container_card(c['name'], c['status'], c['ports'], c['image']) for c in containers]
-            report = fmt.header("حاويات Docker") + "\n\n" + "\n\n".join(cards)
-    elif action == "dock_stats":
-        stats = docker_agent.get_stats()
-        report = fmt.header("استهلاك الحاويات") + fmt.code_block(stats)
-    else:
-        report = fmt.info("سيتم إضافة هذه الميزة قريباً في واجهة تلجرام.")
-
-    bot.edit_message_text(
-        report, call.message.chat.id, call.message.message_id,
-        reply_markup=docker_menu(), parse_mode="HTML"
-    )
-
-
-@bot.callback_query_handler(func=lambda call: call.data.startswith("dep_"))
-def handle_deploy_cbs(call):
-    if call.from_user.id != ADMIN_ID: return
-    bot.answer_callback_query(call.id, "جاري فحص المستودع...")
-    
-    if call.data == "dep_status":
-        out = deploy_agent.git_status()
-        bot.edit_message_text(
-            fmt.deploy_report("Git Status", out), 
-            call.message.chat.id, call.message.message_id, 
-            reply_markup=deploy_menu(), parse_mode="HTML"
-        )
-    elif call.data == "dep_pull":
-        out = deploy_agent.git_pull()
-        bot.edit_message_text(
-            fmt.deploy_report("Git Pull", out),
-            call.message.chat.id, call.message.message_id,
-            reply_markup=deploy_menu(), parse_mode="HTML"
-        )
-    elif call.data == "dep_full":
-        out = deploy_agent.deploy_updates("🔱 NEXUM Auto-Deploy from Inline")
-        bot.send_message(call.message.chat.id, out, parse_mode="HTML")
-
-
-@bot.callback_query_handler(func=lambda call: call.data == "open_webapp")
-def handle_webapp(call):
-    # In reality, this requires binding a domain/ngrok URL. Mocking for now.
-    url = "https://your-public-url.com" 
-    report = fmt.info("لفتح لوحة التحكم عبر WebApp، يلزم ربط رابط حقيقي بالبوت.")
-    bot.send_message(call.message.chat.id, report, parse_mode="HTML")
-
-
-@bot.callback_query_handler(func=lambda call: call.data in ["confirm_run", "cancel_action", "cancel_run"])
-def handle_commands_confirm(call):
-    if call.from_user.id != ADMIN_ID: return
-    if call.data == "cancel_run" or call.data == "cancel_action":
-        pending_commands.pop(call.from_user.id, None)
-        bot.edit_message_text("❌ تم الإلغاء.", call.message.chat.id, call.message.message_id)
-        return
-        
-    cmd = pending_commands.pop(call.from_user.id, None)
-    if cmd:
-        res = executor.execute(cmd, force=True)
-        bot.edit_message_text(
-            fmt.deploy_report("أمر التيرمينال", res['output'], res['status']),
-            call.message.chat.id, call.message.message_id, parse_mode="HTML"
-        )
-
-
-# ===== الرسائل النصية والأوامر المباشرة =====
+# ===== أمر التيرمينال =====
 @bot.message_handler(commands=['run'])
 def handle_run(message):
     if message.from_user.id != ADMIN_ID: return
@@ -179,45 +108,48 @@ def handle_run(message):
     if not cmd:
         bot.reply_to(message, "استخدام: <code>/run الأمر</code>", parse_mode="HTML")
         return
-    
     result = executor.execute(cmd)
     if result['status'] == 'confirm':
         pending_commands[message.from_user.id] = cmd
-        bot.reply_to(
-            message, 
-            fmt.warning(f"أمر حساس يحتاج لتأكيد:\n<code>{cmd}</code>"), 
-            reply_markup=confirm_action("run"), parse_mode="HTML"
-        )
+        bot.reply_to(message, fmt.warning(f"أمر حساس:\n<code>{cmd}</code>"), parse_mode="HTML")
         return
-    
     send_terminal_output(bot, message.chat.id, result['status'], result['output'])
 
 
+# ===== الرسائل النصية =====
 @bot.message_handler(content_types=['text'])
 def handle_text(message):
     if message.from_user.id != ADMIN_ID: return
     text = message.text.strip().lower()
-    
-    # لو كان الأمر عبارة عن توجيه ذكي للتنفيذ
-    EXEC_KW = ['ثبت', 'شغل', 'نفذ']
+
+    EXEC_KW = ['ثبت', 'شغل', 'نفذ', 'ابن', 'build', 'create', 'أنشئ', 'صمم']
     if any(k in text for k in EXEC_KW):
-        bot.reply_to(message, fmt.info("يتم حاليا إعداد التخطيط الذكي لهذا الأمر..."))
-        plan = _planner.create_plan(text)
-        if "error" in plan:
-            bot.send_message(message.chat.id, fmt.error(plan['error']), parse_mode="HTML")
-        else:
-            bot.send_message(message.chat.id, fmt.success(f"تم إعداد الخطة:\n{plan.get('plan_name')}"), parse_mode="HTML")
+        bot.reply_to(message, fmt.info("🧠 NEXUM PRIME: جاري توزيع المهام عبر الأوركستريتور..."))
+        event_bus.emit(event_bus.TASK_STARTED, {"goal": text})
+        try:
+            result = orchestrator.execute_goal(text)
+            protocol_id = result['protocol']['protocol_id']
+            steps = len(result['protocol']['execution_graph'])
+            event_bus.emit(event_bus.TASK_COMPLETED, {"protocol_id": protocol_id})
+            msg = f"✅ <b>بروتوكول:</b> {protocol_id}\nتم تنفيذ {steps} خطوة عبر الوكلاء."
+            bot.send_message(message.chat.id, fmt.success(msg), parse_mode="HTML")
+        except Exception as e:
+            event_bus.emit(event_bus.TASK_FAILED, {"error": str(e)})
+            bot.send_message(message.chat.id, fmt.error(f"❌ خطأ: {str(e)}"), parse_mode="HTML")
         return
 
-    # التحدث مع الذكاء الاصطناعي كالمعتاد
     bot.send_chat_action(message.chat.id, 'typing')
     response = _gemini_svc.ask(message.text)
     safe_reply(bot, message, response)
 
 
 if __name__ == "__main__":
-    print("🔱 NEXUM CORE UI/UX System IS ONLINE...")
+    print("🔱 NEXUM PRIME Sovereign OS — ONLINE")
+    # تهيئة دورة حياة الوكلاء الأساسيين
+    from core.agent_registry import agent_registry
+    for agent_id in agent_registry.agents:
+        lifecycle.init_agent(agent_id)
     try:
         bot.infinity_polling()
     except Exception as e:
-        print(f"Error starting bot: {e}")
+        print(f"Error: {e}")
