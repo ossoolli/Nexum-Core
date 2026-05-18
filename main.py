@@ -11,6 +11,7 @@ from core.llm_factory import llm
 from core.executor import executor
 from core.safe_sender import send_terminal_output, safe_reply
 from core.planner import AIPlanner
+from core.orchestrator import orchestrator
 from core.memory_local import LongTermMemory
 from agents.monitor import monitor_agent
 from agents.deploy import deploy_agent
@@ -199,14 +200,21 @@ def handle_text(message):
     text = message.text.strip().lower()
     
     # لو كان الأمر عبارة عن توجيه ذكي للتنفيذ
-    EXEC_KW = ['ثبت', 'شغل', 'نفذ']
+    EXEC_KW = ['ثبت', 'شغل', 'نفذ', 'ابن', 'build', 'create', 'أنشئ', 'صمم']
     if any(k in text for k in EXEC_KW):
-        bot.reply_to(message, fmt.info("يتم حاليا إعداد التخطيط الذكي لهذا الأمر..."))
-        plan = _planner.create_plan(text)
-        if "error" in plan:
-            bot.send_message(message.chat.id, fmt.error(plan['error']), parse_mode="HTML")
-        else:
-            bot.send_message(message.chat.id, fmt.success(f"تم إعداد الخطة:\n{plan.get('plan_name')}"), parse_mode="HTML")
+        bot.reply_to(message, fmt.info("🧠 جاري تفعيل المايسترو (NEXUM PRIME META-AGENT) ليقوم بتوزيع المهام..."))
+        try:
+            result = orchestrator.execute_goal(text)
+            protocol_id = result['protocol']['protocol_id']
+            graph_steps = len(result['protocol']['execution_graph'])
+            
+            msg = (
+                f"✅ <b>اكتمل بروتوكول العمل:</b> {protocol_id}\n"
+                f"تم بناء مسار من {graph_steps} خطوة ومعالجتها عبر الوكلاء."
+            )
+            bot.send_message(message.chat.id, fmt.success(msg), parse_mode="HTML")
+        except Exception as e:
+            bot.send_message(message.chat.id, fmt.error(f"❌ خطأ من الأوركستريتور: {str(e)}"), parse_mode="HTML")
         return
 
     # التحدث مع الذكاء الاصطناعي كالمعتاد
