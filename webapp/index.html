@@ -3,24 +3,63 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NEXUM OS | Dashboard</title>
+    <title>NEXUM | Command Center</title>
     <style>
-        :root { --bg: #0a0a0c; --card: #16161a; --accent: #00f2ff; --text: #e0e0e0; }
-        body { background: var(--bg); color: var(--text); font-family: sans-serif; margin: 0; padding: 20px; }
-        .header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #333; padding-bottom: 10px; margin-bottom: 20px; }
-        .accent { color: var(--accent); text-shadow: 0 0 8px var(--accent); }
-        .sync-badge { background: #004400; color: #0f0; padding: 5px 12px; border-radius: 20px; font-size: 12px; border: 1px solid #0f0; }
-        .card { background: var(--card); border: 1px solid #333; padding: 20px; border-radius: 12px; }
+        :root { --bg: #050507; --card: #111115; --accent: #00f2ff; --text: #eef; }
+        body { background: var(--bg); color: var(--text); font-family: 'Segoe UI', sans-serif; margin: 0; padding: 25px; }
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+        .card { background: var(--card); border: 1px solid #222; border-radius: 15px; padding: 20px; box-shadow: 0 5px 15px rgba(0,0,0,0.5); }
+        .accent { color: var(--accent); }
+        .app-card { background: #1a1a20; padding: 15px; border-radius: 10px; margin-top: 10px; border-left: 4px solid var(--accent); display: flex; justify-content: space-between; align-items: center; }
+        .btn { background: var(--accent); color: #000; text-decoration: none; padding: 8px 15px; border-radius: 5px; font-weight: bold; font-size: 13px; }
+        .status-dot { width: 10px; height: 10px; background: #0f0; border-radius: 50%; display: inline-block; margin-left: 5px; box-shadow: 0 0 8px #0f0; }
+        h1 { border-bottom: 2px solid #222; padding-bottom: 10px; font-weight: 300; }
     </style>
 </head>
 <body>
-    <div class="header">
-        <h1>NEXUM <span class="accent">PRIME</span></h1>
-        <div class="sync-badge">System Synced with Cloud ✔️</div>
+    <h1>🔱 NEXUM <span class="accent">COMMAND CENTER</span></h1>
+    
+    <div class="grid">
+        <div class="card">
+            <h3 class="accent">🛰️ تطبيقاتك النشطة (Live Apps)</h3>
+            <div id="apps-container">
+                <!-- تطبيق الناسا -->
+                <div class="app-card">
+                    <div>
+                        <strong>NASA Explorer</strong><br>
+                        <small style="color: #666">تطبيق يعرض صوراً حية من الفضاء</small>
+                    </div>
+                    <a href="https://8081-preview.cloudspaces.googleusercontent.com/" target="_blank" class="btn">فتح التطبيق 🚀</a>
+                </div>
+                
+                <!-- الواجهة الرئيسية -->
+                <div class="app-card">
+                    <div>
+                        <strong>Runtime Dashboard</strong><br>
+                        <small style="color: #666">مركز التحكم الحالي</small>
+                    </div>
+                    <div style="color: var(--accent); font-size: 12px;">أنت هنا الآن</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <h3 class="accent">🤖 حالة الوكلاء (Agent System)</h3>
+            <div class="app-card">
+                <span><span class="status-dot"></span> الوكيل الأمني: <b>Active</b></span>
+            </div>
+            <div class="app-card">
+                <span><span class="status-dot"></span> وكيل الربط (GitBot): <b>Idle</b></span>
+            </div>
+            <div class="app-card">
+                <span><span class="status-dot"></span> المحرك الأساسي: <b>Operational</b></span>
+            </div>
+        </div>
     </div>
-    <div class="card">
-        <h3 class="accent">حالة النظام الحيّة</h3>
-        <p>مرحباً بك في قمرة القيادة السيادية. جميع الأنظمة تعمل بكفاءة.</p>
+
+    <div class="card" style="margin-top: 20px;">
+        <h3 class="accent">⚡ موجز العمليات (System Pulse)</h3>
+        <p style="font-family: monospace; color: #888;">> All systems synchronized with GitHub.<br>> Port 8081 (NASA App) is responding.<br>> Environment sovereignty confirmed.</p>
     </div>
 </body>
 </html>

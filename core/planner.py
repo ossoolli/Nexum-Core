@@ -11,22 +11,21 @@ class AIPlanner:
         from core.tool_registry import tool_registry
         tools_schema = tool_registry.get_all_tools_schema()
         
+        # حقن قاعدة "العزل" في عقل النظام
         prompt = f"""
         Objective: {goal}
-        Base Directory: /home/madarmutaz/Mutaz-dev
+        SYSTEM RULE: Always place new applications in subdirectories under: /home/madarmutaz/Mutaz-dev/registry/apps/
         
         Available Tools:
         {json.dumps(tools_schema, ensure_ascii=False)}
         
-        Instruction: Create a technical plan to achieve the objective.
         Return ONLY a JSON object:
         {{
           "tasks": [
             {{
               "task_id": "t1",
-              "agent_id": "agent_backend",
               "action": "write_file",
-              "params": {{"filepath": "agents/mutaz.py", "content": "#code"}},
+              "params": {{"filepath": "registry/apps/[app-name]/app.py", "content": "..."}},
               "dependencies": []
             }}
           ]
@@ -34,26 +33,21 @@ class AIPlanner:
         """
         
         res_text, _ = self.llm.ask(prompt)
-        
-        # استخراج الـ JSON بدقة
         try:
             match = re.search(r'(\{.*\})', res_text, re.DOTALL)
             json_str = match.group(1) if match else res_text
             plan_data = json.loads(json_str)
         except:
-            raise Exception(f"Failed to parse AI Plan: {res_text[:100]}")
+            raise Exception(f"Failed to parse plan")
 
         graph = ExecutionGraph(protocol_id=protocol_id)
         for t in plan_data.get("tasks", []):
             node = TaskNode(
                 task_id=t.get("task_id", "step"),
-                agent_id=t.get("agent_id", "agent_general"),
+                agent_id="agent_docker",
                 action=t.get("action", ""),
                 params=t.get("params", {}),
                 retries=2
             )
-            for d in t.get("dependencies", []):
-                node.add_dependency(d)
             graph.add_node(node)
-            
         return graph
