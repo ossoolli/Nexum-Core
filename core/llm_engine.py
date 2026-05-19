@@ -1,29 +1,32 @@
 import os
-from dotenv import load_dotenv
+import requests
+import json
 
-load_dotenv()
-
-class LLMEngine:
+class OpenRouterEngine:
     def __init__(self):
         self.api_key = os.getenv("OPENROUTER_API_KEY")
+        self.url = "https://openrouter.ai/api/v1/chat/completions"
 
-    def query(self, prompt, model="google/gemini-2.5-flash"):
-        """محرك استعلامات OpenRouter / Gemini"""
-        import requests
+    def ask(self, prompt, model="anthropic/claude-3.5-sonnet"):
+        """يرسل الطلب لـ OpenRouter ويجلب الرد الذكي"""
         headers = {
             "Authorization": f"Bearer {self.api_key}",
+            "HTTP-Referer": "https://nexum.os", # اختيارياً
             "Content-Type": "application/json"
         }
+        
         data = {
             "model": model,
             "messages": [{"role": "user", "content": prompt}]
         }
+        
         try:
-            response = requests.post("https://openrouter.ai/api/v1/chat/completions", headers=headers, json=data)
+            response = requests.post(self.url, headers=headers, data=json.dumps(data))
             response.raise_for_status()
-            return response.json()['choices'][0]['message']['content']
+            result = response.json()
+            return result['choices'][0]['message']['content'], None
         except Exception as e:
-            return f"❌ فشل الاتصال: {str(e)}"
+            return f"❌ خطأ في الاتصال بـ OpenRouter: {str(e)}", None
 
-# للاستخدام المباشر
-llm_engine = LLMEngine()
+# Singleton
+llm_engine = OpenRouterEngine()
