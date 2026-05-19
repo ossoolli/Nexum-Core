@@ -1,4 +1,4 @@
-import os, json, re
+import os, json, re, uuid # تمت إضافة uuid هنا
 from core.execution_graph import ExecutionGraph, TaskNode
 
 class AIPlanner:
@@ -6,7 +6,7 @@ class AIPlanner:
     def generate_execution_graph(self, goal, protocol_id):
         prompt = f"""
         Objective: {goal}
-        Return ONLY valid JSON in this format:
+        Return ONLY valid JSON:
         {{
           "tasks": [
             {{
@@ -23,11 +23,9 @@ class AIPlanner:
             data = json.loads(match.group(1))
             graph = ExecutionGraph(protocol_id=protocol_id)
             for t in data.get('tasks', []):
-                # التأكد من وجود المفاتيح المطلوبة لعدم حدوث KeyError
+                # الأن لن يحدث خطأ name 'uuid'
                 tid = t.get('task_id', f"task_{uuid.uuid4().hex[:4]}")
-                action = t.get('action', 'run_host_terminal')
-                params = t.get('params', {})
-                graph.add_node(TaskNode(task_id=tid, agent_id='master', action=action, params=params))
+                graph.add_node(TaskNode(task_id=tid, agent_id='master', action=t.get('action'), params=t.get('params')))
             return graph
         except Exception as e:
-            raise Exception(f"JSON Parsing Error: {str(e)}")
+            raise Exception(f"خطأ في معالجة المخطط: {str(e)}")

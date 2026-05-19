@@ -1,16 +1,9 @@
-import os, telebot, threading, time, uuid
+import os, telebot, threading, time, uuid, subprocess
 from core.execution_graph import ExecutionGraph, TaskNode
 
 TOKEN = os.getenv("TELEGRAM_TOKEN")
 ADMIN_ID = os.getenv("ADMIN_ID")
-LOG_ID = "-1003969021809"
-
 bot = telebot.TeleBot(TOKEN) if TOKEN else None
-
-def broadcast(msg):
-    if bot and LOG_ID:
-        try: bot.send_message(LOG_ID, msg, parse_mode="Markdown")
-        except: pass
 
 class FlowOrchestrator:
     def __init__(self):
@@ -18,8 +11,7 @@ class FlowOrchestrator:
         self._lock = threading.Lock()
         threading.Thread(target=self._run_scheduler, daemon=True).start()
 
-    def set_planner(self, planner):
-        self.planner = planner
+    def set_planner(self, planner): self.planner = planner
 
     def execute_goal(self, goal):
         protocol_id = f"proto_{uuid.uuid4().hex[:6]}"
@@ -31,12 +23,17 @@ class FlowOrchestrator:
         task.status = "RUNNING"
         from core.tool_registry import tool_registry
         try:
-            res = tool_registry.execute_tool(task.action, task.params)
+            # تنفيذ الأداة وجلب النتيجة الحقيقية
+            result = tool_registry.execute_tool(task.action, task.params)
             task.status = "COMPLETED"
-            broadcast(f"✅ **Mission Update:** {task.action}\n🧬 {graph.protocol_id}")
+            
+            # --- إرسال النتيجة فوراً للمستخدم ---
+            if bot and ADMIN_ID:
+                msg = f"✨ **تمت المهمة بنجاح!**\n📊 **النتيجة:**\n{str(result)[:1000]}"
+                bot.send_message(ADMIN_ID, msg)
         except Exception as e:
             task.status = "FAILED"
-            broadcast(f"❌ **Error:** {str(e)}")
+            if bot and ADMIN_ID: bot.send_message(ADMIN_ID, f"❌ **فشل:** {str(e)}")
 
     def _run_scheduler(self):
         while True:
