@@ -4,8 +4,27 @@ venv/
 __pycache__/
 *.pyc
 *.pyo
+*.pyd
 *.jar
 *.bak
-storage/
+.Python
+
+# Storage (بيانات حساسة)
+storage/memory.json
+storage/bots_registry.json
+storage/channels_registry.json
+storage/logs/
+storage/exports/
+
+# Generated content
+registry/apps/*/
+registry/bots/*/
+agents/generated/
+storage/agent_specs/
+
+# IDE
+.vscode/
+.idea/
+*.swp
 .claude/
 node_modules/

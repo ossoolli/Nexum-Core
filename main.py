@@ -41,6 +41,15 @@ orchestrator.set_bot(bot, ADMIN_ID, LOG_CHANNEL_ID)
 from agents.monitor import monitor_agent
 from agents.deploy import deploy_agent
 
+# ─── الوكلاء الجدد (v5.0) ───
+from agents.webforge_agent import webforge as _webforge
+from agents.bot_builder_agent import bot_builder as _bot_builder
+from agents.agent_smith import agent_smith as _agent_smith
+from agents.channel_manager import channel_manager as _channel_manager
+from core.bot_fleet import bot_fleet as _bot_fleet
+from core.bot_network import bot_network as _bot_network
+from core.preview_server import preview_server as _preview_server
+
 # ─── الأوامر المعلقة (للتأكيد الأمني) ───
 pending_commands = {}
 
@@ -68,28 +77,67 @@ def broadcast(msg, parse_mode="Markdown"):
 class NexumInterpreter:
     """يحلل نوع الطلب ويوجهه للأداة أو الوكيل المناسب"""
 
-    # كلمات تدل على طلب تنفيذي (يحتاج Orchestrator)
-    EXEC_KEYWORDS = [
-        'انشئ', 'اكتب', 'احذف', 'عدل', 'شغل', 'نفذ', 'ابحث',
-        'بناء', 'برمج', 'صنع', 'حمل', 'ثبت', 'install',
-        'create', 'build', 'run', 'deploy', 'search'
+    # كلمات تدل على بناء مواقع (WebForge)
+    WEBFORGE_KEYWORDS = [
+        'انشئ موقع', 'ابني موقع', 'صفحة هبوط', 'landing page',
+        'لوحة تحكم', 'dashboard', 'تطبيق ويب', 'web app', 'fastapi'
     ]
+
+    # كلمات تدل على بناء وكيل
+    AGENT_BUILD_KEYWORDS = [
+        'ابني وكيل', 'انشئ وكيل', 'صمم وكيل', 'build agent',
+        'create agent', 'وكيل يراقب', 'وكيل يقوم'
+    ]
+
+    # كلمات تدل على بناء بوت
+    BOT_BUILD_KEYWORDS = [
+        'ابني بوت', 'انشئ بوت', 'بوت جديد', 'build bot',
+        'بوت تلجرام', 'telegram bot', 'اصنع بوت'
+    ]
+
+    # كلمات تدل على إدارة أسطول البوتات
+    BOT_FLEET_KEYWORDS = [
+        'قائمة البوتات', 'list bots', 'بوتاتي', 'أوقف بوت',
+        'حالة البوتات', 'أسطول البوتات'
+    ]
+
+    # كلمات تدل على إدارة القنوات
+    CHANNEL_KEYWORDS = [
+        'انشر في كل', 'جدوِل منشور', 'إدارة القناة',
+        'بث للقنوات', 'قنواتي', 'cross post'
+    ]
+
+    # كلمات تدل على البث للقناة الرئيسية
+    BROADCAST_KEYWORDS = ['ارسل للقناة', 'ارسل الى القناة', 'انشر في القناة']
 
     # كلمات تدل على طلب مراقبة
     MONITOR_KEYWORDS = ['حالة النظام', 'status', 'النبض', 'pulse', 'موارد']
 
-    # كلمات تدل على طلب نشر
+    # كلمات تدل على طلب نشر Git
     DEPLOY_KEYWORDS = ['ارفع الكود', 'deploy', 'push', 'جيت هب', 'github', 'sync']
 
-    # كلمات تدل على البث للقناة
-    BROADCAST_KEYWORDS = ['ارسل للقناة', 'ارسل الى القناة', 'انشر في القناة']
+    # كلمات تدل على طلب تنفيذي عام (Orchestrator)
+    EXEC_KEYWORDS = [
+        'نفذ', 'شغل', 'احذف ملف', 'عدل ملف',
+        'install', 'ثبت'
+    ]
 
     def classify(self, text: str) -> str:
-        """تصنيف نوع الطلب"""
+        """تصنيف نوع الطلب — الأكثر تحديداً أولاً"""
         lower = text.lower().strip()
 
         if any(k in lower for k in self.BROADCAST_KEYWORDS):
             return "broadcast"
+        if any(k in lower for k in self.WEBFORGE_KEYWORDS):
+            return "webforge"
+        if any(k in lower for k in self.AGENT_BUILD_KEYWORDS):
+            return "agent_build"
+        if any(k in lower for k in self.BOT_BUILD_KEYWORDS):
+            return "bot_build"
+        if any(k in lower for k in self.BOT_FLEET_KEYWORDS):
+            return "bot_fleet"
+        if any(k in lower for k in self.CHANNEL_KEYWORDS):
+            return "channel"
         if any(k in lower for k in self.MONITOR_KEYWORDS):
             return "monitor"
         if any(k in lower for k in self.DEPLOY_KEYWORDS):
@@ -111,6 +159,14 @@ def get_dashboard_markup():
     markup.add(
         types.InlineKeyboardButton("📊 حالة النظام", callback_data="status"),
         types.InlineKeyboardButton("🚀 نشر GitHub", callback_data="deploy")
+    )
+    markup.add(
+        types.InlineKeyboardButton("🌐 مواقعي", callback_data="list_projects"),
+        types.InlineKeyboardButton("🤖 وكلائي", callback_data="list_agents")
+    )
+    markup.add(
+        types.InlineKeyboardButton("🤖 بوتاتي", callback_data="list_bots"),
+        types.InlineKeyboardButton("📢 قنواتي", callback_data="list_channels")
     )
     markup.add(
         types.InlineKeyboardButton("📡 بث تجريبي", callback_data="test_broadcast")
@@ -201,6 +257,49 @@ def handle_callbacks(call):
         pending_commands.pop(call.from_user.id, None)
         bot.answer_callback_query(call.id, "تم الإلغاء.")
 
+    elif call.data == "list_projects":
+        projects = _webforge.list_projects()
+        if projects:
+            lines = [f"🌐 <b>مواقعي ({len(projects)}):</b>"]
+            for p in projects:
+                icon = "🟢" if p.get('has_html') else "⚪"
+                lines.append(f"{icon} <code>{p['name']}</code> — {p['files']} ملفات")
+            bot.send_message(call.message.chat.id, "\n".join(lines), parse_mode="HTML")
+        else:
+            bot.send_message(call.message.chat.id, "🌐 لا توجد مواقع بعد. اكتب: <b>ابني موقع</b>", parse_mode="HTML")
+
+    elif call.data == "list_agents":
+        agents = _agent_smith.list_agents()
+        if agents:
+            lines = [f"🤖 <b>وكلائي ({len(agents)}):</b>"]
+            for a in agents:
+                st = {"DESIGNED": "📝", "BUILT": "✅", "RUNNING": "🟢"}.get(a['status'], "⚪")
+                lines.append(f"{st} <code>{a['name']}</code> — {a['description'][:40]}")
+            bot.send_message(call.message.chat.id, "\n".join(lines), parse_mode="HTML")
+        else:
+            bot.send_message(call.message.chat.id, "🤖 لا توجد وكلاء مخصصين. اكتب: <b>ابني وكيل</b>", parse_mode="HTML")
+
+    elif call.data == "list_bots":
+        bots = _bot_fleet.list_bots()
+        if bots:
+            lines = [f"🤖 <b>بوتاتي ({len(bots)}):</b>"]
+            for b in bots:
+                st = "🟢" if b['status'] == 'RUNNING' else "🔴"
+                lines.append(f"{st} <code>{b['name']}</code> — {b['personality'][:30]}")
+            bot.send_message(call.message.chat.id, "\n".join(lines), parse_mode="HTML")
+        else:
+            bot.send_message(call.message.chat.id, "🤖 لا توجد بوتات. اكتب: <b>ابني بوت</b>", parse_mode="HTML")
+
+    elif call.data == "list_channels":
+        channels = _channel_manager.list_channels()
+        if channels:
+            lines = [f"📢 <b>قنواتي ({len(channels)}):</b>"]
+            for c in channels:
+                lines.append(f"📱 <code>{c['name']}</code> — {c['posts_count']} منشور")
+            bot.send_message(call.message.chat.id, "\n".join(lines), parse_mode="HTML")
+        else:
+            bot.send_message(call.message.chat.id, "📢 لا توجد قنوات مسجلة.")
+
 
 # ╔══════════════════════════════════════════╗
 # ║       المعالج الشامل (Universal Handler)  ║
@@ -276,6 +375,80 @@ def handle_universal(message):
         result = deploy_agent.deploy_updates(f"🔱 {text[:30]}")
         bot.send_message(message.chat.id, result, parse_mode="HTML")
         broadcast(f"🚀 **Git Deploy:**\n{text[:100]}")
+        return
+
+    # ─── WebForge (بناء مواقع) ───
+    if category == "webforge":
+        bot.reply_to(message, "🌐 **WebForge** جاري البناء...", parse_mode="Markdown")
+        try:
+            build_type = "landing"
+            if any(w in text.lower() for w in ['لوحة تحكم', 'dashboard']):
+                build_type = "dashboard"
+            elif any(w in text.lower() for w in ['fastapi', 'api']):
+                build_type = "api"
+            # استخراج اسم المشروع من النص
+            proj_name = text.split()[-1] if len(text.split()) > 2 else "my_project"
+            res = _webforge.start({"type": build_type, "project_name": proj_name, "description": text})
+            if res.get("status") == "success":
+                msg = f"✅ تم بناء: <code>{res['project']}</code>"
+                if res.get('preview_url'):
+                    msg += f"\n🔗 المعاينة: {res['preview_url']}"
+                bot.send_message(message.chat.id, msg, parse_mode="HTML")
+            else:
+                bot.reply_to(message, f"❌ {res.get('error', 'فشل')}")
+        except Exception as e:
+            bot.reply_to(message, f"❌ خطأ WebForge: {e}")
+        return
+
+    # ─── Agent Builder ───
+    if category == "agent_build":
+        bot.reply_to(message, "🤖 **AgentSmith** جاري التصميم...", parse_mode="Markdown")
+        try:
+            words = text.split()
+            agent_name = "custom_agent"
+            for i, w in enumerate(words):
+                if w in ['وكيل', 'agent'] and i + 1 < len(words):
+                    agent_name = words[i + 1]
+                    break
+            res = _agent_smith.design_agent(agent_name, text)
+            if res.get("status") == "success":
+                # بناء فوري
+                path = _agent_smith.build_agent(agent_name)
+                bot.send_message(message.chat.id, f"✅ الوكيل <code>{agent_name}</code> جاهز.\n📁 {path}", parse_mode="HTML")
+            else:
+                bot.reply_to(message, f"❌ {res.get('error')}")
+        except Exception as e:
+            bot.reply_to(message, f"❌ خطأ AgentSmith: {e}")
+        return
+
+    # ─── Bot Builder ───
+    if category == "bot_build":
+        bot.reply_to(message, "🏗️ **BotBuilder** جاري البناء...\n⚠️ أرسل الـ Token لاحقاً.", parse_mode="Markdown")
+        return
+
+    # ─── Bot Fleet ───
+    if category == "bot_fleet":
+        bots = _bot_fleet.list_bots()
+        if bots:
+            lines = ["🤖 <b>أسطول البوتات:</b>"]
+            for b in bots:
+                st = "🟢" if b['status'] == 'RUNNING' else "🔴"
+                lines.append(f"{st} <code>{b['name']}</code> [{b['status']}]")
+            bot.send_message(message.chat.id, "\n".join(lines), parse_mode="HTML")
+        else:
+            bot.reply_to(message, "🤖 لا توجد بوتات في الأسطول. اكتب: <b>ابني بوت</b>", parse_mode="HTML")
+        return
+
+    # ─── Channel Manager ───
+    if category == "channel":
+        channels = _channel_manager.list_channels()
+        if channels:
+            lines = ["📢 <b>قنواتي:</b>"]
+            for c in channels:
+                lines.append(f"📱 {c['name']} — {c['posts_count']} منشور")
+            bot.send_message(message.chat.id, "\n".join(lines), parse_mode="HTML")
+        else:
+            bot.reply_to(message, "📢 لا توجد قنوات مسجلة.")
         return
 
     # ─── التنفيذ عبر الـ Orchestrator ───
