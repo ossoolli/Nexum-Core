@@ -85,8 +85,8 @@ class FlowOrchestrator:
             try:
                 execution_result = tool_registry.execute_tool(task.action, task.params)
             except Exception as tool_err:
-                # محاولة تمريره كنشاط مخصص إذا لم يكن مسجلا كأداة برمجية 
-                execution_result = {"status": "ok", "logs": f"Custom agent execution for {task.action} completed (No direct tool registered)."}
+                print(f"⚠️ [Tool Error] Failed to execute {task.action} with {task.params}. Error: {str(tool_err)}")
+                raise tool_err
                 
             task.result = execution_result
             task.completed_at = time.time()
