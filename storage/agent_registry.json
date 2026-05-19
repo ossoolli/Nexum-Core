@@ -1,0 +1,64 @@
+{
+    "architect_agent": {
+        "agent_id": "architect_agent",
+        "name": "Architect Agent",
+        "role": "System Architect",
+        "capabilities": [
+            "design_architecture",
+            "build_protocols",
+            "create_workflows"
+        ],
+        "restrictions": [
+            "no_direct_code_execution"
+        ],
+        "status": "active",
+        "created_at": "2026-05-18T09:25:36.775816"
+    },
+    "coding_agent": {
+        "agent_id": "coding_agent",
+        "name": "Backend & API Coder",
+        "role": "Backend Developer",
+        "capabilities": [
+            "write_python",
+            "build_api",
+            "database_design"
+        ],
+        "restrictions": [
+            "requires_sandbox"
+        ],
+        "status": "active",
+        "created_at": "2026-05-18T09:25:36.776084"
+    },
+    "frontend_agent": {
+        "agent_id": "frontend_agent",
+        "name": "UI/UX & Frontend Coder",
+        "role": "Frontend Developer",
+        "capabilities": [
+            "build_react",
+            "deploy_pages",
+            "create_ui",
+            "tailwind"
+        ],
+        "restrictions": [
+            "no_secret_access",
+            "no_root_shell"
+        ],
+        "status": "active",
+        "created_at": "2026-05-18T09:25:36.776314"
+    },
+    "infra_agent": {
+        "agent_id": "infra_agent",
+        "name": "DevOps & Infrastructure",
+        "role": "DevOps Engineer",
+        "capabilities": [
+            "docker_manage",
+            "cloud_deploy",
+            "github_actions"
+        ],
+        "restrictions": [
+            "require_admin_approval_for_destructive"
+        ],
+        "status": "active",
+        "created_at": "2026-05-18T09:25:36.778427"
+    }
+}
