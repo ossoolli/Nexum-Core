@@ -1,11 +1,11 @@
-# 🔱 NEXUM PRIME | Sovereign Agentic Operating System
+# 🔱 NEXUM CORE OS | Sovereign Agentic Operating System
 
-> **نظام تشغيل سيادي للوكلاء المستقلين.** NEXUM PRIME ليس مجرد بوت — بل بيئة تنفيذ ذكية حيث يخطّط وكلاء AI، يبنون، وينشرون أنظمة برمجية بشكل مستقل عبر واجهة تفاعلية كاملة.
+> **نظام تشغيل سيادي ذكي يعمل على سيرفر خاص.** NEXUM ليس مجرد بوت — بل نواة تنفيذ مستقلة تُخطط، تُحلل، تُنفذ، وتبُث النتائج في الوقت الحقيقي عبر Telegram.
 
-[![Deploy](https://img.shields.io/badge/Live-GitHub%20Pages-blue?style=for-the-badge&logo=github)](https://ossoolli.github.io/Nexum-Core/)
 [![Python](https://img.shields.io/badge/Python-3.10+-green?style=for-the-badge&logo=python)](https://python.org)
 [![Telegram](https://img.shields.io/badge/Telegram-Bot%20API-blue?style=for-the-badge&logo=telegram)](https://core.telegram.org/bots/api)
-[![Version](https://img.shields.io/badge/Version-2.2--STABLE-orange?style=for-the-badge)](#)
+[![Version](https://img.shields.io/badge/Version-5.0--SOVEREIGN-gold?style=for-the-badge)](#)
+[![AI](https://img.shields.io/badge/AI-Gemini%20+%20Claude-purple?style=for-the-badge&logo=google)](#)
 [![License](https://img.shields.io/badge/License-Proprietary-red?style=for-the-badge)](LICENSE)
 
 ---
@@ -13,193 +13,194 @@
 ## 📑 الفهرس
 
 - [الرؤية](#-الرؤية)
-- [المعمارية](#%EF%B8%8F-المعمارية-9-layer-architecture)
-- [لوحة التحكم التفاعلية](#-لوحة-التحكم-التفاعلية-click-first-ux)
-- [Mini App Dashboard](#-mini-app-dashboard)
-- [القدرات الذكية](#-القدرات-الذكية)
-- [مرجع الأوامر](#-مرجع-الأوامر)
-- [التثبيت والتشغيل](#-التثبيت-والتشغيل)
-- [إعدادات البيئة](#%EF%B8%8F-إعدادات-البيئة)
+- [المعمارية](#%EF%B8%8F-المعمارية)
+- [القدرات](#-القدرات)
+- [الأوامر](#-الأوامر-والتفاعل)
+- [التثبيت](#-التثبيت-والتشغيل)
+- [الإعدادات](#%EF%B8%8F-إعدادات-البيئة)
 - [هيكل المشروع](#-هيكل-المشروع)
-- [استكشاف الأخطاء](#-استكشاف-الأخطاء-troubleshooting)
+- [استكشاف الأخطاء](#-استكشاف-الأخطاء)
 - [خارطة الطريق](#%EF%B8%8F-خارطة-الطريق)
-- [المطور](#-المطور)
+- [المطوّر](#-المطوّر)
 
 ---
 
 ## 🌌 الرؤية
 
 ```
-Command Bot  →  Interactive Sovereign Control System
+Simple Bot  →  Intelligent Agent  →  Sovereign Operating System
 ```
 
-NEXUM تحوّل من بوت تليجرام تقليدي إلى **نظام تشغيل سيادي تفاعلي** يعمل بالكامل عبر النقر، البطاقات، والقوائم الديناميكية بدلاً من الأوامر النصية.
+بدأ NEXUM كبوت Telegram بسيط، ثم تطوّر ليصبح **نظام تشغيل سيادي** يمتلك:
+- 🧠 **عقلاً ذكياً** (Gemini + Claude + OpenRouter)
+- 👁️ **رؤية حاسوبية** (تحليل صور وملفات PDF)
+- 🛠️ **أيادٍ تنفيذية** (تشغيل أوامر على السيرفر)
+- 📡 **صوتاً حياً** (بث مباشر لقناة Telegram)
+- 🧬 **ذاكرة دائمة** (سياق محادثة + مؤشرات اقتصادية)
+- ⏰ **وعياً زمنياً** (تقارير دورية تلقائية)
 
 ---
 
-## 🏗️ المعمارية (9-Layer Architecture)
+## 🏗️ المعمارية
 
 ```
-Telegram (Control Plane)
-    ↓
-Interactive Click-first UX Layer
-    ↓
-FastAPI (Runtime Gateway)
-    ↓
-Event Bus (Nervous System)
-    ↓
-Runtime State (Source of Truth)
-    ↓
-Agents (Autonomous Workers)
-    ↓
-Orchestrator (Executive Brain)
-    ↓
-Mini App (Visual Operating System)
-    ↓
-Protocol Engine (Self-Evolving Infrastructure)
+┌─────────────────────────────────────┐
+│         Telegram Interface          │
+│   (Text / Photos / Documents)       │
+└──────────────┬──────────────────────┘
+               ↓
+┌──────────────────────────────────────┐
+│        NexumInterpreter              │
+│  (التصنيف الذكي للطلبات)              │
+│  broadcast | monitor | deploy |      │
+│  execute   | chat                    │
+└──────┬───────┬───────┬───────┬──────┘
+       ↓       ↓       ↓       ↓
+   ┌───────┐ ┌─────┐ ┌──────┐ ┌────────┐
+   │Monitor│ │Deploy│ │Gemini│ │Orchest-│
+   │Agent  │ │Agent │ │  AI  │ │rator   │
+   └───────┘ └─────┘ └──────┘ └───┬────┘
+                                   ↓
+                          ┌────────────────┐
+                          │  AI Planner    │
+                          │ (خطة تنفيذية)  │
+                          └───────┬────────┘
+                                  ↓
+                          ┌────────────────┐
+                          │Execution Graph │
+                          │   (DAG)        │
+                          └───────┬────────┘
+                                  ↓
+                          ┌────────────────┐
+                          │ Tool Registry  │
+                          │  + MCP Layer   │
+                          └───────┬────────┘
+                                  ↓
+              ┌───────┬───────┬───────┬──────┐
+              │Terminal│ Files │Search │Sandbox│
+              └───────┴───────┴───────┴──────┘
 ```
 
 ### المحركات الأساسية
 
-| # | المحرك | الوصف |
-|---|--------|-------|
-| 1 | 🧠 **Orchestrator & DAG** | تنفيذ المهام بنظام الرسم البياني الموجّه مع إعادة المحاولة |
-| 2 | 🌐 **Distributed Event Bus** | النظام العصبي — Redis Pub/Sub للبث اللحظي |
-| 3 | 🔄 **Agent Lifecycle** | آلة حالة: `CREATED → READY → RUNNING → TERMINATED` |
-| 4 | 🔐 **Permission Manager** | نظام صلاحيات RBAC |
-| 5 | 📊 **Runtime State** | مصدر الحقيقة الموحّد في الذاكرة + السحابة |
-| 6 | 🔀 **Callback Router** | موجّه تفاعلي لجميع الأزرار والقوائم |
-| 7 | 🧠 **AI Planner** | مخطط ذكي يولّد Execution Graphs تلقائياً |
-| 8 | 🛠️ **System Tools** | أدوات: Terminal, Files, Web Search, Scraping |
-| 9 | ☁️ **Cloud Memory** | ذاكرة دائمة عبر Supabase PostgreSQL |
+| # | المحرك | الملف | الوصف |
+|---|--------|-------|-------|
+| 1 | 🔱 **البوابة الموحدة** | `main.py` | نقطة الدخول: أوامر، صور، ملفات، دردشة |
+| 2 | 🧠 **المنسق** | `core/orchestrator.py` | تنفيذ الأهداف عبر DAG + بث النتائج |
+| 3 | 📋 **المخطط** | `core/planner.py` | تحويل النص لخطة تنفيذية عبر AI |
+| 4 | 📊 **الرسم البياني** | `core/execution_graph.py` | DAG يدعم التبعيات والتنفيذ المتوازي |
+| 5 | 🛠️ **سجل الأدوات** | `core/tool_registry.py` | Function Calling + MCP Protocol |
+| 6 | 🌐 **ناقل الأحداث** | `core/event_bus_distributed.py` | Redis Pub/Sub للتشغيل الموزع |
+| 7 | 🔄 **دورة الحياة** | `core/lifecycle.py` | حالات الوكيل: `CREATED→RUNNING→TERMINATED` |
+| 8 | 🔐 **الأمان** | `core/security.py` | فلترة أوامر خطرة + تأكيد قبل التنفيذ |
+| 9 | 🤖 **Gemini AI** | `services/gemini_service.py` | Multimodal + Retry Logic |
+| 10 | 🧬 **OpenRouter** | `core/llm_engine.py` | Claude / GPT-4o / Llama |
 
 ---
 
-## 🎮 لوحة التحكم التفاعلية (Click-first UX)
+## 🧠 القدرات
 
-النظام يعمل بالكامل عبر **النقر** — لا حاجة للكتابة:
+### 1. الإدراك متعدد الحواس (Multimodal)
+| النوع | الإجراء |
+|-------|---------|
+| 📷 **صور** | تحليل تلقائي فوري عبر Gemini Vision |
+| 📄 **PDF** | قراءة واستخراج أهم النقاط |
+| 📝 **مستندات نصية** | فحص وتحليل المحتوى |
+| 🗣️ **نص حر** | دردشة ذكية مع ذاكرة سياقية |
 
-```
-/start → القائمة الرئيسية
-  ├── ⚡ Runtime       → حالة النظام، مقاييس حية، Event Bus
-  ├── 🤖 Agents        → بطاقة تحكم لكل وكيل (Start/Stop/Restart/Logs/Memory)
-  ├── 🧬 Protocols     → البروتوكولات + Execution Graph
-  ├── 🚀 Deployments   → Git Status / Push / GitHub Pages / Cloud Run
-  ├── 🧠 AI Brain      → Chat / Web Search / Scrape / Code Generation
-  ├── 🛡️ Security      → Lockdown / Audit / Integrity Check
-  ├── 💾 Memory        → DB Status / Cloud Sync / Clear History
-  ├── 🐳 Docker        → Containers / Images / Stats / Prune
-  └── ⚙️ Settings      → System Info / AI Model / Restart Bot
-```
+### 2. التنفيذ المستقل (Autonomous Execution)
+- **AI Planner** يحول الأوامر النصية لخطط تنفيذية
+- **Orchestrator** ينفذ الخطط عبر أدوات النظام
+- **أدوات مدمجة:** Terminal، كتابة ملفات، قراءة ملفات، بحث ويب، استخراج صفحات
+- **Sandbox** لتنفيذ كود غير موثوق داخل Docker
 
-### مميزات الـ UX
+### 3. البث الحي (Live Broadcasting)
+- بث تلقائي لقناة Telegram عند كل عملية
+- تقارير صحة دورية (CPU / RAM / Disk)
+- مشاركة تحليلات الملفات للقناة بأمر واحد
 
-- **Inline Keyboards** في كل شاشة — 9 قوائم فرعية متداخلة
-- **Agent Cards** — بطاقة تحكم لكل وكيل مع أزرار مباشرة
-- **Confirmation Dialogs** — تأكيد قبل الإجراءات الخطيرة
-- **Visual Progress Bars** — أشرطة تقدم نصية للـ CPU/RAM/Disk
-- **Quick Actions Panel** — إجراءات سريعة بنقرة واحدة
-- **Smart Error Handling** — أخطاء مغلّفة بـ HTML آمن
+### 4. الذاكرة الدائمة (Persistent Memory)
+- **ذاكرة سياقية** — يتذكر آخر 50 رسالة لكل مستخدم
+- **ذاكرة نظام** — مؤشرات اقتصادية وبيانات مخزنة
+- **ذاكرة سحابية** — Supabase PostgreSQL (اختياري)
 
----
-
-## 📱 Mini App Dashboard
-
-تطبيق ويب مصغّر داخل تليجرام بتصميم فاخر:
-
-- **Dark Futuristic UI** مع Glassmorphism وتدرّجات Neon
-- **Live Terminal Feed** — سجل أحداث حي بنمط التيرمينال
-- **Swarm Control** — إدارة الوكلاء مع مؤشرات حية
-- **Cloud Intelligence** — لوحة حالة الذاكرة السحابية
-- **Quick Protocols** — بروتوكولات جاهزة بنقرة واحدة
-- **WebSocket Live** — اتصال حي مع السيرفر
-
-🔗 **رابط المعاينة:** [https://ossoolli.github.io/Nexum-Core/](https://ossoolli.github.io/Nexum-Core/)
-
----
-
-## 🧠 القدرات الذكية
-
-### الإدراك متعدد الحواس (Multimodal)
-- 📷 **الصور** — تحليل ومعالجة
-- 📄 **PDF والمستندات** — قراءة وتلخيص
-- 🎵 **الصوت** — استقبال ومعالجة
-- 📝 **الكود** — فحص وتعديل أي ملف برمجي
-- 📑 **الملفات النصية** — قراءة تلقائية لـ `.py .js .html .css .json .md .csv .yml .sh`
-
-### البحث والويب (Web Intelligence)
-- 🔍 **`/search`** — بحث حي في الإنترنت
-- 🕸️ **`/scrape`** — شفط وقراءة محتوى أي رابط
-- 📝 **`/code`** — توليد كود بالذكاء الاصطناعي
-
-### الاستقلالية (Sovereign Autonomy)
-- اتخاذ القرارات دون توقّف
-- Exponential Backoff ضدّ أخطاء 503
-- وعي لحظي بحالة السيرفر (CPU/RAM/Files)
-- ذاكرة سحابية دائمة (Supabase)
-
-### الأمان (Safety Layer)
-- فحص أوامر حساسة قبل التنفيذ
-- مسار تأكيد عبر `/confirm` و `/cancel`
+### 5. الأمان (Security Layer)
+- حظر أوامر خطيرة (`rm -rf /`, `mkfs`, `reboot`)
+- مسار تأكيد للأوامر الحساسة
 - حصر الوصول على `ADMIN_ID` فقط
-- HTML-escape لكل ناتج معروض
+- HTML-escape لكل المخرجات
 
 ---
 
-## 💻 مرجع الأوامر
+## 💻 الأوامر والتفاعل
 
-| الأمر | الوصف | مثال |
-|-------|------|------|
-| `/start` · `/menu` · `/dashboard` · `/home` | فتح لوحة التحكم الرئيسية | `/start` |
-| `/run <cmd>` | تنفيذ أمر نظام (مع فحص أمان) | `/run ls -la` |
-| `/confirm` | تأكيد آخر أمر حسّاس معلّق | `/confirm` |
-| `/cancel` | إلغاء آخر أمر معلّق | `/cancel` |
-| `/search <query>` | بحث ويب فوري | `/search latest LLM benchmarks` |
-| `/scrape <url>` | استخراج محتوى صفحة | `/scrape https://example.com` |
-| `/code <description>` | توليد كود بالـ AI | `/code خادم Flask بسيط` |
+### أوامر مباشرة
+| الأمر | الوصف |
+|-------|-------|
+| `/start` · `/dashboard` | لوحة التحكم الرئيسية مع أزرار تفاعلية |
+| `/run <أمر>` | تنفيذ أمر Shell مع فحص أمني |
 
-### التفاعل النصي
+### التفاعل الذكي (بدون أوامر)
+| ما تكتبه | ما يحدث |
+|----------|---------|
+| `مرحبا` | رد ترحيبي قصير وودود |
+| `حالة النظام` | تقرير CPU / RAM / Disk / Network / Uptime |
+| `ابحث عن سعر الذهب` | تنفيذ عبر Orchestrator + Tool Registry |
+| `انشئ تطبيق ويب` | تخطيط وتنفيذ تلقائي في `registry/apps/` |
+| `ارفع الكود` | Git add → commit → push تلقائياً |
+| `ارسل للقناة` | بث آخر تحليل للقناة الحية |
+| صورة 📷 | تحليل فوري بـ Gemini Vision |
+| ملف PDF 📄 | تحليل واستخراج النقاط المهمة |
 
-- أرسل **رسالة عادية** للدردشة مع الذكاء الاصطناعي مع وعي بحالة النظام
-- أرسل **صورة/PDF/صوت/مستند** للتحليل متعدد الحواس
-- ابدأ رسالة بكلمات تنفيذ صريحة (`ابن`, `أنشئ`, `نفّذ`, `build`, `create`, `spawn`, `deploy`) لتشغيل الـ Orchestrator
+### أزرار لوحة التحكم
+| الزر | الوظيفة |
+|------|---------|
+| 📊 حالة النظام | تقرير صحة السيرفر |
+| 🚀 نشر GitHub | رفع التحديثات لـ GitHub |
+| 📡 بث تجريبي | إرسال رسالة اختبار للقناة |
 
 ---
 
 ## 🚀 التثبيت والتشغيل
 
-### 1. المتطلبات
+### المتطلبات
 - Python 3.10+
 - حساب Telegram Bot ([@BotFather](https://t.me/BotFather))
 - مفتاح Google Gemini API
-- PostgreSQL / Supabase *(اختياري — للذاكرة السحابية)*
 - Redis *(اختياري — للـ Event Bus الموزّع)*
 
-### 2. التثبيت
+### التثبيت
 ```bash
 git clone https://github.com/ossoolli/Nexum-Core.git
 cd Nexum-Core
 
 python3 -m venv venv
-source venv/bin/activate          # Linux/macOS
-# .\venv\Scripts\Activate.ps1     # Windows PowerShell
-
+source venv/bin/activate
 pip install -r requirements.txt
 ```
 
-### 3. الإقلاع
+### التشغيل اليدوي
 ```bash
-# المحرك الأساسي (Bot + AI)
 python main.py
-
-# خادم الواجهة المرئية (اختياري)
-python webapp/api_server.py
 ```
 
-### 4. النشر عبر Docker
+### التشغيل عبر PM2 (الموصى به للإنتاج)
 ```bash
-docker build -t nexum-prime .
-docker run -d --env-file .env --name nexum nexum-prime
+pm2 start ecosystem.config.js
+pm2 status
+```
+
+هذا يشغّل **3 عمليات** مُدارة:
+| العملية | الوظيفة |
+|---------|---------|
+| `nexum-core` | البوت الرئيسي |
+| `nexum-runtime-api` | واجهة الويب (FastAPI) |
+| `nexum-chronos` | تقارير دورية تلقائية |
+
+### النشر عبر Docker
+```bash
+docker build -t nexum-core .
+docker run -d --env-file .env --name nexum nexum-core
 ```
 
 ---
@@ -211,20 +212,19 @@ docker run -d --env-file .env --name nexum nexum-prime
 | المتغير | الوصف | إلزامي |
 |---------|------|--------|
 | `TELEGRAM_TOKEN` | رمز البوت من BotFather | ✅ |
-| `ADMIN_ID` | معرّف Telegram الخاص بك (Numeric) | ✅ |
+| `ADMIN_ID` | معرّف Telegram الخاص بك | ✅ |
 | `GOOGLE_API_KEY` | مفتاح Gemini API | ✅ |
-| `WEBAPP_URL` | رابط Mini App Dashboard | ⬜ |
-| `DB_CONNECTION` | PostgreSQL DSN للذاكرة السحابية | ⬜ |
-| `SUPABASE_URL` | عنوان مشروع Supabase | ⬜ |
-| `SUPABASE_KEY` | مفتاح Supabase | ⬜ |
-| `REDIS_URL` | عنوان Redis للـ Event Bus | ⬜ |
+| `LOG_CHANNEL_ID` | معرّف قناة البث الحي | ⬜ |
+| `OPENROUTER_API_KEY` | مفتاح OpenRouter (Claude/GPT) | ⬜ |
+| `OPENAI_API_KEY` | مفتاح OpenAI المباشر | ⬜ |
+| `DB_CONNECTION` | PostgreSQL DSN | ⬜ |
+| `MASTER_KEY` | مفتاح التشفير الداخلي | ⬜ |
 
-مثال:
 ```env
 TELEGRAM_TOKEN=123456:ABC-DEF...
 ADMIN_ID=987654321
 GOOGLE_API_KEY=AIza...
-WEBAPP_URL=https://ossoolli.github.io/Nexum-Core/
+LOG_CHANNEL_ID=-100xxxxxxxxxx
 ```
 
 ---
@@ -233,84 +233,105 @@ WEBAPP_URL=https://ossoolli.github.io/Nexum-Core/
 
 ```
 Nexum-Core/
-├── main.py                    # القلب النابض — Interactive Control System
-├── requirements.txt           # التبعيات
-├── Dockerfile                 # حاوية الإنتاج
-├── .env                       # المتغيرات البيئية (لا يُرفع)
-├── core/
-│   ├── keyboards.py           # 9 قوائم تفاعلية + بطاقات وكلاء
-│   ├── callback_router.py     # موجّه الأحداث
-│   ├── orchestrator.py        # المنسّق التنفيذي (DAG)
-│   ├── planner.py             # المخطّط الذكي (AI Planner)
-│   ├── lifecycle.py           # مدير دورة حياة الوكلاء
-│   ├── event_bus.py           # ناقل الأحداث
-│   ├── event_bus_distributed.py  # Redis Pub/Sub
-│   ├── runtime_state.py       # حالة النظام اللحظية
-│   ├── system_tools.py        # Terminal, Files, Web, Search
-│   ├── safe_sender.py         # طبقة أمان الرسائل
-│   ├── executor.py            # منفّذ الأوامر (cross-platform)
-│   ├── security.py            # فاحص الأوامر الخطرة
-│   ├── permission_manager.py  # RBAC
-│   ├── protocol_compiler.py   # مُجمّع البروتوكولات الذاتية
-│   ├── reflection.py          # طبقة التأمّل الذاتي
-│   └── agent_registry.py      # سجل الوكلاء
-├── services/
-│   ├── gemini_service.py      # Gemini AI مع Retry Logic
-│   └── db_service.py          # PostgreSQL/Supabase
-├── agents/
-│   ├── monitor.py             # وكيل المراقبة
-│   ├── deploy.py              # وكيل النشر
-│   ├── docker_agent.py        # وكيل الحاويات
-│   ├── frontend_agent.py      # وكيل الواجهات
-│   ├── github_agent.py        # وكيل GitHub
-│   └── agent_factory.py       # مصنع توليد الوكلاء
-├── webapp/
-│   ├── api_server.py          # FastAPI + WebSocket + SSE
-│   └── index.html             # Mini App Dashboard
-└── storage/
-    └── memory.json            # ذاكرة محلية
+├── main.py                        # 🔱 البوابة الموحدة (260+ سطر)
+├── ecosystem.config.js            # ⚙️ إعدادات PM2 (3 عمليات)
+├── requirements.txt               # 📦 المكتبات
+├── Dockerfile                     # 🐳 حاوية Docker
+├── README.md                      # 📖 هذا الملف
+│
+├── core/                          # 🧠 النواة
+│   ├── orchestrator.py            #    المنسق المركزي + بث حي
+│   ├── planner.py                 #    المخطط الذكي (AI → JSON → DAG)
+│   ├── execution_graph.py         #    محرك DAG بالتبعيات
+│   ├── tool_registry.py           #    سجل الأدوات + MCP Protocol
+│   ├── system_tools.py            #    7 أدوات نظام مسجلة
+│   ├── executor.py                #    منفذ أوامر Shell
+│   ├── sandbox.py                 #    بيئة عزل Docker/gVisor
+│   ├── security.py                #    فلترة أوامر خطرة
+│   ├── lifecycle.py               #    إدارة دورة حياة الوكلاء
+│   ├── event_bus.py               #    ناقل الأحداث
+│   ├── event_bus_distributed.py   #    Redis Pub/Sub
+│   ├── llm_factory.py             #    مصنع النماذج (Gemini + OpenAI)
+│   ├── llm_engine.py              #    محرك OpenRouter
+│   ├── memory.py                  #    ذاكرة JSON سريعة
+│   ├── memory_local.py            #    ذاكرة سياقية طويلة المدى
+│   ├── git_bot.py                 #    مزامنة Git تلقائية
+│   ├── agent_registry.py          #    سجل الوكلاء
+│   ├── knowledge_base.py          #    قاعدة معرفية
+│   ├── reflection.py              #    نظام التأمل الذاتي
+│   ├── protocol_compiler.py       #    مترجم البروتوكولات
+│   └── search_engine.py           #    محرك بحث ويب
+│
+├── agents/                        # 🤖 الوكلاء المستقلون
+│   ├── chronos.py                 #    ⏰ تقارير دورية + مراقبة صحية
+│   ├── monitor.py                 #    📊 مراقبة CPU/RAM/Disk/Network
+│   ├── deploy.py                  #    🚀 نشر Git تلقائي
+│   ├── docker_agent.py            #    🐳 إدارة حاويات Docker
+│   ├── github_agent.py            #    📂 عمليات GitHub
+│   ├── frontend_agent.py          #    🖥️ بناء واجهات
+│   ├── qa_tester.py               #    🧪 فحص الجودة
+│   ├── security_guard.py          #    🛡️ حراسة أمنية
+│   └── agent_factory.py           #    🏭 مصنع توليد الوكلاء
+│
+├── services/                      # 🌐 الخدمات الخارجية
+│   ├── gemini_service.py          #    Gemini API + Multimodal + Retry
+│   └── db_service.py              #    PostgreSQL / Supabase
+│
+├── webapp/                        # 🖥️ واجهة التحكم المرئية
+│   ├── api_server.py              #    FastAPI + WebSocket
+│   └── index.html                 #    Mini App Dashboard
+│
+├── registry/apps/                 # 📂 التطبيقات المعزولة
+└── storage/                       # 💾 البيانات المحلية
 ```
 
 ---
 
-## 🔧 استكشاف الأخطاء (Troubleshooting)
+## 🔧 استكشاف الأخطاء
 
 | المشكلة | الحلّ |
 |---------|------|
-| البوت لا يستجيب | تأكّد أن `TELEGRAM_TOKEN` و `ADMIN_ID` صحيحان وأن معرّفك يطابق `ADMIN_ID` |
-| `Module not found` | شغّل `pip install -r requirements.txt` داخل بيئة `venv` |
-| أوامر `/run` تفشل على Windows | تم دعمها — يستخدم `cmd.exe` تلقائياً على Windows و `/bin/bash` على Linux |
-| `Docker غير متوفر` | تأكّد من تثبيت Docker وأنّ المستخدم لديه صلاحية `docker.sock` |
-| الذاكرة السحابية تظهر OFFLINE | تحقّق من `DB_CONNECTION` و `SUPABASE_URL/KEY` في `.env` |
-| `503` من Gemini | الـ Exponential Backoff يعالجها — انتظر بضع ثوانٍ وأعد المحاولة |
-| النصوص العربية تظهر مشوّهة في المحرر | اضبط المحرر على ترميز UTF-8 — الملفات مُرمّزة بشكل صحيح |
+| البوت لا يستجيب | تأكّد من `TELEGRAM_TOKEN` و `ADMIN_ID` صحيحان |
+| `Module not found` | شغّل `pip install -r requirements.txt` داخل `venv` |
+| أوامر `/run` تفشل | تأكد أن المسارات مطلقة، النظام يعمل على Linux |
+| الذاكرة لا تحفظ | تأكد من وجود مجلد `storage/` |
+| `503` من Gemini | Exponential Backoff مدمج — انتظر ثوانٍ |
+| البث لا يصل للقناة | تأكد أن البوت مضاف كـ Admin في القناة وأن `LOG_CHANNEL_ID` صحيح |
+| `ارسل للقناة` لا يرسل التحليل | أرسل ملف/صورة أولاً لحفظ التحليل ثم اكتب `ارسل للقناة` |
 
 ---
 
 ## 🛣️ خارطة الطريق
 
-- [x] نظام وكلاء مستقل (Autonomous Agents)
-- [x] واجهة تفاعلية Click-first (9 قوائم)
-- [x] إدراك متعدد الحواس (Multimodal)
-- [x] بحث وسكرابينج من الويب
-- [x] ذاكرة سحابية دائمة (Supabase)
-- [x] Mini App Dashboard (Glassmorphism)
-- [x] Exponential Backoff للـ API
-- [x] دعم Cross-platform (Linux/Windows/Docker)
-- [x] مسار تأكيد للأوامر الحسّاسة (`/confirm` · `/cancel`)
-- [ ] Runtime Visual Graph (Cytoscape.js / React Flow)
-- [ ] Real-time Notifications System
-- [ ] Command Palette (CMD+K style)
-- [ ] Multi-View System (System/Agent/Protocol/Security)
+### ✅ مكتمل (v5.0)
+- [x] نظام تنفيذ مستقل (Orchestrator + DAG + Planner)
+- [x] إدراك متعدد الحواس (صور + PDF + مستندات)
+- [x] بث مباشر لقناة Telegram
+- [x] تقارير صحة دورية (Chronos)
+- [x] لوحة تحكم تفاعلية (Inline Keyboards)
+- [x] ذاكرة سياقية طويلة المدى
+- [x] بحث ويب (DuckDuckGo)
+- [x] نظام أمني متعدد الطبقات
+- [x] مزامنة Git تلقائية
+- [x] PM2 إدارة عمليات (3 عمليات)
+- [x] دعم Multi-LLM (Gemini + Claude + GPT)
+
+### 🔜 قادم
+- [ ] واجهة ReactFlow لعرض الـ Agent Topology حياً
+- [ ] وكيل Sentinel لمراقبة أمن السيرفر
+- [ ] متجر تطبيقات داخلي (App Store)
+- [ ] Protocol DSL عبر ملفات YAML
+- [ ] نظام إشعارات ذكي (تنبيهات حسب الأولوية)
+- [ ] Multi-Agent Collaboration (تعاون بين الوكلاء)
 
 ---
 
 ## 👨‍💻 المطوّر
 
-تم تطوير هذا المشروع بواسطة **معتز اسماعيل تيلخ (Mutaz Tailakh)**.
+تم تصميم وبناء هذا المشروع بواسطة **معتز إسماعيل تيلخ (Mutaz Tailakh)**.
 
 [![GitHub](https://img.shields.io/badge/GitHub-ossoolli-black?style=flat-square&logo=github)](https://github.com/ossoolli)
 
 ---
 
-*🔱 NEXUM PRIME — Sovereign Agentic OS v2.2-STABLE*
+*🔱 NEXUM CORE OS v5.0 — Sovereign Agentic Operating System*

@@ -44,6 +44,9 @@ from agents.deploy import deploy_agent
 # ─── الأوامر المعلقة (للتأكيد الأمني) ───
 pending_commands = {}
 
+# ─── ذاكرة آخر تحليل (للبث السريع) ───
+_last_analysis = {}  # {user_id: "آخر تحليل ملف/صورة"}
+
 
 # ╔══════════════════════════════════════════╗
 # ║         البث المباشر للقناة              ║
@@ -216,9 +219,16 @@ def handle_universal(message):
         content = text
         for kw in interpreter.BROADCAST_KEYWORDS:
             content = content.replace(kw, "").strip()
+        # إذا لم يحدد محتوى، نرسل آخر تحليل محفوظ
         if not content:
-            content = "📡 إشعار تلقائي من NEXUM OS"
-        broadcast(f"📢 **NEXUM BROADCAST**\n\n{content}")
+            last = _last_analysis.get(message.from_user.id)
+            if last:
+                content = last
+            else:
+                content = "📡 لا يوجد تحليل محفوظ. أرسل ملفاً أو صورة أولاً."
+                bot.reply_to(message, content)
+                return
+        broadcast(f"📢 **NEXUM BROADCAST**\n━━━━━━━━━━━━━━\n\n{content}")
         bot.reply_to(message, "✅ تم النشر في القناة بنجاح!")
         return
 
@@ -231,6 +241,7 @@ def handle_universal(message):
             prompt = text or "حلل هذه الصورة بدقة واستخرج كل المعلومات المهمة منها."
             res, _ = _gemini_svc.ask(prompt, file_data=data, mime_type="image/jpeg")
             bot.reply_to(message, res)
+            _last_analysis[message.from_user.id] = res[:2000]
             _memory.save_context(message.from_user.id, f"[تحليل صورة] {res[:200]}", role='assistant')
         except Exception as e:
             bot.reply_to(message, f"❌ فشل تحليل الصورة: {e}")
@@ -246,7 +257,8 @@ def handle_universal(message):
             prompt = text or "قم بتحليل هذا الملف بالكامل واستخرج أهم النقاط والمعلومات."
             res, _ = _gemini_svc.ask(prompt, file_data=data, mime_type=mime)
             bot.reply_to(message, res)
-            bot.send_message(message.chat.id, "💡 هل تود إرسال هذا التحليل للقناة؟ اكتب: <b>ارسل للقناة</b>", parse_mode="HTML")
+            _last_analysis[message.from_user.id] = res[:2000]
+            bot.send_message(message.chat.id, "💡 للنشر في القناة اكتب: <b>ارسل للقناة</b>", parse_mode="HTML")
             _memory.save_context(message.from_user.id, f"[تحليل ملف: {message.document.file_name}] {res[:200]}", role='assistant')
         except Exception as e:
             bot.reply_to(message, f"❌ فشل تحليل الملف: {e}")
@@ -293,7 +305,15 @@ def handle_universal(message):
         full_prompt = f"{history_prompt}الرسالة الحالية: {text}"
         res, _ = _gemini_svc.ask(
             full_prompt,
-            system_instruction="أنت NEXUM OS نظام تشغيل ذكاء اصطناعي سيادي. تحدث بالعربية. ردودك عملية ودقيقة."
+            system_instruction=(
+                "أنت NEXUM OS نظام تشغيل ذكاء اصطناعي سيادي يعمل على سيرفر خاص بالمايسترو معتز. "
+                "قواعد صارمة: "
+                "1. إذا قال المستخدم 'مرحبا' أو تحية، رد بجملة ترحيب قصيرة واسأله كيف تساعده. لا تكتب أكثر من 3 أسطر. "
+                "2. لا تكتب تقارير تقنية طويلة إلا إذا طُلب منك ذلك صراحة. "
+                "3. إذا سألك سؤالاً محدداً، أجب بشكل مختصر ومركز. "
+                "4. تحدث بالعربية دائماً. "
+                "5. أنت مساعد ذكي وودود، لست محاضراً."
+            )
         )
         bot.reply_to(message, res)
         _memory.save_context(message.from_user.id, res[:500], role='assistant')
