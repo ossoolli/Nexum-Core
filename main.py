@@ -5,40 +5,37 @@ from services.gemini_service import GeminiService
 
 bot = telebot.TeleBot(os.getenv("TELEGRAM_TOKEN"))
 ADMIN_ID = int(os.getenv("ADMIN_ID", "0"))
-CH_ID = "-1003969021809" # حقن مباشر للـ ID
 _gemini_svc = GeminiService(os.getenv("GOOGLE_API_KEY"))
 
-@bot.message_handler(func=lambda m: True, content_types=['text', 'document'])
-def handle_all(message):
+@bot.message_handler(content_types=['photo', 'document', 'text'])
+def handle_universal(message):
     if message.from_user.id != ADMIN_ID: return
-    text = message.text or message.caption or ""
     
-    # محرك البث المباشر للقناة
-    if "ارسل للقناة" in text:
-        content_to_send = text.replace("ارسل للقناة", "").strip()
-        if not content_to_send: content_to_send = "إشعار تلقائي من NEXUM OS"
-        
-        try:
-            bot.send_message(CH_ID, f"📢 **NEXUM LIVE BROADCAST**\n\n{content_to_send}", parse_mode="Markdown")
-            bot.reply_to(message, "✅ تم النشر في القناة بنجاح!")
-        except Exception as e:
-            bot.reply_to(message, f"❌ خطأ فني أثناء البث: {e}")
-        return
+    # 🔔 إشعار للمستخدم بالبدء
+    bot.send_chat_action(message.chat.id, 'upload_photo')
+    
+    caption = message.caption or message.text or "حلل هذا المحتوى بدقة."
+    data = None
+    m_type = None
 
-    # معالجة الملفات
-    if message.content_type == 'document':
-        bot.reply_to(message, "⚙️ جاري معالجة الملف...")
-        try:
-            file_info = bot.get_file(message.document.file_id)
-            downloaded = bot.download_file(file_info.file_path)
-            res, _ = _gemini_svc.ask("قم بتحليل هذا الملف.", file_data=downloaded, mime_type=message.document.mime_type)
-            bot.reply_to(message, res)
-        except Exception as e: bot.reply_to(message, f"❌ فشل المعالجة: {e}")
-        return
+    # 1. إذا كانت صورة
+    if message.content_type == 'photo':
+        file_info = bot.get_file(message.photo[-1].file_id)
+        data = bot.download_file(file_info.file_path)
+        m_type = "image/jpeg"
+    
+    # 2. إذا كان ملفاً
+    elif message.content_type == 'document':
+        file_info = bot.get_file(message.document.file_id)
+        data = bot.download_file(file_info.file_path)
+        m_type = message.document.mime_type or "application/pdf"
 
-    # الرد العادي
-    res, _ = _gemini_svc.ask(text)
-    bot.reply_to(message, res)
+    # التنفيذ عبر Gemini فوراً
+    try:
+        res, _ = _gemini_svc.ask(caption, file_data=data, mime_type=m_type)
+        bot.reply_to(message, res)
+    except Exception as e:
+        bot.reply_to(message, f"❌ حدث خطأ: {str(e)}")
 
 if __name__ == "__main__":
     bot.infinity_polling()
