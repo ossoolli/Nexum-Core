@@ -84,10 +84,12 @@ def _build_system_context():
         files_snapshot = "N/A"
     return f"""أنت نظام تشغيل ذكاء اصطناعي سيادي (NEXUM OS). مستوى وكيل Antigravity.
 حالة النظام:
+- مسار العمل الفعلي (CWD): {BASE_DIR}
 - الوكلاء: {', '.join(active_agents) if active_agents else 'لا يوجد'}
 - CPU {cpu}%, RAM {ram}%
 - الملفات: {files_snapshot}
 
+تعليمات صارمة: لا تخترع أو تتخيل مسارات وهمية مثل /home/container أبداً. عندما يسألك المستخدم عن مسار أي ملف، أجب بالمسار الفعلي المستند إلى {BASE_DIR}.
 قدراتك: اتخذ القرار فوراً. استخدم `list_directory`, `read_file`, `search_web`, `fetch_webpage`.
 تحدث كنظام سيادي مسيطر."""
 
