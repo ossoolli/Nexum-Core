@@ -6,9 +6,10 @@ import telebot
 from typing import Dict, Any
 from core.execution_graph import ExecutionGraph, TaskNode
 
-# نربط البوت مباشرة هنا لإرسال الإشعارات المستقلة
 TOKEN = os.getenv("TELEGRAM_TOKEN")
 ADMIN_ID = os.getenv("ADMIN_ID")
+LOG_CHANNEL_ID = os.getenv("LOG_CHANNEL_ID") # المعرف الذي جلبناه
+
 feedback_bot = telebot.TeleBot(TOKEN) if TOKEN else None
 
 class FlowOrchestrator:
@@ -35,19 +36,22 @@ class FlowOrchestrator:
             result = tool_registry.execute_tool(task.action, task.params)
             task.status = "COMPLETED"
             
-            # --- إشعار النجاح الفوري ---
-            if feedback_bot and ADMIN_ID:
-                msg = f"✅ **تم الإنجاز بنجاح!**\n📋 الأداة: `{task.action}`\n📂 المسار: `{task.params.get('filepath', 'Host')}`\n🧬 البروتوكول: `{graph.protocol_id}`"
-                feedback_bot.send_message(ADMIN_ID, msg, parse_mode="Markdown")
-            
-            # --- تشغيل الـ Auto Sync التلقائي لرفع الملف لـ GitHub ---
+            # --- البث الحي لقناة Mutaz Live ---
+            if feedback_bot and LOG_CHANNEL_ID:
+                log_msg = f"🛰️ **NEXUM MISSION UPDATE**\n━━━━━━━━━━━━━━\n🔹 **المهمة:** `{graph.protocol_id}`\n🛠️ **الإجراء:** `{task.action}`\n✅ **الحالة:** نجاح باهر\n📂 **المسار:** `{task.params.get('filepath', 'System Root')}`"
+                try:
+                    # الإرسال للقناة مباشرة
+                    feedback_bot.send_message(LOG_CHANNEL_ID, log_msg, parse_mode="Markdown")
+                except Exception as ex:
+                    print(f"Error sending to channel: {ex}")
+
             from core.git_bot import auto_sync
             auto_sync()
 
         except Exception as e:
             task.status = "FAILED"
-            if feedback_bot and ADMIN_ID:
-                feedback_bot.send_message(ADMIN_ID, f"❌ **فشل في التنفيذ:**\n`{str(e)}`")
+            if feedback_bot and LOG_CHANNEL_ID:
+                feedback_bot.send_message(LOG_CHANNEL_ID, f"❌ **Mission Failed:** {str(e)}")
 
     def _run_scheduler(self):
         while True:
