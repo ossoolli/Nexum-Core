@@ -810,6 +810,34 @@ def handle_text(message):
 
 
 # ╔══════════════════════════════════════════════════════════════╗
+# ║                  EVENT BUS NOTIFICATIONS                     ║
+# ╚══════════════════════════════════════════════════════════════╝
+
+def notify_task_completed(event):
+    data = event.get('data', {})
+    task_id = data.get('task_id')
+    agent_id = data.get('agent_id')
+    result = data.get('result_preview', '')
+    msg = f"✅ <b>المهمة اكتملت:</b> <code>{task_id}</code>\n🤖 <b>الوكيل:</b> {agent_id}\n📝 <b>النتيجة:</b> {result}"
+    bot.send_message(ADMIN_ID, msg, parse_mode="HTML")
+
+def notify_task_failed(event):
+    data = event.get('data', {})
+    task_id = data.get('task_id')
+    error = data.get('error', 'فشل غير معروف')
+    msg = f"❌ <b>فشلت المهمة:</b> <code>{task_id}</code>\n⚠️ <b>السبب:</b> <pre>{html.escape(str(error))}</pre>"
+    bot.send_message(ADMIN_ID, msg, parse_mode="HTML")
+
+def notify_system_alert(event):
+    data = event.get('data', {})
+    msg = f"⚠️ <b>تنبيه النظام:</b> {data.get('msg', 'لا يوجد تفاصيل')}"
+    bot.send_message(ADMIN_ID, msg, parse_mode="HTML")
+
+event_bus.subscribe(event_bus.TASK_COMPLETED, notify_task_completed)
+event_bus.subscribe(event_bus.TASK_FAILED, notify_task_failed)
+event_bus.subscribe(event_bus.SYSTEM_ALERT, notify_system_alert)
+
+# ╔══════════════════════════════════════════════════════════════╗
 # ║                         MAIN                                ║
 # ╚══════════════════════════════════════════════════════════════╝
 

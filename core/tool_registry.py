@@ -83,7 +83,11 @@ class ToolRegistry:
         """تنفيذ أداة بناءً على اسمها"""
         if tool_name in self._local_tools:
             func = self._local_tools[tool_name]["executor"]
-            return func(**params)
+            # استخراج المعايير التي تقبلها الدالة فقط لمنع أخطاء TypeError
+            import inspect
+            sig = inspect.signature(func)
+            valid_params = {k: v for k, v in params.items() if k in sig.parameters}
+            return func(**valid_params)
             
         if tool_name.startswith("mcp::"):
             # ابحث عن السيرفر الذي يملك الأداة ونفذها
