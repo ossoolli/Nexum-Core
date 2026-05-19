@@ -1,6 +1,6 @@
 #!/bin/bash
 
-cd /home/madarmutaz/Mutaz-dev/Nexum-Core
+cd /home/madarmutaz/Mutaz-dev
 
 git pull origin main
 
