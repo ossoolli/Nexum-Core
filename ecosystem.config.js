@@ -3,8 +3,8 @@ module.exports = {
     {
       name: "nexum-core",
       script: "main.py",
-      interpreter: "python", // On Windows, PM2 uses global python. Make sure you activate venv if needed before running pm2 start.
-      cwd: "c:\\Users\\Administrator\\Downloads\\Mutaz-dev-master\\Nexum-Core",
+      interpreter: "./venv/bin/python",
+      cwd: "/home/madarmutaz/Mutaz-dev/Nexum-Core",
       autorestart: true,
       watch: false,
       max_memory_restart: "1G",
@@ -15,8 +15,8 @@ module.exports = {
     {
       name: "nexum-runtime-api",
       script: "webapp/api_server.py",
-      interpreter: "python",
-      cwd: "c:\\Users\\Administrator\\Downloads\\Mutaz-dev-master\\Nexum-Core",
+      interpreter: "./venv/bin/python",
+      cwd: "/home/madarmutaz/Mutaz-dev/Nexum-Core",
       autorestart: true,
       watch: false,
       max_memory_restart: "1G",
