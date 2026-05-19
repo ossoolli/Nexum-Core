@@ -3,63 +3,445 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NEXUM | Command Center</title>
+    <title>NEXUM OS v5.0 | Command Center</title>
+    <meta name="description" content="NEXUM Sovereign Agentic OS — مركز التحكم السيادي">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        :root { --bg: #050507; --card: #111115; --accent: #00f2ff; --text: #eef; }
-        body { background: var(--bg); color: var(--text); font-family: 'Segoe UI', sans-serif; margin: 0; padding: 25px; }
-        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
-        .card { background: var(--card); border: 1px solid #222; border-radius: 15px; padding: 20px; box-shadow: 0 5px 15px rgba(0,0,0,0.5); }
-        .accent { color: var(--accent); }
-        .app-card { background: #1a1a20; padding: 15px; border-radius: 10px; margin-top: 10px; border-left: 4px solid var(--accent); display: flex; justify-content: space-between; align-items: center; }
-        .btn { background: var(--accent); color: #000; text-decoration: none; padding: 8px 15px; border-radius: 5px; font-weight: bold; font-size: 13px; }
-        .status-dot { width: 10px; height: 10px; background: #0f0; border-radius: 50%; display: inline-block; margin-left: 5px; box-shadow: 0 0 8px #0f0; }
-        h1 { border-bottom: 2px solid #222; padding-bottom: 10px; font-weight: 300; }
+        :root {
+            --bg: #050507; --surface: #0d0d12; --card: #111118; --card-hover: #16161f;
+            --accent: #00d4ff; --accent2: #7b61ff; --accent3: #00e676;
+            --text: #e8eaf0; --text2: #8a8d9a; --text3: #555;
+            --border: #1e1e2a; --danger: #ff4d6a; --success: #00e676; --warn: #ffb74d;
+            --radius: 14px; --font: 'Inter', 'Segoe UI', sans-serif;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { background: var(--bg); color: var(--text); font-family: var(--font); padding: 0; min-height: 100vh; }
+
+        /* ═══ Header ═══ */
+        .header {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 20px 30px; border-bottom: 1px solid var(--border);
+            background: linear-gradient(180deg, rgba(0,212,255,0.03), transparent);
+        }
+        .header h1 { font-size: 22px; font-weight: 600; }
+        .header .logo-accent { color: var(--accent); }
+        .header .status-badge {
+            display: flex; align-items: center; gap: 8px;
+            background: rgba(0,230,118,0.1); border: 1px solid rgba(0,230,118,0.2);
+            padding: 6px 14px; border-radius: 20px; font-size: 12px; color: var(--success);
+        }
+        .header .dot { width: 8px; height: 8px; background: var(--success); border-radius: 50%; box-shadow: 0 0 8px var(--success); animation: pulse 2s infinite; }
+        @keyframes pulse { 0%,100%{ opacity:1 } 50%{ opacity:0.4 } }
+
+        /* ═══ Tab Navigation ═══ */
+        .tab-nav {
+            display: flex; gap: 4px; padding: 12px 30px;
+            background: var(--surface); border-bottom: 1px solid var(--border);
+            overflow-x: auto;
+        }
+        .tab-btn {
+            background: transparent; border: none; color: var(--text2); padding: 10px 18px;
+            border-radius: 10px; cursor: pointer; font-size: 13px; font-family: var(--font);
+            white-space: nowrap; transition: all 0.2s;
+        }
+        .tab-btn:hover { background: var(--card); color: var(--text); }
+        .tab-btn.active { background: linear-gradient(135deg, rgba(0,212,255,0.15), rgba(123,97,255,0.1)); color: var(--accent); font-weight: 600; }
+
+        /* ═══ Content ═══ */
+        .content { padding: 24px 30px; }
+        .tab-content { display: none; animation: fadeIn 0.3s ease; }
+        .tab-content.active { display: block; }
+        @keyframes fadeIn { from { opacity:0; transform:translateY(8px) } to { opacity:1; transform:translateY(0) } }
+
+        .section-title { font-size: 16px; font-weight: 600; margin-bottom: 16px; display: flex; align-items: center; gap: 8px; }
+        .section-title span { color: var(--accent); }
+
+        /* ═══ Cards Grid ═══ */
+        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 14px; margin-bottom: 24px; }
+        .stat-card {
+            background: var(--card); border: 1px solid var(--border); border-radius: var(--radius);
+            padding: 18px; transition: all 0.3s;
+        }
+        .stat-card:hover { border-color: var(--accent); transform: translateY(-2px); box-shadow: 0 8px 20px rgba(0,0,0,0.4); }
+        .stat-card .label { color: var(--text2); font-size: 12px; margin-bottom: 6px; }
+        .stat-card .value { font-size: 28px; font-weight: 700; color: var(--accent); }
+        .stat-card .sub { color: var(--text3); font-size: 11px; margin-top: 4px; }
+
+        /* ═══ Form ═══ */
+        .form-group { margin-bottom: 14px; }
+        .form-group label { display: block; color: var(--text2); font-size: 12px; margin-bottom: 6px; font-weight: 500; }
+        .form-group input, .form-group textarea, .form-group select {
+            width: 100%; background: var(--surface); border: 1px solid var(--border);
+            border-radius: 8px; padding: 10px 14px; color: var(--text); font-size: 13px;
+            font-family: var(--font); outline: none; transition: border 0.2s;
+        }
+        .form-group input:focus, .form-group textarea:focus, .form-group select:focus { border-color: var(--accent); }
+        .form-group textarea { min-height: 80px; resize: vertical; }
+
+        .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--accent), var(--accent2)); color: #000;
+            border: none; padding: 10px 24px; border-radius: 8px; cursor: pointer;
+            font-weight: 600; font-size: 13px; font-family: var(--font); transition: all 0.2s;
+        }
+        .btn-primary:hover { opacity: 0.9; transform: translateY(-1px); }
+        .btn-sm {
+            background: var(--card); border: 1px solid var(--border); color: var(--text2);
+            padding: 5px 12px; border-radius: 6px; cursor: pointer; font-size: 11px;
+            font-family: var(--font); transition: all 0.2s;
+        }
+        .btn-sm:hover { border-color: var(--accent); color: var(--accent); }
+
+        .btn-danger { background: rgba(255,77,106,0.1); border: 1px solid rgba(255,77,106,0.3); color: var(--danger); }
+        .btn-success { background: rgba(0,230,118,0.1); border: 1px solid rgba(0,230,118,0.3); color: var(--success); }
+
+        /* ═══ List Items ═══ */
+        .list-card {
+            background: var(--card); border: 1px solid var(--border); border-radius: var(--radius);
+            padding: 16px; margin-bottom: 10px; display: flex; justify-content: space-between;
+            align-items: center; transition: all 0.2s;
+        }
+        .list-card:hover { border-color: var(--accent); }
+        .list-card .info { flex: 1; }
+        .list-card .name { font-weight: 600; font-size: 14px; }
+        .list-card .desc { color: var(--text2); font-size: 12px; margin-top: 2px; }
+        .list-card .actions { display: flex; gap: 6px; }
+
+        .badge {
+            display: inline-block; padding: 3px 10px; border-radius: 12px; font-size: 10px; font-weight: 600;
+        }
+        .badge-running { background: rgba(0,230,118,0.15); color: var(--success); }
+        .badge-stopped { background: rgba(255,77,106,0.15); color: var(--danger); }
+        .badge-designed { background: rgba(123,97,255,0.15); color: var(--accent2); }
+        .badge-built { background: rgba(0,212,255,0.15); color: var(--accent); }
+
+        .empty-state { text-align: center; padding: 50px; color: var(--text3); }
+        .empty-state .icon { font-size: 40px; margin-bottom: 10px; }
+
+        /* ═══ Checkbox / Radio ═══ */
+        .checkbox-group { display: flex; flex-wrap: wrap; gap: 8px; }
+        .checkbox-group label {
+            background: var(--surface); border: 1px solid var(--border); padding: 6px 14px;
+            border-radius: 8px; cursor: pointer; font-size: 12px; transition: all 0.2s;
+        }
+        .checkbox-group input { display: none; }
+        .checkbox-group input:checked + span { color: var(--accent); }
+        .checkbox-group label:has(input:checked) { border-color: var(--accent); background: rgba(0,212,255,0.08); }
+
+        .form-card { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: 20px; }
+
+        .two-col { display: grid; grid-template-columns: 1fr 2fr; gap: 20px; }
+        @media(max-width: 768px) { .two-col { grid-template-columns: 1fr; } .form-row { grid-template-columns: 1fr; } }
+
+        #log-output { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 12px; font-family: 'Courier New', monospace; font-size: 12px; color: var(--text2); min-height: 80px; max-height: 200px; overflow-y: auto; white-space: pre-wrap; }
     </style>
 </head>
 <body>
-    <h1>🔱 NEXUM <span class="accent">COMMAND CENTER</span></h1>
-    
-    <div class="grid">
-        <div class="card">
-            <h3 class="accent">🛰️ تطبيقاتك النشطة (Live Apps)</h3>
-            <div id="apps-container">
-                <!-- تطبيق الناسا -->
-                <div class="app-card">
-                    <div>
-                        <strong>NASA Explorer</strong><br>
-                        <small style="color: #666">تطبيق يعرض صوراً حية من الفضاء</small>
-                    </div>
-                    <a href="https://8081-preview.cloudspaces.googleusercontent.com/" target="_blank" class="btn">فتح التطبيق 🚀</a>
+
+<!-- ═══ Header ═══ -->
+<div class="header">
+    <h1>🔱 NEXUM <span class="logo-accent">COMMAND CENTER</span> <small style="color:var(--text3);font-size:12px">v5.0</small></h1>
+    <div class="status-badge"><div class="dot"></div> جميع الأنظمة نشطة</div>
+</div>
+
+<!-- ═══ Tab Navigation ═══ -->
+<div class="tab-nav">
+    <button onclick="showTab('status')" class="tab-btn active" id="tab-status">📊 النظام</button>
+    <button onclick="showTab('webforge')" class="tab-btn" id="tab-webforge">🌐 المواقع</button>
+    <button onclick="showTab('agents')" class="tab-btn" id="tab-agents">🤖 الوكلاء</button>
+    <button onclick="showTab('bots')" class="tab-btn" id="tab-bots">🤖 البوتات</button>
+    <button onclick="showTab('channels')" class="tab-btn" id="tab-channels">📢 القنوات</button>
+</div>
+
+<div class="content">
+
+<!-- ════════════════════════ Tab 1: النظام ════════════════════════ -->
+<div class="tab-content active" id="panel-status">
+    <div class="stats-grid">
+        <div class="stat-card"><div class="label">CPU</div><div class="value" id="stat-cpu">—%</div><div class="sub">استخدام المعالج</div></div>
+        <div class="stat-card"><div class="label">RAM</div><div class="value" id="stat-ram">—%</div><div class="sub">الذاكرة</div></div>
+        <div class="stat-card"><div class="label">القرص</div><div class="value" id="stat-disk">—%</div><div class="sub">المساحة المستخدمة</div></div>
+        <div class="stat-card"><div class="label">الوقت</div><div class="value" id="stat-uptime">—</div><div class="sub">مدة التشغيل</div></div>
+    </div>
+    <div class="section-title"><span>⚡</span> سجل العمليات</div>
+    <div id="log-output">> NEXUM OS v5.0 — Online and Sovereign.
+> جميع الأنظمة متزامنة مع GitHub.
+> بيئة السيادة: مؤكدة.</div>
+</div>
+
+<!-- ════════════════════════ Tab 2: المواقع ════════════════════════ -->
+<div class="tab-content" id="panel-webforge">
+    <div class="two-col">
+        <div class="form-card">
+            <div class="section-title"><span>🌐</span> بناء موقع جديد</div>
+            <div class="form-group"><label>اسم المشروع</label><input id="wf-name" placeholder="my_project"></div>
+            <div class="form-group"><label>الوصف</label><textarea id="wf-desc" placeholder="صفحة هبوط لمشروع عقاري..."></textarea></div>
+            <div class="form-group"><label>النوع</label>
+                <div class="checkbox-group">
+                    <label><input type="radio" name="wf-type" value="landing" checked><span>صفحة هبوط</span></label>
+                    <label><input type="radio" name="wf-type" value="dashboard"><span>لوحة تحكم</span></label>
+                    <label><input type="radio" name="wf-type" value="api"><span>FastAPI</span></label>
                 </div>
-                
-                <!-- الواجهة الرئيسية -->
-                <div class="app-card">
-                    <div>
-                        <strong>Runtime Dashboard</strong><br>
-                        <small style="color: #666">مركز التحكم الحالي</small>
+            </div>
+            <div class="form-group"><label>الألوان</label>
+                <select id="wf-color"><option value="blue">أزرق</option><option value="green">أخضر</option><option value="dark">داكن</option><option value="purple">بنفسجي</option></select>
+            </div>
+            <button class="btn-primary" onclick="buildProject()">🚀 ابنِ الآن</button>
+        </div>
+        <div>
+            <div class="section-title"><span>📁</span> مشاريعي</div>
+            <div id="projects-list"><div class="empty-state"><div class="icon">🌐</div>لا توجد مشاريع بعد</div></div>
+        </div>
+    </div>
+</div>
+
+<!-- ════════════════════════ Tab 3: الوكلاء ════════════════════════ -->
+<div class="tab-content" id="panel-agents">
+    <div class="two-col">
+        <div class="form-card">
+            <div class="section-title"><span>🤖</span> تصميم وكيل جديد</div>
+            <div class="form-group"><label>اسم الوكيل</label><input id="ag-name" placeholder="price_watcher"></div>
+            <div class="form-group"><label>المهمة</label><textarea id="ag-purpose" placeholder="يراقب أسعار الشقق في عمّان كل ساعة..."></textarea></div>
+            <div class="form-group"><label>الأدوات</label>
+                <div class="checkbox-group">
+                    <label><input type="checkbox" value="web_search"><span>بحث ويب</span></label>
+                    <label><input type="checkbox" value="telegram_broadcast"><span>بث تلجرام</span></label>
+                    <label><input type="checkbox" value="storage"><span>تخزين</span></label>
+                    <label><input type="checkbox" value="email"><span>بريد</span></label>
+                </div>
+            </div>
+            <div class="form-group"><label>الجدولة</label><input id="ag-trigger" placeholder="كل ساعة"></div>
+            <button class="btn-primary" onclick="buildAgent()">⚙️ صمّم وابنِ</button>
+        </div>
+        <div>
+            <div class="section-title"><span>📋</span> وكلائي</div>
+            <div id="agents-list"><div class="empty-state"><div class="icon">🤖</div>لا توجد وكلاء مخصصين</div></div>
+        </div>
+    </div>
+</div>
+
+<!-- ════════════════════════ Tab 4: البوتات ════════════════════════ -->
+<div class="tab-content" id="panel-bots">
+    <div class="two-col">
+        <div class="form-card">
+            <div class="section-title"><span>🏗️</span> إطلاق بوت جديد</div>
+            <div class="form-group"><label>اسم البوت</label><input id="bt-name" placeholder="ossooli_support"></div>
+            <div class="form-group"><label>Token</label><input type="password" id="bt-token" placeholder="Bot Token من @BotFather"></div>
+            <div class="form-group"><label>الشخصية</label><textarea id="bt-persona" placeholder="مساعد عقاري ودود ومحترف..."></textarea></div>
+            <div class="form-group"><label>القدرات</label>
+                <div class="checkbox-group">
+                    <label><input type="checkbox" value="chat" checked><span>محادثة</span></label>
+                    <label><input type="checkbox" value="web_search"><span>بحث</span></label>
+                    <label><input type="checkbox" value="broadcast"><span>بث</span></label>
+                    <label><input type="checkbox" value="qa"><span>أسئلة</span></label>
+                </div>
+            </div>
+            <div class="form-group"><label>Admin ID</label><input id="bt-admin" placeholder="123456789"></div>
+            <button class="btn-primary" onclick="spawnBot()">🚀 أطلق البوت</button>
+        </div>
+        <div>
+            <div class="section-title"><span>🤖</span> أسطول البوتات</div>
+            <div id="bots-list"><div class="empty-state"><div class="icon">🤖</div>لا توجد بوتات في الأسطول</div></div>
+        </div>
+    </div>
+</div>
+
+<!-- ════════════════════════ Tab 5: القنوات ════════════════════════ -->
+<div class="tab-content" id="panel-channels">
+    <div class="two-col">
+        <div>
+            <div class="form-card" style="margin-bottom:16px">
+                <div class="section-title"><span>📢</span> تسجيل قناة</div>
+                <div class="form-row">
+                    <div class="form-group"><label>معرّف القناة</label><input id="ch-id" placeholder="@channel أو -100xxx"></div>
+                    <div class="form-group"><label>الاسم</label><input id="ch-name" placeholder="قناة أصولي"></div>
+                </div>
+                <div class="form-group"><label>Bot Token</label><input type="password" id="ch-token" placeholder="Token البوت المرتبط"></div>
+                <div class="form-group"><label>التصنيفات</label><input id="ch-tags" placeholder="عقارات, أخبار (مفصولة بفاصلة)"></div>
+                <button class="btn-primary" onclick="registerChannel()">✅ سجّل القناة</button>
+            </div>
+            <div class="form-card">
+                <div class="section-title"><span>✍️</span> نشر منشور</div>
+                <div class="form-group"><label>المحتوى</label><textarea id="post-content" placeholder="اكتب المنشور هنا..."></textarea></div>
+                <div class="form-group"><label>القنوات</label><div id="ch-checkboxes" class="checkbox-group"><small style="color:var(--text3)">سجّل قنوات أولاً</small></div></div>
+                <div class="form-row">
+                    <div class="form-group"><label>التوقيت</label><input type="datetime-local" id="post-time"></div>
+                    <div style="display:flex;gap:8px;align-items:end;padding-bottom:14px">
+                        <button class="btn-primary" onclick="crossPost()">📤 انشر الآن</button>
+                        <button class="btn-sm" onclick="schedulePost()">⏰ جدوِل</button>
                     </div>
-                    <div style="color: var(--accent); font-size: 12px;">أنت هنا الآن</div>
                 </div>
             </div>
         </div>
-
-        <div class="card">
-            <h3 class="accent">🤖 حالة الوكلاء (Agent System)</h3>
-            <div class="app-card">
-                <span><span class="status-dot"></span> الوكيل الأمني: <b>Active</b></span>
-            </div>
-            <div class="app-card">
-                <span><span class="status-dot"></span> وكيل الربط (GitBot): <b>Idle</b></span>
-            </div>
-            <div class="app-card">
-                <span><span class="status-dot"></span> المحرك الأساسي: <b>Operational</b></span>
-            </div>
+        <div>
+            <div class="section-title"><span>📋</span> قنواتي</div>
+            <div id="channels-list"><div class="empty-state"><div class="icon">📢</div>لا توجد قنوات مسجلة</div></div>
         </div>
     </div>
+</div>
 
-    <div class="card" style="margin-top: 20px;">
-        <h3 class="accent">⚡ موجز العمليات (System Pulse)</h3>
-        <p style="font-family: monospace; color: #888;">> All systems synchronized with GitHub.<br>> Port 8081 (NASA App) is responding.<br>> Environment sovereignty confirmed.</p>
-    </div>
+</div><!-- end content -->
+
+<script>
+const API = '';
+
+// ═══ Tab Switching ═══
+function showTab(name) {
+    document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+    document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+    document.getElementById('panel-' + name).classList.add('active');
+    document.getElementById('tab-' + name).classList.add('active');
+    // Load data for the tab
+    if(name === 'webforge') loadProjects();
+    if(name === 'agents') loadAgents();
+    if(name === 'bots') loadBots();
+    if(name === 'channels') loadChannels();
+    if(name === 'status') loadStatus();
+}
+
+// ═══ API Helpers ═══
+async function api(path, method='GET', body=null) {
+    try {
+        const opts = { method, headers: {'Content-Type':'application/json'} };
+        if(body) opts.body = JSON.stringify(body);
+        const res = await fetch(API + path, opts);
+        return await res.json();
+    } catch(e) {
+        console.error('API Error:', e);
+        return { error: e.message };
+    }
+}
+
+function log(msg) {
+    const el = document.getElementById('log-output');
+    el.textContent += '\n> ' + msg;
+    el.scrollTop = el.scrollHeight;
+}
+
+// ═══ Status Tab ═══
+async function loadStatus() {
+    const data = await api('/api/health');
+    if(data && data.modules) {
+        const mods = data.modules;
+        const counts = Object.values(mods).filter(v=>v).length;
+        document.getElementById('stat-uptime').textContent = counts + '/' + Object.keys(mods).length;
+    }
+}
+
+// ═══ WebForge ═══
+async function buildProject() {
+    const name = document.getElementById('wf-name').value;
+    const desc = document.getElementById('wf-desc').value;
+    const type = document.querySelector('input[name="wf-type"]:checked').value;
+    const color = document.getElementById('wf-color').value;
+    if(!name) return alert('أدخل اسم المشروع');
+    log('جاري بناء: ' + name + '...');
+    const res = await api('/api/webforge/build', 'POST', { project_name:name, description:desc, type, color_scheme:color });
+    if(res.status === 'success') { log('✅ تم بناء ' + name); loadProjects(); }
+    else log('❌ ' + (res.error || 'فشل'));
+}
+
+async function loadProjects() {
+    const data = await api('/api/webforge/apps');
+    const el = document.getElementById('projects-list');
+    if(!data || !data.length) { el.innerHTML = '<div class="empty-state"><div class="icon">🌐</div>لا توجد مشاريع</div>'; return; }
+    el.innerHTML = data.map(p => `<div class="list-card"><div class="info"><div class="name">${p.name}</div><div class="desc">${p.files || 0} ملفات</div></div><div class="actions"><button class="btn-sm btn-success" onclick="previewProject('${p.name}')">👁️ معاينة</button></div></div>`).join('');
+}
+
+async function previewProject(name) { const r = await api('/api/webforge/preview/'+name); if(r.preview_url) window.open(r.preview_url); }
+
+// ═══ Agents ═══
+async function buildAgent() {
+    const name = document.getElementById('ag-name').value;
+    const purpose = document.getElementById('ag-purpose').value;
+    const tools = [...document.querySelectorAll('#panel-agents .checkbox-group input:checked')].map(i=>i.value);
+    const trigger = document.getElementById('ag-trigger').value;
+    if(!name) return alert('أدخل اسم الوكيل');
+    log('جاري تصميم الوكيل: ' + name + '...');
+    const res = await api('/api/agents/build', 'POST', { name, purpose, tools_needed:tools, triggers:trigger?[trigger]:[] });
+    if(res.status === 'success') { log('✅ الوكيل ' + name + ' جاهز'); loadAgents(); }
+    else log('❌ ' + (res.error||'فشل'));
+}
+
+async function loadAgents() {
+    const data = await api('/api/agents/list');
+    const el = document.getElementById('agents-list');
+    if(!data || !data.length) { el.innerHTML = '<div class="empty-state"><div class="icon">🤖</div>لا توجد وكلاء</div>'; return; }
+    const badges = { DESIGNED:'badge-designed', BUILT:'badge-built', RUNNING:'badge-running' };
+    el.innerHTML = data.map(a => `<div class="list-card"><div class="info"><div class="name">${a.name} <span class="badge ${badges[a.status]||'badge-stopped'}">${a.status}</span></div><div class="desc">${a.description||''}</div></div><div class="actions"><button class="btn-sm" onclick="exportAgent('${a.name}')">📦 تصدير</button></div></div>`).join('');
+}
+
+async function exportAgent(name) { const r = await api('/api/agents/export/'+name, 'POST'); log(r.path || r.error); }
+
+// ═══ Bots ═══
+async function spawnBot() {
+    const name = document.getElementById('bt-name').value;
+    const token = document.getElementById('bt-token').value;
+    const personality = document.getElementById('bt-persona').value;
+    const caps = [...document.querySelectorAll('#panel-bots .checkbox-group input:checked')].map(i=>i.value);
+    const admin = parseInt(document.getElementById('bt-admin').value) || 0;
+    if(!name||!token) return alert('أدخل الاسم والـ Token');
+    log('جاري إطلاق بوت: ' + name + '...');
+    const res = await api('/api/bots/spawn', 'POST', { name, token, personality, capabilities:caps, admin_id:admin });
+    if(res.status === 'success') { log('✅ البوت ' + name + ' يعمل'); loadBots(); }
+    else log('❌ ' + (res.error||'فشل'));
+}
+
+async function loadBots() {
+    const data = await api('/api/bots/list');
+    const el = document.getElementById('bots-list');
+    if(!data || !data.length) { el.innerHTML = '<div class="empty-state"><div class="icon">🤖</div>لا بوتات</div>'; return; }
+    el.innerHTML = data.map(b => `<div class="list-card"><div class="info"><div class="name">${b.name} <span class="badge ${b.status==='RUNNING'?'badge-running':'badge-stopped'}">${b.status}</span></div><div class="desc">${(b.personality||'').substring(0,50)}</div></div><div class="actions"><button class="btn-sm btn-success" onclick="restartBot('${b.name}')">🔄</button><button class="btn-sm btn-danger" onclick="killBot('${b.name}')">⏹️</button></div></div>`).join('');
+}
+
+async function restartBot(n) { await api('/api/bots/'+n+'/restart','POST'); loadBots(); }
+async function killBot(n) { await api('/api/bots/'+n,'DELETE'); loadBots(); }
+
+// ═══ Channels ═══
+async function registerChannel() {
+    const id = document.getElementById('ch-id').value;
+    const name = document.getElementById('ch-name').value;
+    const token = document.getElementById('ch-token').value;
+    const tags = document.getElementById('ch-tags').value.split(',').map(t=>t.trim()).filter(Boolean);
+    if(!id||!name||!token) return alert('أكمل البيانات');
+    const res = await api('/api/channels/register', 'POST', { channel_id:id, name, bot_token:token, tags });
+    if(res.status === 'success') { log('✅ قناة ' + name + ' مسجلة'); loadChannels(); }
+    else log('❌ فشل التسجيل');
+}
+
+async function loadChannels() {
+    const data = await api('/api/channels/list');
+    const el = document.getElementById('channels-list');
+    const cb = document.getElementById('ch-checkboxes');
+    if(!data || !data.length) {
+        el.innerHTML = '<div class="empty-state"><div class="icon">📢</div>لا قنوات</div>';
+        cb.innerHTML = '<small style="color:var(--text3)">سجّل قنوات أولاً</small>';
+        return;
+    }
+    el.innerHTML = data.map(c => `<div class="list-card"><div class="info"><div class="name">${c.name}</div><div class="desc">${c.posts_count||0} منشور — ${(c.tags||[]).join(', ')}</div></div></div>`).join('');
+    cb.innerHTML = data.map(c => `<label><input type="checkbox" value="${c.channel_id}" checked><span>${c.name}</span></label>`).join('');
+}
+
+async function crossPost() {
+    const content = document.getElementById('post-content').value;
+    const ids = [...document.querySelectorAll('#ch-checkboxes input:checked')].map(i=>i.value);
+    if(!content||!ids.length) return alert('اكتب المحتوى واختر القنوات');
+    const res = await api('/api/channels/crosspost', 'POST', { content, channel_ids:ids });
+    log(res.results ? '✅ تم النشر' : '❌ فشل');
+}
+
+async function schedulePost() {
+    const content = document.getElementById('post-content').value;
+    const ids = [...document.querySelectorAll('#ch-checkboxes input:checked')].map(i=>i.value);
+    const time = document.getElementById('post-time').value;
+    if(!content||!ids.length) return alert('اكتب المحتوى واختر القنوات');
+    const res = await api('/api/channels/schedule', 'POST', { content, channel_ids:ids, scheduled_time: time || 'now' });
+    log(res.job_id ? '✅ المنشور مجدوَل: ' + res.job_id : '❌ فشل');
+}
+
+// ═══ Auto-load ═══
+loadStatus();
+</script>
 </body>
 </html>

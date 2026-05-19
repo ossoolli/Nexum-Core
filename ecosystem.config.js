@@ -35,6 +35,31 @@ module.exports = {
       env: {
         PYTHONUNBUFFERED: "1"
       }
+    },
+    {
+      name: "nexum-bot-fleet",
+      script: "core/bot_fleet.py",
+      interpreter: "./venv/bin/python",
+      cwd: "/home/madarmutaz/Mutaz-dev",
+      autorestart: true,
+      watch: false,
+      max_memory_restart: "200M",
+      env: {
+        PYTHONUNBUFFERED: "1"
+      }
+    },
+    {
+      name: "nexum-channel-manager",
+      script: "agents/channel_manager.py",
+      interpreter: "./venv/bin/python",
+      cwd: "/home/madarmutaz/Mutaz-dev",
+      autorestart: true,
+      cron_restart: "0 * * * *",
+      watch: false,
+      max_memory_restart: "200M",
+      env: {
+        PYTHONUNBUFFERED: "1"
+      }
     }
   ]
 }

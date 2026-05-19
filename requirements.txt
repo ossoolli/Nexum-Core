@@ -1,4 +1,4 @@
-﻿# Core
+# Core
 pyTelegramBotAPI
 python-dotenv
 requests
@@ -7,6 +7,7 @@ httpx
 # FastAPI
 fastapi
 uvicorn[standard]
+websockets
 pydantic>=2.0
 
 # AI
@@ -14,7 +15,13 @@ google-generativeai
 openai
 
 # Infrastructure
+redis
 psutil
+gitpython
+docker
+
+# Web
+aiohttp
 beautifulsoup4
 
 # Database (optional)
@@ -23,4 +30,4 @@ supabase
 
 # Utils
 schedule
-gitpython
+cryptography

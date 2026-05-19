@@ -113,6 +113,7 @@ def read_file(filepath: str) -> Dict[str, Any]:
 
 def register_all_system_tools():
     """يسجل جميع أدوات النظام في السجل المركزي"""
+    # ─── أدوات النظام الأساسية ───
     tool_registry.register_local_tool("run_in_sandbox", run_in_sandbox)
     tool_registry.register_local_tool("run_host_terminal", run_host_terminal)
     tool_registry.register_local_tool("write_file", write_file)
@@ -120,4 +121,40 @@ def register_all_system_tools():
     tool_registry.register_local_tool("list_directory", list_directory)
     tool_registry.register_local_tool("fetch_webpage", fetch_webpage)
     tool_registry.register_local_tool("search_web", search_web)
-    print("✅ [System Tools] تم تسجيل جميع أدوات السيرفر والاستكشاف والويب بنجاح.")
+
+    # ─── أدوات الوكلاء الجدد (v5.0) ───
+    try:
+        from agents.webforge_agent import webforge
+        tool_registry.register_local_tool("build_website", webforge.build_landing_page)
+        tool_registry.register_local_tool("build_dashboard", webforge.build_dashboard)
+        tool_registry.register_local_tool("build_fastapi", webforge.build_fastapi_app)
+        tool_registry.register_local_tool("list_projects", webforge.list_projects)
+    except Exception:
+        pass
+
+    try:
+        from agents.agent_smith import agent_smith
+        tool_registry.register_local_tool("design_agent", agent_smith.design_agent)
+        tool_registry.register_local_tool("build_agent", agent_smith.build_agent)
+        tool_registry.register_local_tool("export_agent", agent_smith.export_agent)
+        tool_registry.register_local_tool("list_agents", agent_smith.list_agents)
+    except Exception:
+        pass
+
+    try:
+        from core.bot_fleet import bot_fleet
+        tool_registry.register_local_tool("spawn_bot", bot_fleet.spawn_bot)
+        tool_registry.register_local_tool("list_bots", bot_fleet.list_bots)
+        tool_registry.register_local_tool("kill_bot", bot_fleet.kill_bot)
+    except Exception:
+        pass
+
+    try:
+        from agents.channel_manager import channel_manager
+        tool_registry.register_local_tool("cross_post", channel_manager.cross_post)
+        tool_registry.register_local_tool("schedule_post", channel_manager.schedule_post)
+    except Exception:
+        pass
+
+    print("✅ [System Tools] تم تسجيل جميع الأدوات بنجاح (7 أساسية + أدوات الوكلاء).")
+

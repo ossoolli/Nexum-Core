@@ -169,7 +169,8 @@ def get_dashboard_markup():
         types.InlineKeyboardButton("📢 قنواتي", callback_data="list_channels")
     )
     markup.add(
-        types.InlineKeyboardButton("📡 بث تجريبي", callback_data="test_broadcast")
+        types.InlineKeyboardButton("📡 بث تجريبي", callback_data="test_broadcast"),
+        types.InlineKeyboardButton("⚙️ الإعدادات", callback_data="settings")
     )
     return markup
 

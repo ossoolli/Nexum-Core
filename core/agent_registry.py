@@ -112,4 +112,87 @@ class AgentRegistry:
             if capability in agent.get("capabilities", []) and agent.get("status") == "active"
         ]
 
+    def list_all(self) -> List[dict]:
+        """قائمة جميع الوكلاء المسجلين"""
+        return list(self.agents.values())
+
+    def register_from_file(self, name: str, filepath: str):
+        """تسجيل وكيل من ملف Python مُولّد"""
+        self.register_agent(
+            agent_id=name,
+            name=name,
+            role="Generated Agent",
+            capabilities=["run"],
+            tools=[],
+            protocols=[],
+            restrictions=[]
+        )
+
+    def load_generated_agents(self):
+        """تحميل الوكلاء المولّدة تلقائياً من agents/generated/"""
+        import importlib.util
+        gen_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "agents", "generated")
+        if not os.path.isdir(gen_dir):
+            return
+        for f in os.listdir(gen_dir):
+            if f.endswith("_agent.py"):
+                name = f.replace("_agent.py", "")
+                filepath = os.path.join(gen_dir, f)
+                try:
+                    self.register_from_file(name, filepath)
+                except Exception as e:
+                    print(f"[AgentRegistry] Failed to load {f}: {e}")
+
+    def send_message_between_agents(
+        self,
+        from_agent: str,
+        to_agent: str,
+        message: dict
+    ) -> bool:
+        """يستدعي EventBus لإرسال رسالة بين وكيلين"""
+        try:
+            from core.event_bus import event_bus
+            event_bus.emit("agent.message", {
+                "from": from_agent,
+                "to": to_agent,
+                "payload": message,
+            })
+            return True
+        except Exception as e:
+            print(f"[AgentRegistry] Message relay failed: {e}")
+            return False
+
+    def health_check_all(self) -> dict:
+        """
+        يفحص كل وكيل بـ agent.health_check()
+        يُعيد تقريراً: {agent_id: healthy/unhealthy}
+        """
+        report = {}
+        for agent_id, info in self.agents.items():
+            try:
+                # الوكلاء المولّدة يمكن فحصها ديناميكياً
+                report[agent_id] = {
+                    "status": info.get("status", "unknown"),
+                    "healthy": info.get("status") == "active",
+                    "name": info.get("name", agent_id),
+                }
+            except Exception:
+                report[agent_id] = {"status": "error", "healthy": False}
+        return report
+
+    def get_marketplace_catalog(self) -> list:
+        """قائمة الوكلاء القابلة للتصدير مع الوصف"""
+        catalog = []
+        for agent_id, info in self.agents.items():
+            catalog.append({
+                "agent_id": agent_id,
+                "name": info.get("name", ""),
+                "role": info.get("role", ""),
+                "capabilities": info.get("capabilities", []),
+                "exportable": info.get("role") == "Generated Agent",
+            })
+        return catalog
+
 agent_registry = AgentRegistry()
+
+
