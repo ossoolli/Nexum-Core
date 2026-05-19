@@ -23,6 +23,18 @@ module.exports = {
       env: {
         PYTHONUNBUFFERED: "1"
       }
+    },
+    {
+      name: "nexum-chronos",
+      script: "agents/chronos.py",
+      interpreter: "./venv/bin/python",
+      cwd: "/home/madarmutaz/Mutaz-dev",
+      autorestart: true,
+      watch: false,
+      max_memory_restart: "256M",
+      env: {
+        PYTHONUNBUFFERED: "1"
+      }
     }
   ]
 }

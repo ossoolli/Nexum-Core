@@ -1,11 +1,11 @@
 .env
-.env*
 venv/
+.venv/
 __pycache__/
 *.pyc
 *.pyo
-storage/
+*.jar
 *.bak
-*.log
-.idea/
-.vscode/
+storage/
+.claude/
+node_modules/

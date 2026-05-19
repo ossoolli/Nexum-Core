@@ -1,31 +1,99 @@
-import os, json, re, uuid # تمت إضافة uuid هنا
+"""
+🧠 NEXUM AI Planner — المخطط الذكي
+====================================
+يحول الأهداف النصية إلى مخططات تنفيذ (Execution Graph) قابلة للتشغيل.
+"""
+import json
+import re
+import uuid
+
 from core.execution_graph import ExecutionGraph, TaskNode
 
+
 class AIPlanner:
-    def __init__(self, llm): self.llm = llm
-    def generate_execution_graph(self, goal, protocol_id):
-        prompt = f"""
-        Objective: {goal}
-        Return ONLY valid JSON:
-        {{
-          "tasks": [
-            {{
-              "task_id": "step_1",
-              "action": "run_host_terminal",
-              "params": {{"command": "python3 core/search_engine.py 'سعر الدولار اليوم'"}}
-            }}
-          ]
-        }}
-        """
+    def __init__(self, llm):
+        self.llm = llm
+
+    def generate_execution_graph(self, goal: str, protocol_id: str) -> ExecutionGraph:
+        """يولد مخطط تنفيذ من هدف نصي عبر الذكاء الاصطناعي"""
+
+        prompt = f"""You are a task planner for an autonomous server OS.
+Your ONLY job is to return a valid JSON execution plan.
+
+Environment:
+- Base directory: /home/madarmutaz/Mutaz-dev
+- Apps directory: /home/madarmutaz/Mutaz-dev/registry/apps/
+- Available tools: write_file, run_host_terminal, read_file, list_directory, search_web, fetch_webpage, run_in_sandbox
+
+Rules:
+1. All file paths MUST be absolute starting with /home/madarmutaz/Mutaz-dev/
+2. New apps MUST go in registry/apps/<app_name>/
+3. Return ONLY valid JSON, no explanation, no markdown.
+
+User Goal: {goal}
+
+Return format:
+{{
+  "tasks": [
+    {{
+      "task_id": "step_1",
+      "action": "write_file",
+      "params": {{"filepath": "/home/madarmutaz/Mutaz-dev/registry/apps/myapp/app.py", "content": "..."}}
+    }},
+    {{
+      "task_id": "step_2", 
+      "action": "run_host_terminal",
+      "params": {{"command": "cd /home/madarmutaz/Mutaz-dev && python3 registry/apps/myapp/app.py"}}
+    }}
+  ]
+}}"""
+
         res, _ = self.llm.ask(prompt)
+
+        # استخراج JSON من الرد
         try:
-            match = re.search(r'(\{.*\})', res, re.DOTALL)
-            data = json.loads(match.group(1))
-            graph = ExecutionGraph(protocol_id=protocol_id)
-            for t in data.get('tasks', []):
-                # الأن لن يحدث خطأ name 'uuid'
-                tid = t.get('task_id', f"task_{uuid.uuid4().hex[:4]}")
-                graph.add_node(TaskNode(task_id=tid, agent_id='master', action=t.get('action'), params=t.get('params')))
-            return graph
-        except Exception as e:
-            raise Exception(f"خطأ في معالجة المخطط: {str(e)}")
+            # محاولة 1: البحث عن JSON مباشر
+            match = re.search(r'\{[\s\S]*"tasks"[\s\S]*\}', res)
+            if not match:
+                raise ValueError("No JSON found in LLM response")
+
+            data = json.loads(match.group(0))
+
+        except (json.JSONDecodeError, ValueError) as parse_err:
+            # محاولة 2: تنظيف وإعادة المحاولة
+            try:
+                cleaned = res.strip()
+                # إزالة markdown code fences
+                cleaned = re.sub(r'^```(?:json)?\s*', '', cleaned)
+                cleaned = re.sub(r'\s*```$', '', cleaned)
+                data = json.loads(cleaned)
+            except Exception:
+                raise Exception(f"Failed to parse plan: {parse_err}\nRaw: {res[:500]}")
+
+        # بناء الـ Execution Graph
+        graph = ExecutionGraph(protocol_id=protocol_id)
+        tasks = data.get('tasks', [])
+
+        if not tasks:
+            raise Exception("Plan contains no tasks")
+
+        for t in tasks:
+            tid = t.get('task_id', f"task_{uuid.uuid4().hex[:4]}")
+            action = t.get('action', 'run_host_terminal')
+            params = t.get('params', {})
+
+            node = TaskNode(
+                task_id=tid,
+                agent_id='agent_master',
+                action=action,
+                params=params
+            )
+
+            # إضافة التبعيات إذا وجدت
+            deps = t.get('depends_on', [])
+            for dep in deps:
+                node.add_dependency(dep)
+
+            graph.add_node(node)
+
+        return graph
