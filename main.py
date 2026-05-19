@@ -539,8 +539,8 @@ def _send_audit_logs(chat_id):
                      reply_markup=ui_builder.build_quick_actions())
 
 
-_EXEC_AR = ('ثبت', 'شغل', 'نفذ', 'نفّذ', 'ابن', 'ابني', 'أنشئ', 'انشئ', 'صمم', 'صمّم', 'عدل', 'أضف', 'اضف', 'اكتب', 'برمج', 'صلح', 'ابرمج', 'حدث')
-_EXEC_EN_RE = re.compile(r'(?<![A-Za-z])(build|create|spawn|deploy|write|edit|update|fix|make)(?![A-Za-z])', re.IGNORECASE)
+_EXEC_AR = ('ثبت', 'شغل', 'نفذ', 'نفّذ', 'ابن', 'ابني', 'أنشئ', 'انشئ', 'صمم', 'صمّم', 'عدل', 'أضف', 'اضف', 'اكتب', 'برمج', 'صلح', 'ابرمج', 'حدث', 'انشاء', 'بناء', 'كتابة', 'تعديل', 'اصلاح', 'أريد', 'اريد', 'ارغب', 'أرغب')
+_EXEC_EN_RE = re.compile(r'(?<![A-Za-z])(build|create|spawn|deploy|write|edit|update|fix|make|want)(?![A-Za-z])', re.IGNORECASE)
 
 def _is_execution_request(text: str) -> bool:
     """تحديد ما إذا كانت الرسالة طلب تنفيذ صريح للأوركيستراتر.
