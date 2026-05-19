@@ -41,6 +41,8 @@ class AgentRegistry:
             name="Architect Agent",
             role="System Architect",
             capabilities=["design_architecture", "build_protocols", "create_workflows"],
+            tools=["generate_diagram", "create_protocol_blueprint"],
+            protocols=["system_design_protocol"],
             restrictions=["no_direct_code_execution"]
         )
         self.register_agent(
@@ -48,6 +50,8 @@ class AgentRegistry:
             name="Backend & API Coder",
             role="Backend Developer",
             capabilities=["write_python", "build_api", "database_design"],
+            tools=["execute_python", "read_file", "write_file", "github_commit"],
+            protocols=["backend_development_protocol"],
             restrictions=["requires_sandbox"]
         )
         self.register_agent(
@@ -55,6 +59,8 @@ class AgentRegistry:
             name="UI/UX & Frontend Coder",
             role="Frontend Developer",
             capabilities=["build_react", "deploy_pages", "create_ui", "tailwind"],
+            tools=["read_file", "write_file"],
+            protocols=["ui_generation_protocol"],
             restrictions=["no_secret_access", "no_root_shell"]
         )
         self.register_agent(
@@ -62,17 +68,34 @@ class AgentRegistry:
             name="DevOps & Infrastructure",
             role="DevOps Engineer",
             capabilities=["docker_manage", "cloud_deploy", "github_actions"],
+            tools=["docker_ps", "shell_execute"],
+            protocols=["deployment_pipeline_protocol"],
             restrictions=["require_admin_approval_for_destructive"]
         )
         
-    def register_agent(self, agent_id: str, name: str, role: str, capabilities: List[str], restrictions: List[str]):
+    def register_agent(
+        self, 
+        agent_id: str, 
+        name: str, 
+        role: str, 
+        capabilities: List[str] = None, 
+        tools: List[str] = None,
+        protocols: List[str] = None,
+        restrictions: List[str] = None
+    ):
         """تسجيل وكيل جديد مُوَلَّد"""
         self.agents[agent_id] = {
             "agent_id": agent_id,
             "name": name,
             "role": role,
-            "capabilities": capabilities,
-            "restrictions": restrictions,
+            "capabilities": capabilities or [],
+            "tools": tools or [],
+            "protocols": protocols or [],
+            "restrictions": restrictions or [],
+            "awareness": {
+                "last_event_seen": None,
+                "current_memory_context": None
+            },
             "status": "active",
             "created_at": datetime.now().isoformat()
         }

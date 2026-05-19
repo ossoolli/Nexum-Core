@@ -1,169 +1,145 @@
-"""
-NEXUM Runtime Server — FastAPI + WebSocket + SSE
-الخادم الحقيقي لمنصة التحكم السيادية (Sovereign Control Plane)
-"""
 import os
 import sys
 import json
 import asyncio
-import psutil
 from datetime import datetime
 
-from fastapi import FastAPI, WebSocket, WebSocketDisconnect
-from fastapi.responses import HTMLResponse, StreamingResponse
+from fastapi import FastAPI, WebSocket, WebSocketDisconnect, Request
+from fastapi.responses import HTMLResponse
 from fastapi.middleware.cors import CORSMiddleware
 import uvicorn
 
-# إعداد المسار
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, BASE_DIR)
 
 from core.agent_registry import agent_registry
 from core.event_bus import event_bus
 from core.lifecycle import lifecycle
-from core.orchestrator import orchestrator
+from core.runtime.message_bus import message_bus
+from core.protocols.runtime_gateway import runtime_gateway
+from core.runtime.async_orchestrator import async_orchestrator
+from core.runtime.state_diff import state_diff
 
-app = FastAPI(title="NEXUM PRIME Runtime", version="2.0")
+app = FastAPI(title="NEXUM Sovereign Runtime Gateway", version="3.0")
 app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_methods=["*"], allow_headers=["*"])
 
-# === WebSocket Connections ===
-connected_clients: list[WebSocket] = []
+@app.on_event("startup")
+async def startup_event():
+    """Start runtime kernel workers and gateway message routers asynchronously"""
+    from core.runtime.runtime_kernel import runtime_kernel
+    asyncio.create_task(runtime_kernel.start())
+    asyncio.create_task(_route_message_bus_to_gateway())
+    print("🔱 [Gateway] Sovereign Runtime Gateway Initialized.")
 
+@app.on_event("shutdown")
+async def shutdown_event():
+    from core.runtime.runtime_kernel import runtime_kernel
+    runtime_kernel.stop()
 
-async def broadcast(data: dict):
-    """بث البيانات لجميع العملاء المتصلين عبر WebSocket"""
-    message = json.dumps(data)
-    for ws in connected_clients[:]:
+async def _route_message_bus_to_gateway():
+    """قراءة الأحداث من الـ Message Bus وبثها عبر الـ Gateway بشكل تراكمي"""
+    while True:
+        event = await message_bus.event_stream.get()
         try:
-            await ws.send_text(message)
-        except Exception:
-            connected_clients.remove(ws)
+            # Generate delta updates if applicable to reduce volume
+            if event["type"] == "METRICS_UPDATE":
+                delta = state_diff.compute_diff(event["data"], namespace="metrics")
+                if delta:
+                    await runtime_gateway.broadcast({"type": "metrics", "delta": delta}, channel="system")
+            else:
+                await runtime_gateway.broadcast(event, channel="events_live")
+        finally:
+            message_bus.event_stream.task_done()
 
+# === RUNTIME SNAPSHOT ENDPOINTS ===
 
-# === Routes ===
+from core.runtime.swarm_manager import swarm_manager
 
-@app.get("/", response_class=HTMLResponse)
-async def serve_ui():
-    """تقديم واجهة النظام التشغيلي المرئي"""
-    html_path = os.path.join(BASE_DIR, "webapp", "index.html")
-    with open(html_path, "r", encoding="utf-8") as f:
-        return f.read()
-
-
-@app.get("/api/agents")
-async def get_agents(capability: str = None):
-    """جلب سجل الوكلاء مع حالات دورة الحياة.
-    إذا تم تمرير capability، يتم إرجاع الوكلاء الذين يمتلكون هذه القدرة.
+@app.post("/agents/spawn")
+async def spawn_new_agent(payload: dict):
     """
+    Endpoint لتوليد وكيل جديد فعلياً في Runtime
+    """
+    role = payload.get("role", "Worker")
+    capabilities = payload.get("capabilities", [])
+    parent_id = payload.get("parent_id")
+    
+    agent = await swarm_manager.spawn_agent(role, capabilities, parent_id)
+    return {"status": "success", "agent": agent}
+
+@app.get("/runtime/state")
+async def get_runtime_state():
+    return {
+        "status": "active",
+        "timestamp": datetime.utcnow().isoformat(),
+        "active_graphs": len(async_orchestrator.active_graphs),
+        "queued_tasks": message_bus.task_queue.qsize()
+    }
+
+@app.get("/runtime/agents")
+async def get_runtime_agents(capability: str = None):
     if capability:
         agents = agent_registry.get_agents_by_capability(capability)
     else:
         agents = list(agent_registry.agents.values())
     for ag in agents:
-        state_info = lifecycle.get_state(ag["agent_id"])
-        ag["lifecycle"] = state_info
+        ag["lifecycle"] = lifecycle.get_state(ag["agent_id"])
     return agents
 
+@app.get("/runtime/events")
+async def get_runtime_events():
+    return event_bus.get_history(limit=100)
 
-@app.get("/api/graph")
-async def get_graph():
-    """Return the current active execution graph for visualization.
-    If multiple graphs exist, the first one is returned.
-    """
-    if orchestrator.active_graphs:
-        # pick the first active graph
-        graph = next(iter(orchestrator.active_graphs.values()))
-        # Build a simple dict compatible with Cytoscape (nodes & edges)
-        nodes = []
-        edges = []
-        for node in getattr(graph, "nodes", []):
-            nodes.append({"data": {"id": getattr(node, "task_id", ""), "label": getattr(node, "action", "")}})
-            for dep in getattr(node, "dependencies", []):
-                edges.append({"data": {"source": dep, "target": getattr(node, "task_id", "")}})
-        return {"protocol_id": getattr(graph, "protocol_id", "unknown"), "nodes": nodes, "edges": edges}
-    return {"protocol_id": None, "nodes": [], "edges": []}
+@app.get("/runtime/protocols")
+async def get_runtime_protocols():
+    # Helper endpoint to fetch available yaml protocols
+    return []
 
-
-@app.get("/api/events")
-async def get_events():
-    """جلب آخر الأحداث المسجلة في النظام"""
-    return event_bus.get_history(limit=50)
-
-
-@app.get("/api/system/stream")
-async def system_stream():
-    """بث SSE حي لاستهلاك الموارد"""
-    async def generate():
-        while True:
-            data = {
-                "cpu": psutil.cpu_percent(interval=None),
-                "ram": psutil.virtual_memory().percent,
-                "disk": psutil.disk_usage('/').percent,
-                "timestamp": datetime.now().isoformat(),
-            }
-            yield f"data: {json.dumps(data)}\n\n"
-            await asyncio.sleep(2)
-    return StreamingResponse(generate(), media_type="text/event-stream")
-
-
-@app.post("/api/orchestrate")
+@app.post("/runtime/orchestrate")
 async def trigger_orchestrator(payload: dict):
-    """تلقي أوامر من الـ Command Palette وتشغيل الأوركستريتور"""
     goal = payload.get("goal", "")
     if not goal:
         return {"error": "No goal provided"}
+    
+    # We send this to the planner via regular event bus or create an async planner interface
+    # For now, put it into the task queue or orchestrate directly
+    await message_bus.route_task(None, {"action": "generate_graph", "goal": goal})
+    return {"status": "Processing via Swarm"}
 
-    event_bus.emit(event_bus.TASK_STARTED, {"goal": goal})
-    try:
-        result = orchestrator.execute_goal(goal)
-        event_bus.emit(event_bus.TASK_COMPLETED, {
-            "goal": goal,
-            "protocol_id": result.get("protocol", {}).get("protocol_id"),
-        })
-        return {"status": "success", "result": result}
-    except Exception as e:
-        event_bus.emit(event_bus.TASK_FAILED, {"goal": goal, "error": str(e)})
-        return {"status": "error", "message": str(e)}
-
+# === SOVEREIGN WEBSOCKET LAYER ===
 
 @app.websocket("/ws")
-async def websocket_endpoint(ws: WebSocket):
-    """نقطة WebSocket للبث الحي للأحداث وحالة النظام"""
-    await ws.accept()
-    connected_clients.append(ws)
+async def websocket_endpoint(websocket: WebSocket):
+    await runtime_gateway.connect(websocket)
     try:
-        # إرسال الحالة الأولية
-        await ws.send_text(json.dumps({
+        # إرسال Snapshot مبدئي
+        init_state = {
             "type": "init",
             "agents": list(agent_registry.agents.values()),
-            "events": event_bus.get_history(20),
-        }))
+        }
+        await websocket.send_text(json.dumps(init_state))
+        
         while True:
-            # انتظار أوامر من العميل
-            data = await ws.receive_text()
+            data = await websocket.receive_text()
             msg = json.loads(data)
-            if msg.get("action") == "orchestrate":
-                result = orchestrator.execute_goal(msg.get("goal", ""))
-                await ws.send_text(json.dumps({"type": "orchestrate_result", "data": result}))
+            
+            # إدارة الاشتراكات ديناميكياً
+            if msg.get("action") == "subscribe":
+                await runtime_gateway.subscribe(websocket, msg.get("channel"))
+            elif msg.get("action") == "unsubscribe":
+                await runtime_gateway.unsubscribe(websocket, msg.get("channel"))
+                
     except WebSocketDisconnect:
-        connected_clients.remove(ws)
+        runtime_gateway.disconnect(websocket)
 
-
-# ربط الـ Event Bus بالـ WebSocket للبث التلقائي
-def _on_any_event(event):
-    """عند حدوث أي حدث، أرسله لكل العملاء المتصلين"""
-    import asyncio
-    try:
-        loop = asyncio.get_event_loop()
-        if loop.is_running():
-            loop.create_task(broadcast({"type": "event", "event": event}))
-    except RuntimeError:
-        pass
-
-event_bus.subscribe("*", _on_any_event)
-
+# HTML UI
+@app.get("/", response_class=HTMLResponse)
+async def serve_ui():
+    html_path = os.path.join(BASE_DIR, "webapp", "index.html")
+    with open(html_path, "r", encoding="utf-8") as f:
+        return f.read()
 
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))
-    print(f"🔱 NEXUM Runtime Server on port {port}")
-    uvicorn.run(app, host="0.0.0.0", port=port)
+    print(f"🔱 NEXUM Runtime OS active on port {port}")
+    uvicorn.run("api_server:app", host="0.0.0.0", port=port, reload=True)
