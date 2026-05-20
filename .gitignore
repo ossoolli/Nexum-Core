@@ -10,6 +10,7 @@ __pycache__/
 .Python
 
 # Storage (بيانات حساسة)
+storage/
 storage/memory.json
 storage/bots_registry.json
 storage/channels_registry.json
