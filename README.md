@@ -1,124 +1,124 @@
-# 🔱 NEXUM CORE OS — v7.3.0 (The Sovereign Union)
-> **نظام تشغيل وكيل سيادي (Sovereign Agentic OS) — العقل المركزي لإدارة السيرفرات والبناء الذاتي.**
+# 🔱 NEXUM CORE OS — v7.3.0 (The Sovereign Restoration)
 
-[![Version](https://img.shields.io/badge/Version-7.3.0--SOVEREIGN-gold?style=for-the-badge)](#)
-[![Python](https://img.shields.io/badge/Python-3.10+-green?style=for-the-badge&logo=python)](https://python.org)
-[![AI](https://img.shields.io/badge/AI-Gemini%201.5%20Pro-purple?style=for-the-badge&logo=google)](#)
-[![Stability](https://img.shields.io/badge/Stability-Resilient%20Core-blue?style=for-the-badge)](#)
+> **"حيث يلتقي التاريخ بالحداثة، والذكاء بالسيادة."** — نظام تشغيل وكيل سيادي (Sovereign Agentic OS) لإدارة السيرفرات، بناء المواقع، وتوليد الوكلاء والبوتات.
 
 ---
 
-## 🌌 الرؤية (The Vision)
-NEXUM ليس مجرد بوت تلجرام؛ إنه **نظام تشغيل وكيل (Agentic OS)** مستقل. بدأت الرؤية في v5.0 وبنظام التنفيذ المستقل، وتطورت في v7.1 لتشمل بناء المواقع والوكلاء، ووصلت في **v7.3.0** إلى حالة "الاتحاد السيادي" حيث تلتقي استقرارية البنية التحتية مع عراقة الوظائف التشغيلية.
-
-```
-History (v5.0) + Philosophy (v7.1) + Modernity (v7.2.1) = Sovereign Mastery (v7.3.0)
-```
+[![Version](https://img.shields.io/badge/Version-7.3.0--RESTORED-gold?style=for-the-badge)](#)
+[![Architecture](https://img.shields.io/badge/Architecture-Agentic%20Nervous%20System-blue?style=for-the-badge)](#)
+[![AI](https://img.shields.io/badge/Intelligence-Hybrid%20Intent%20Engine-purple?style=for-the-badge)](#)
+[![Security](https://img.shields.io/badge/Security-Sovereign%20Guard-red?style=for-the-badge)](#)
 
 ---
 
-## 🏗️ الهيكلية الهجينة (The Union Architecture)
-يعمل النظام في v7.3.0 بهيكلية "العصب المركزي" (Nervous System) حيث يربط ملف `main.py` بين ثلاث طبقات:
+## 🏛️ رحلة الاتحاد (The Evolution of Nexum)
 
-1.  **الطبقة النواتية (`nexum/` Package)**:
-    *   `Intelligence`: مصنف النوايا يعتمد على Gemini (بدلاً من الكلمات المفتاحية).
-    *   `Security`: درع الحماية (Rate Limiter) وسجل التدقيق (Audit Log).
-    *   `Memory`: نظام تلخيص ذكي لإدارة نافذة السياق (Summarizer).
-    *   `Kernel`: نظام الإقلاع (Bootstrap) واسترداد الانهيار (Crash Recovery).
+في الإصدار **v7.3.0**، قمنا بعملية **"الترميم السيادي"**، حيث تم دمج أقوى الميزات التي فُقدت عبر تاريخ المشروع في بنية واحدة حديثة:
 
-2.  **الطبقة التخطيطية (`core/`)**:
-    *   `Orchestrator`: تنفيذ المهام عبر رسوم بيانية (DAG).
-    *   `Planner`: تحويل الأوامر النصية إلى خطط عمل JSON.
-    *   `Router`: موجه مركزي للتحكم بـ Callbacks لوحة التحكم.
-
-3.  **الطبقة التنفيذية (`agents/`)**:
-    *   `WebForge`: بناء مواقع ويب كاملة في ثوانٍ.
-    *   `AgentSmith`: تصميم وبناء وكلاء أذكياء متخصصين.
-    *   `BotBuilder`: توليد بوتات تلجرام بشخصيات فريدة.
-    *   `ChannelManager`: إدارة البث والنشر عبر القنوات.
+*   🔄 **Restored from v5.0 (The Soul)**: استعادة محرك `NexumInterpreter` للتعرف اللحظي على الكلمات المفتاحية (قنوات، بوتات، وكلاء) لضمان سرعة رد فعل لا تضاهى.
+*   🎨 **Restored from v7.1 (The UI)**: إعادة إحياء واجهة `SovereignUIBuilder` العملاقة المكونة من 9 أقسام تخصصية ودعم الـ Telegram Mini Apps.
+*   ☁️ **Inherited from v7.2 (The Cloud)**: الحفاظ على استقرار التخزين السحابي وتحسينات استهلاك الموارد.
+*   🧠 **Advanced v7.3 (The Brain)**: نظام التخطيط الآلي (AI Planner) والتشفير السيادي والربط المعياري (Modular Router).
 
 ---
 
-## 🛠️ المحركات السيادية (Sovereign Engines)
+## 🏗️ البنية المعمارية (The Nervous System)
 
-| المحرك | الملف | الوصف |
-| :--- | :--- | :--- |
-| 🔱 **المحرّك الرابط** | `main.py` | يجمع كل الأسلاك، يعالج الرسائل، ويوجه الوكلاء. |
-| 🧠 **المصنّف الذكي** | `classifier.py` | يفهم نية المستخدم بدقة (بناء، تنفيذ، مراقبة، دردشة). |
-| 🌐 **WebForge** | `webforge_agent.py` | يبني Landing Pages و Dashboards و APIs فوراً. |
-| 🤖 **AgentSmith** | `agent_smith.py` | يصمم ويبني ويشغل وكلاء مخصصين من وصف نصي. |
-| 📡 **البث الحي** | `broadcast()` | يبث إشعارات النظام لقناة التلجرام في الوقت الحقيقي. |
-| 🛡️ **درع الاستقرار** | `Crash Recovery` | حلقة مغلقة تضمن استمرار البوت حتى عند انقطاع الشبكة. |
+يعمل Nexum Core كـ "جهاز عصبي" متكامل يربط بين أربعة مجالات حيوية:
 
----
+### 1. العقل المدبر (Intelligence & Core)
+*   **Hybrid Classifier**: يجمع بين ذكاء Gemini وسرعة regex-based classification لفهم أوامرك فورياً.
+*   **Flow Orchestrator**: يحول أهدافك المعقدة إلى خطوات تنفيذية متسلسلة (Execution Graphs).
+*   **Modular Router**: الموجه المركزي الذي يربط 50+ زر تفاعلي بمعالجاتها الخاصة.
 
-## 📱 لوحة التحكم الشاملة (The Dashboard)
-عند إرسال `/start` أو `/dashboard` تظهر اللوحة السيادية المكونة من 7 أزرار حيوية:
+### 2. أسطول البناء (Creation Fleet)
+*   🌐 **WebForge Agent**: بناء المواقع (Landing Pages, Dashboards) برمجياً في ثوانٍ.
+*   🤖 **Bot Builder**: صناعة بوتات تلجرام مخصصة بمهام وشخصيات فريدة.
+*   🎨 **Agent Smith**: تصميم وكلاء ذكاء اصطناعي متخصصين (مثل وكيل المراقبة أو البرمجة).
 
-*   📊 **النبض (Status)**: تقرير فوري لموارد السيرفر (CPU, RAM, Disk).
-*   🚀 **نشر GitHub**: رفع التحديثات ومزامنة الكود بضغطة زر.
-*   🌐 **المواقع**: قائمة بكافة المشاريع التي بناها WebForge.
-*   🤖 **الوكلاء**: إدارة الوكلاء الذين صممهم AgentSmith.
-*   🤖 **البوتات**: التحكم بأسطول البوتات الفرعية (BotFleet).
-*   📢 **القنوات**: إدارة القنوات وجدولة المنشورات.
-*   📡 **قناة البث**: اختبار حلقة الوصل مع قناة العمليات.
+### 3. العمليات والسيادة (Ops & Sovereignty)
+*   📢 **Channel Manager**: بث المنشورات للقنوات المربوطة وجدولة المحتوى (Cross-Posting).
+*   🚀 **Auto-Deploy**: نشر وتحديث الكود مباشرة من GitHub للسيرفر.
+*   📊 **Pulse Monitor**: مراقبة حية لموارد السيرفر (CPU, RAM, Network) مع تنبيهات ذكية.
 
 ---
 
-## 🛠️ التثبيت والتشغيل (Setup)
+## 🎛️ لوحة التحكم السيادية (The 9-Sector Dashboard)
 
-### 1. إعداد البيئة
-```bash
-# 1. تهيئة ملف الإعدادات
-cp .env.example .env
+بمجرد إرسال `/start` أو `/dashboard` تظهر اللوحة العملاقة التي تتيح لك التحكم بـ 9 عوالم مختلفة:
 
-# 2. تنصيب المتطلبات
-pip install -r requirements.txt
-```
-
-### 2. التشغيل المستقر
-```bash
-# التشغيل المباشر
-python main.py
-
-# أو عبر PM2 (الموصى به للإنتاج)
-pm2 start ecosystem.config.js
-```
+1.  ⚡ **Runtime**: مراقبة العمليات الحية واستقرار السيرفر.
+2.  🤖 **Agents**: إدارة وتصميم أسطول الوكلاء الذكية.
+3.  🧬 **Protocols**: عرض وتعديل بروتوكولات العمل الآلي.
+4.  🚀 **Deploy**: إدارة عمليات النشر والـ CI/CD اليدوي.
+5.  🧠 **AI Brain**: التحكم بنوافذ السياق والذاكرة والتلخيص.
+6.  🛡️ **Security**: عرض سجل التدقيق (Audit Logs) وضبط الحماية.
+7.  💾 **Memory**: إدارة التخزين المحلي والسحابي للمشروع.
+8.  🐳 **Docker**: التحكم في الحاويات والخدمات المعزولة.
+9.  ⚙️ **Settings**: ضبط الهوية، التوكنات، وصلاحيات المسؤول.
 
 ---
 
-## 📂 هيكل المشروع (Project Map)
+## 📂 هيكل المجلدات (Project DNA)
 
 ```text
 Nexum-Core/
-├── main.py                 # 🔱 العقل المدبر (v7.3.0)
-├── nexum/                  # 📦 الحزمة النواتية الحديثة
-│   ├── intelligence/       #    Gemini Classifier & AI logic
-│   ├── security/           #    Audit Log & Rate Limiter
-│   ├── memory/             #    Context Summarizer
-│   └── kernel/             #    Bootstrap & Resilience
-├── core/                   # 🧠 المخطط والمنسق (Legacy & Power)
-│   ├── orchestrator.py     #    منفذ المهام DAG
-│   ├── router.py           #    موجه الـ Callbacks
-│   └── executor.py         #    منفذ أوامر Shell
-├── agents/                 # 🤖 أسطول الوكلاء
-│   ├── webforge_agent.py   #    بناء الويب
-│   ├── agent_smith.py      #    بناء الوكلاء
-│   └── monitor.py          #    مراقبة النبض
-└── registry/               # 📂 مخزن المخرجات (Apps, Bots, Agents)
+├── main.py                 # 🔱 العقل المركزي (النقطة السيادية)
+├── nexum/                  # 📦 الحزمة النواتية (Kernel, Intelligence, Security)
+├── core/                   # 🧠 العضلات (Orchestrator, Planner, Router, Keyboards)
+├── agents/                 # 🤖 الوكلاء (WebForge, BotBuilder, AgentSmith, ChannelManager)
+├── handlers/               # 🔗 المعالجات (توجيه الأزرار والقوائم)
+├── ui/                     # 🎨 المكونات البصرية (Components, Messages)
+├── services/               # ☁️ الخدمات الخارجية (Gemini, API Clients)
+└── storage/                # 💾 الذاكرة الدائمة (Bots, Projects, Logs)
 ```
 
 ---
 
-## 🛣️ خارطة الطريق (Roadmap)
-*   **v7.x**: تعميق التكامل بين الوكلاء (Multi-Agent Swarms).
-*   **v8.x**: واجهة ويب Mini App تفاعلية بالكامل داخل Telegram.
-*   **v9.x**: الانتقال إلى بنية لامركزية بالكامل (Decentralized Core).
+## 🚀 التثبيت والتشغيل السريع (Installation)
+
+### 📂 التشغيل عبر Google Cloud Shell
+للتنفيذ المباشر من بيئة الـ Cloud Shell الخاصة بك:
+
+```bash
+# الانتقال لمجلد المشروع
+madarmutaz@cloudshell:~$ cd Nexum-Core
+
+# تنصيب المكتبات اللازمة
+pip install -r requirements.txt
+
+# تهيئة الإعدادات
+nano .env # أضف BOT_TOKEN, ADMIN_ID, GOOGLE_API_KEY
+
+# إطلاق النواة (Test Mode)
+python main.py
+```
+
+### ♾️ التشغيل المستمر (Continuous Awareness)
+لضمان عمل النظام 24/7 دون "هذيان" وبذاكرة واعية لا تتأثر بالانهيارات:
+
+```bash
+# استخدام PM2 للإدارة الاحترافية
+pm2 start ecosystem.config.js
+
+# الأوامر الحيوية
+pm2 status          # عرض الحالة
+pm2 logs nexum-core  # متابعة سجل الوعي
+pm2 restart all      # إعادة تشغيل السيادة
+```
+
+---
+
+## 📜 خارطة الطريق وشهادة السيادة
+
+*   **v7.3.0 [CURRENT]**: استعادة كامل الميزات المفقودة ودمج الإصدارات.
+*   **v7.5.0**: تفعيل نظام "متجر الأدوات" (Tool Registry) الكامل لدعم MCP.
+*   **v8.0.0**: إطلاق واجهة الويب المتكاملة (Sovereign Mini App).
 
 ---
 
 ## 👨‍💻 المايسترو
-تم تطوير وبرمجة هذا النظام بواسطة **معتز إسماعيل تيلخ (Mutaz Tailakh)**.
+تم تطوير نظام **Nexum Core OS** بواسطة المبرمج **معتز إسماعيل تيلخ (Mutaz Tailakh)**، كجزء من رؤية Ossoolli للأنظمة المستقلة.
 
 ---
-🔱 **NEXUM — The Future is Sovereign.**
+🔱 **NEXUM — The Sovereign Union.**

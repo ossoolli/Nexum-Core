@@ -1,9 +1,11 @@
 # -*- coding: utf-8 -*-
 """
-🔱 NEXUM CORE OS v7.3.0 — The Sovereign Union
-==============================================
-إصدار التجميع السيادي: يدمج ذكاء v5.0، هيكلة v7.1، وحداثة v7.2.1.
-الملف الوحيد الذي يربط "الجهاز العصبي" للنظام بالكامل.
+🔱 NEXUM CORE OS v7.3.0 — Sovereign Restoration
+================================================
+إصدار التجميع السيادي النهائي:
+- يدمج ذكاء التفسير v5.0 (NexumInterpreter Keywords)
+- يدمج واجهة v7.1 السيادية (Sovereign UI / 9-Sector Dashboard)
+- يربط الموجه الموحد v7.3 وحماية v7.2.1
 """
 
 import os
@@ -19,7 +21,6 @@ from nexum.security.audit import log_audit, AuditEvent
 from nexum.security.rate_limiter import rate_limiter
 from nexum.intelligence.classifier import classifier, Intent
 from nexum.memory.summarizer import summarizer
-from nexum.interfaces.telegram.runner import TelegramRunner
 
 # 2. ─── طبقة الخدمات والمهمات الأصلية (Core) ───
 import telebot
@@ -31,6 +32,8 @@ from core.orchestrator import orchestrator
 from core.planner import AIPlanner
 from core.fsm_manager import fsm_manager
 from core.router import setup_router
+from core.keyboards import SovereignUIBuilder
+from core.system_tools import register_all_system_tools
 
 # 3. ─── طبقة الوكلاء (Agents Fleet) ───
 from agents.monitor import monitor_agent
@@ -42,22 +45,22 @@ from agents.channel_manager import channel_manager as _channel_manager
 try:
     from core.bot_fleet import bot_fleet as _bot_fleet
 except ImportError:
-    # لتجنب الفشل إذا لم يتم إكمال ملفات الـ fleet بعد
     _bot_fleet = None
 
-# --- تهيئة البوت المركزية (v7.2.1 style) ---
+# --- تهيئة البوت والواجهة ---
 bot = telebot.TeleBot(config.telegram_token)
+ui_builder = SovereignUIBuilder()
 ADMIN_ID = config.admin_id
 LOG_CHANNEL_ID = config.log_channel_id
 
-# تهيئة المخطط
+# تهيئة المحرك والذكاء
 _planner = AIPlanner(gemini_service)
 orchestrator.set_planner(_planner)
 orchestrator.set_bot(bot, ADMIN_ID, LOG_CHANNEL_ID)
 
-# متغيرات الحالة (v5.0 style)
+# متغيرات الحالة السيادية
+_last_analysis = {}
 pending_commands = {}
-_last_analysis = {}  # {user_id: "آخر تحليل صورة/ملف"}
 
 # ╔══════════════════════════════════════════╗
 # ║         1. البث المباشر (Broadcast)      ║
@@ -68,67 +71,112 @@ def broadcast(msg, parse_mode="Markdown"):
     if LOG_CHANNEL_ID:
         try:
             timestamp = datetime.now().strftime("%H:%M:%S")
-            bot.send_message(LOG_CHANNEL_ID, f"📡 `[{timestamp}]` {msg}", parse_mode=parse_mode)
+            # التأكد من أن الـ ID رقمي
+            cid = int(LOG_CHANNEL_ID) if str(LOG_CHANNEL_ID).replace('-', '').isdigit() else LOG_CHANNEL_ID
+            bot.send_message(cid, f"📡 `[{timestamp}]` {msg}", parse_mode=parse_mode)
         except Exception as e:
             logger.error(f"[Broadcast Error] {e}")
 
 # ╔══════════════════════════════════════════╗
-# ║       2. لوحة التحكم (Dashboard UI)      ║
+# ║       2. لوحة التحكم (Sovereign UI)      ║
 # ╚══════════════════════════════════════════╝
 
-def get_dashboard_markup():
-    """لوحة التحكم الكاملة بـ 7 أزرار (الأسلاك المفقودة)"""
-    markup = types.InlineKeyboardMarkup()
-    markup.add(
-        types.InlineKeyboardButton("📊 النبض", callback_data="status"),
-        types.InlineKeyboardButton("🚀 نشر GitHub", callback_data="deploy")
-    )
-    markup.add(
-        types.InlineKeyboardButton("🌐 المواقع", callback_data="list_projects"),
-        types.InlineKeyboardButton("🤖 الوكلاء", callback_data="list_agents")
-    )
-    markup.add(
-        types.InlineKeyboardButton("🤖 البوتات", callback_data="list_bots"),
-        types.InlineKeyboardButton("📢 القنوات", callback_data="list_channels")
-    )
-    markup.add(
-        types.InlineKeyboardButton("📡 قناة البث", callback_data="test_broadcast"),
-        types.InlineKeyboardButton("⚙️ الإعدادات", callback_data="settings")
-    )
-    return markup
-
-# ╔══════════════════════════════════════════╗
-# ║        3. المعالجات (Handlers)           ║
-# ╚══════════════════════════════════════════╝
-
-@bot.message_handler(commands=['start', 'dashboard'])
+@bot.message_handler(commands=['start', 'dashboard', 'menu'])
 def send_welcome(message):
     if message.from_user.id != ADMIN_ID: return
     
-    log_audit(AuditEvent.COMMAND_EXECUTED, ADMIN_ID, {"cmd": "start"})
-    broadcast("🔱 **NEXUM CORE UI:** تم طلب لوحة التحكم.")
+    log_audit(AuditEvent.COMMAND_EXECUTED, ADMIN_ID, {"cmd": "dashboard"})
+    broadcast("🔱 **NEXUM OS:** تم استدعاء لوحة التحكم السيادية.")
+    
+    markup = ui_builder.build_main_control_plane()
     
     bot.send_message(
         message.chat.id,
         "🔱 <b>NEXUM CORE OS v7.3.0</b>\n"
         "━━━━━━━━━━━━━━\n"
         "📡 القناة الحية: 🟢 متصلة\n"
-        "🧠 المصنف: Gemini 1.5 Pro\n"
+        "🧠 المصنف: v7.2-Agentic\n"
         "🛡️ الحماية: نشطة (v7.2)\n"
         "━━━━━━━━━━━━━━\n"
-        "جاهز لتوجيه الوكلاء وتنفيذ المهام السيادية.",
-        reply_markup=get_dashboard_markup(),
+        "مرحباً بك في مركز التحكم. اختر قسماً للإدارة:",
+        reply_markup=markup,
         parse_mode="HTML"
     )
 
-@bot.message_handler(commands=['run'])
-def run_command(message):
+# ╔══════════════════════════════════════════╗
+# ║        3. المعالج الشامل (Universal)    ║
+# ╚══════════════════════════════════════════╝
+
+@bot.message_handler(content_types=['photo', 'document', 'text'])
+def handle_universal(message):
     if message.from_user.id != ADMIN_ID: return
-    cmd = message.text.replace('/run ', '', 1).strip()
-    if not cmd:
-        bot.reply_to(message, "الاستخدام: <code>/run <الأمر></code>", parse_mode="HTML")
+
+    # أ. الحماية والتحقق
+    if not rate_limiter.is_allowed(ADMIN_ID):
+        bot.reply_to(message, "⚠️ حماية: عمليات متكررة جداً.")
         return
 
+    text = message.text or message.caption or ""
+    if not text and message.content_type not in ['photo', 'document']: return
+
+    # ب. التصنيف والذكاء (دمج مصفوفة الكلمات المفتاحية v5.0)
+    intent_result = classifier.classify(text)
+    intent = intent_result.intent
+    lower_text = text.lower()
+
+    # ج. توجيه سيادي بناءً على الكلمات المفتاحية الهجينة
+    
+    # 1. خدمات المراقبة والنظام
+    if intent == Intent.MONITOR or any(k in lower_text for k in ['حالة', 'status', 'النبض', 'pulse']):
+        bot.reply_to(message, monitor_agent.get_pulse_report(), parse_mode="HTML")
+        return
+
+    # 2. النشر والتحديث
+    if intent == Intent.DEPLOY or any(k in lower_text for k in ['ارفع', 'انشر الكود', 'deploy', 'push', 'sync']):
+        bot.reply_to(message, "🚀 جاري مزامنة الكود مع GitHub...")
+        res = deploy_agent.deploy_updates(f"🔱 Auto Sync: {text[:20]}")
+        bot.send_message(message.chat.id, res, parse_mode="HTML")
+        return
+
+    # 3. بناء المواقع (WebForge)
+    if any(k in lower_text for k in ['انشئ موقع', 'ابني موقع', 'صفحة هبوط', 'webforge', 'dashboard', 'موقع']):
+        _handle_webforge(message, text)
+        return
+
+    # 4. بناء البوتات (BotBuilder)
+    if any(k in lower_text for k in ['ابني بوت', 'انشئ بوت', 'بوت جديد', 'build bot', 'botbuilder']):
+        _handle_bot_builder(message, text)
+        return
+
+    # 5. إدارة القنوات (Channel Manager)
+    if any(k in lower_text for k in ['انشر في الكل', 'بث للقنوات', 'قنواتي', 'cross post', 'ارسل للقناة']):
+        _handle_channel_manager_cmd(message, text)
+        return
+
+    # 6. إدارة الوكلاء (Agent Smith)
+    if any(k in lower_text for k in ['ابني وكيل', 'انشئ وكيل', 'agent smith', 'صمم وكيل']):
+        _handle_agent_smith(message, text)
+        return
+
+    # 7. أوامر التنفيذ المباشرة (Shell/Execute)
+    if intent == Intent.EXECUTE or text.startswith('!'):
+        cmd = text[1:] if text.startswith('!') else text
+        _handle_execute(message, cmd)
+        return
+
+    # 8. الصور والملفات
+    if message.content_type in ['photo', 'document']:
+        _handle_media(message, text)
+        return
+
+    # 9. المحادثة العادية (Chat)
+    _handle_chat(message, text)
+
+# ╔══════════════════════════════════════════╗
+# ║        4. المعالجات الفرعية (Sub)       ║
+# ╚══════════════════════════════════════════╝
+
+def _handle_execute(message, cmd):
     result = executor.execute(cmd)
     if result['status'] == 'confirm':
         pending_commands[message.from_user.id] = cmd
@@ -137,108 +185,31 @@ def run_command(message):
             types.InlineKeyboardButton("✅ نفّذ", callback_data="confirm_run"),
             types.InlineKeyboardButton("❌ إلغاء", callback_data="cancel_run")
         )
-        bot.reply_to(message, f"⚠️ <b>أمر حساس، تأكيد مطلوب:</b>\n<pre>{cmd}</pre>", reply_markup=markup, parse_mode="HTML")
+        bot.reply_to(message, f"⚠️ **أمر حساس:**\n<pre>{cmd}</pre>", reply_markup=markup, parse_mode="HTML")
     else:
-        bot.reply_to(message, f"<pre>{result['output'][:3500]}</pre>", parse_mode="HTML")
+        bot.reply_to(message, f"💻 **المخرجات:**\n<pre>{result['output'][:3500]}</pre>", parse_mode="HTML")
 
-# ╔══════════════════════════════════════════╗
-# ║      4. معالج الأزرار (Callbacks)        ║
-# ╚══════════════════════════════════════════╝
+def _handle_webforge(message, text):
+    bot.reply_to(message, "🌐 **WebForge:** جاري تحليل المتطلبات وبناء المشروع...")
+    res = _webforge.start({"project_name": "auto_project", "description": text})
+    bot.send_message(message.chat.id, f"✅ **تجهيز الموقع:** {res.get('project', 'Project Ready')}")
 
-@bot.callback_query_handler(func=lambda call: True)
-def handle_callbacks(call):
-    if call.from_user.id != ADMIN_ID: return
-    bot.answer_callback_query(call.id, "🔱 تم...")
+def _handle_bot_builder(message, text):
+    bot.reply_to(message, "🤖 **BotBuilder:** جاري تصميم وبرمجة البوت الجديد...")
+    res = _bot_builder.process_request(text)
+    bot.send_message(message.chat.id, f"✅ **تم إنشاء البوت:**\n{res}")
 
-    if call.data == "status":
-        bot.send_message(call.message.chat.id, monitor_agent.get_pulse_report(), parse_mode="HTML")
-    elif call.data == "deploy":
-        res = deploy_agent.deploy_updates("🔱 NEXUM Deploy")
-        bot.send_message(call.message.chat.id, res, parse_mode="HTML")
-    elif call.data == "test_broadcast":
-        broadcast("📡 **Live Broadcast Probe:** حلقة الوصل تعمل بكفاءة.")
-        bot.answer_callback_query(call.id, "✅ تم البث!")
-    elif call.data == "list_projects":
-        projects = _webforge.list_projects()
-        bot.send_message(call.message.chat.id, f"🌐 **المواقع:** {len(projects)} مشاريع مكتشفة.")
-    elif call.data == "list_agents":
-        agents = _agent_smith.list_agents()
-        bot.send_message(call.message.chat.id, f"🤖 **الوكلاء:** {len(agents)} وكلاء مسجلون.")
-    elif call.data == "list_bots":
-        if _bot_fleet:
-            bots = _bot_fleet.list_bots()
-            bot.send_message(call.message.chat.id, f"🤖 **بوتاتي:** {len(bots)} بوتات في الأسطول.")
-    elif call.data == "list_channels":
-        channels = _channel_manager.list_channels()
-        bot.send_message(call.message.chat.id, f"📢 **القنوات:** {len(channels)} قنوات مربوطة.")
-    elif call.data == "confirm_run":
-        cmd = pending_commands.pop(call.from_user.id, None)
-        if cmd:
-            res = executor.execute(cmd, force=True)
-            bot.send_message(call.message.chat.id, f"✅ <pre>{res['output'][:3500]}</pre>", parse_mode="HTML")
+def _handle_channel_manager_cmd(message, text):
+    bot.reply_to(message, "📢 **ChannelManager:** جاري معالجة طلب البث والقنوات...")
+    # إذا كان النص يحتوي على محتوى للنشر
+    content = text.split("نشر", 1)[-1] if "نشر" in text else text
+    _channel_manager.broadcast_to_all(content)
+    bot.send_message(message.chat.id, "✅ تمت عملية النشر في جميع القنوات المربوطة.")
 
-# ╔══════════════════════════════════════════╗
-# ║    5. المعالج الشامل (Universal Engine)  ║
-# ╚══════════════════════════════════════════╝
-
-@bot.message_handler(content_types=['photo', 'document', 'text'])
-def handle_universal(message):
-    if message.from_user.id != ADMIN_ID: return
-
-    # 🛑 أ. Rate Limiting (v7.2.1)
-    if not rate_limiter.is_allowed(ADMIN_ID):
-        bot.reply_to(message, "⚠️ حماية: عمليات متكررة جداً. انتظر قليلاً.")
-        return
-
-    text = message.text or message.caption or ""
-    
-    # 🔍 ب. التصنيف الذكي (Gemini Classifier v7.2.1)
-    result = classifier.classify(text)
-    intent = result.intent
-    
-    # 📝 ج. التسجيل الأمني (Audit Log)
-    log_audit(AuditEvent.COMMAND_EXECUTED, ADMIN_ID, {"intent": intent, "text": text[:100]})
-    
-    # 📡 البث الحي للقناة
-    broadcast(f"🔍 **Nexum Intelligence:** Intent `{intent}` context received.")
-
-    # 🐍 د. منطق التوجيه للوكلاء (The nervous systemwires)
-    
-    # معالجة الصور/الملفات أولاً
-    if message.content_type in ['photo', 'document']:
-        _handle_media(message, text)
-        return
-
-    # التوجيه بناءً على النية (intent)
-    if intent == Intent.MONITOR:
-        bot.reply_to(message, monitor_agent.get_pulse_report(), parse_mode="HTML")
-
-    elif intent == Intent.DEPLOY:
-        bot.reply_to(message, "🚀 نشر وتحديث...")
-        res = deploy_agent.deploy_updates(f"🔱 Auto Sync: {text[:20]}")
-        bot.send_message(message.chat.id, res, parse_mode="HTML")
-
-    elif intent == Intent.EXECUTE:
-        # التوجيه لبناء الوكلاء أو المواقع بناءً على الكلمات المفتاحية لمزيد من الدقة
-        lower_text = text.lower()
-        if any(k in lower_text for k in ['ابني موقع', 'موقع', 'webforge']):
-            _handle_webforge(message, text)
-        elif any(k in lower_text for k in ['ابني وكيل', 'وكيل']):
-            _handle_agent_smith(message, text)
-        elif any(k in lower_text for k in ['ارسل للقناة', 'انشر']):
-             _handle_broadcast_command(message, text)
-        else:
-            bot.reply_to(message, "🧠 جاري التخطيط والتنفيذ عبر Orchestrator...")
-            orchestrator.execute_goal(text)
-
-    elif intent == Intent.CHAT:
-        _handle_chat(message, text)
-
-    # 🧠 هـ. التلخيص (Memory Summarizer v7.2.1)
-    # يتم استدعاؤه بعد المعالجة للحفاظ على نافذة السياق
-    history = context_memory.get_context(ADMIN_ID)
-    if summarizer.should_summarize(history):
-        summarizer.summarize(history)
+def _handle_agent_smith(message, text):
+    bot.reply_to(message, "🎨 **AgentSmith:** جاري تصميم وكيل ذكاء اصطناعي مخصص...")
+    _agent_smith.design_agent("custom_agent", text)
+    bot.send_message(message.chat.id, "✅ الوكيل جاهز في قائمة الوكلاء.")
 
 def _handle_media(message, text):
     bot.send_chat_action(message.chat.id, 'typing')
@@ -254,54 +225,62 @@ def _handle_media(message, text):
         
         bot.reply_to(message, res)
         _last_analysis[ADMIN_ID] = res[:2000]
-        context_memory.save_context(ADMIN_ID, f"[Media Analysis] {res[:200]}", role='assistant')
     except Exception as e:
-        logger.error(f"Media analysis error: {e}")
-        bot.reply_to(message, f"❌ فشل تحليل المحتوى: {e}")
-
-def _handle_webforge(message, text):
-    bot.send_message(message.chat.id, "🌐 **WebForge** جاري التحليل والبناء...")
-    res = _webforge.start({"project_name": "auto_project", "description": text})
-    bot.send_message(message.chat.id, f"✅ تم البناء: {res.get('project', 'Project')}")
-
-def _handle_agent_smith(message, text):
-    bot.send_message(message.chat.id, "🤖 **AgentSmith** جاري تصميم الوكيل...")
-    res = _agent_smith.design_agent("custom_agent", text)
-    bot.send_message(message.chat.id, f"✅ التصميم مكتمل.")
-
-def _handle_broadcast_command(message, text):
-    content = text.replace("ارسل للقناة", "").replace("انشر", "").strip()
-    if not content:
-        content = _last_analysis.get(ADMIN_ID, "📡 لا يوجد تحليل محفوظ.")
-    broadcast(f"📢 **NEXUM BROADCAST**\n\n{content}")
-    bot.reply_to(message, "✅ تم البث!")
+        bot.reply_to(message, f"❌ خطأ في التحليل: {e}")
 
 def _handle_chat(message, text):
-    res, _ = gemini_service.ask(text, system_instruction="NEXUM OS. Be concise.")
+    history = context_memory.get_context(ADMIN_ID)
+    res, _ = gemini_service.ask(text, history=history, system_instruction="You are NEXUM OS. Efficient and advanced.")
     bot.reply_to(message, res)
     context_memory.save_context(ADMIN_ID, text, role='user')
     context_memory.save_context(ADMIN_ID, res, role='assistant')
+    
+    if summarizer.should_summarize(history):
+        summarizer.summarize(history)
+
+# معالج مخصص للأزرار القديمة (Compatibility)
+@bot.callback_query_handler(func=lambda call: call.data in ["confirm_run", "cancel_run", "status", "deploy"])
+def handle_legacy_callbacks(call):
+    if call.from_user.id != ADMIN_ID: return
+    if call.data == "confirm_run":
+        cmd = pending_commands.pop(call.from_user.id, None)
+        if cmd:
+            res = executor.execute(cmd, force=True)
+            bot.send_message(call.message.chat.id, f"✅ <pre>{res['output'][:3500]}</pre>", parse_mode="HTML")
+    elif call.data == "cancel_run":
+        pending_commands.pop(call.from_user.id, None)
+        bot.answer_callback_query(call.id, "❌ تم الإلغاء")
+    elif call.data == "status":
+        bot.send_message(call.message.chat.id, monitor_agent.get_pulse_report(), parse_mode="HTML")
+    elif call.data == "deploy":
+        res = deploy_agent.deploy_updates("🔱 NEXUM Manual Deploy")
+        bot.send_message(call.message.chat.id, res, parse_mode="HTML")
 
 # ╔══════════════════════════════════════════╗
-# ║        6. الإقلاع (Sovereign Boot)        ║
+# ║        5. الإقلاع (Sovereign Boot)        ║
 # ╚══════════════════════════════════════════╝
 
 if __name__ == "__main__":
     from nexum.kernel.bootstrap import bootstrap
+    
+    # 1. تهيئة النواة
     if not bootstrap():
+        print("❌ فشل الإقلاع (Bootstrap Failed)")
         sys.exit(1)
 
-    print("🔱 NEXUM CORE OS v7.3.0 — Online and Sovereign.")
-    broadcast("🔱 **NEXUM OS v7.3.0** استعاد كامل وعيه التشغيلي.\nجميع الوكلاء والأسلاك العصبية نشطة.")
+    # 2. تسجيل مجموعة الأدوات الشاملة (v7.3)
+    register_all_system_tools()
     
-    # درع استقرار Polling (Crash Recovery)
+    # 3. تفعيل الموجه السيادي (The Router)
+    setup_router(bot)
+
+    print("🔱 NEXUM CORE OS v7.3.0 is Online.")
+    broadcast("🔱 **NEXUM OS v7.3.0** استعاد كامل وعيه السيادي.\nجميع البروتوكولات والواجهات التفاعلية نشطة.")
+    
+    # حلقة الاستقرار (Crash Recovery)
     while True:
         try:
-            logger.info("🔱 NEXUM polling started")
-            bot.infinity_polling(timeout=30, long_polling_timeout=25)
-        except KeyboardInterrupt:
-            logger.info("Shutdown requested")
-            break
+            bot.infinity_polling(timeout=60, long_polling_timeout=30)
         except Exception as e:
-            logger.error(f"Crash Recovery Triggered: {e}")
+            logger.error(f"Kernel Recovery: {e}")
             time.sleep(10)

@@ -11,7 +11,7 @@ class NexumConfig(BaseSettings):
     google_api_key: str
 
     # Optional
-    log_channel_id: str = Field(default="", alias="TELEGRAM_CHANNEL_ID")
+    log_channel_id: int = Field(default=0, alias="TELEGRAM_CHANNEL_ID")
     openrouter_api_key: str = ""
     openai_api_key: str = ""
     db_connection: str = ""

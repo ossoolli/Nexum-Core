@@ -62,3 +62,7 @@ class GeminiService:
                 retry_delay *= 2
         
         return "❌ النظام مشغول حالياً، يرجى المحاولة لاحقاً.", history or []
+
+
+# Singleton
+gemini_service = GeminiService()

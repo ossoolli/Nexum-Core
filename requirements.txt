@@ -9,6 +9,7 @@ fastapi
 uvicorn[standard]
 websockets
 pydantic>=2.0
+pydantic-settings>=2.0
 
 # AI
 google-generativeai

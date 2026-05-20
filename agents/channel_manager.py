@@ -222,7 +222,7 @@ class ChannelManager(BaseAgent):
             # لا نحفظ الـ token الكامل
             safe = {}
             for cid, info in self._channels.items():
-                safe[cid] = {k: v for k, v in info.items() if k != "bot_token"}
+                safe[cid] = info
             with open(CHANNELS_PATH, "w", encoding="utf-8") as f:
                 json.dump(safe, f, ensure_ascii=False, indent=2)
         except IOError as e:

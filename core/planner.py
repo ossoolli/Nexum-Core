@@ -22,7 +22,7 @@ class AIPlanner:
             "agents":  os.path.join(BASE_DIR, "registry", "agents"),
             "storage": os.path.join(BASE_DIR, "storage"),
             "docs":    os.path.join(BASE_DIR, "storage", "docs"),
-            "tmp":     "/tmp/nexum",
+            "tmp":     os.path.join(BASE_DIR, "storage", "temp"),
         }
 
     def generate_execution_graph(self, goal: str, protocol_id: str) -> ExecutionGraph:
