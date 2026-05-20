@@ -74,22 +74,27 @@ def run_host_terminal(command: str) -> Dict[str, Any]:
 
 def write_file(filepath: str, content: str) -> Dict[str, Any]:
     """
-    يكتب محتوى نصي بالكامل في ملف. إذا كان الملف موجوداً سيتم الكتابة فوقه. 
-    يستخدم لإنشاء ملفات Dockerfile، Python، أو ملفات Configuration.
+    يكتب محتوى نصي بالكامل في ملف داخل مجلد المشروع.
     """
     try:
-        # تحويل المسار إلى مسار مطلق يبدأ من BASE_DIR إذا كان نسبياً
-        if not os.path.isabs(filepath):
-            filepath = os.path.abspath(os.path.join(BASE_DIR, filepath))
+        # تنظيف المسار ومنع الصعود للحبيات (Anti-path traversal)
+        safe_path = os.path.normpath(filepath).lstrip('/')
+        if safe_path.startswith('..'):
+             return {"status": "error", "message": "Access Denied: Path outside project root."}
+             
+        full_path = os.path.abspath(os.path.join(BASE_DIR, safe_path))
+        
+        # التأكد أن النتيجة النهائية لا تزال داخل BASE_DIR
+        if not full_path.startswith(os.path.abspath(BASE_DIR)):
+            return {"status": "error", "message": "Access Denied: Path outside project root."}
             
-        # التأكد من وجود المجلد
-        directory = os.path.dirname(filepath)
+        directory = os.path.dirname(full_path)
         if directory and not os.path.exists(directory):
             os.makedirs(directory, exist_ok=True)
             
-        with open(filepath, "w", encoding="utf-8") as f:
+        with open(full_path, "w", encoding="utf-8") as f:
             f.write(content)
-        return {"status": "success", "message": f"تم بنجاح كتابة {len(content)} حرف في {filepath}"}
+        return {"status": "success", "message": f"تم بنجاح كتابة الملف في: {safe_path}"}
     except Exception as e:
         return {"status": "error", "message": str(e)}
 

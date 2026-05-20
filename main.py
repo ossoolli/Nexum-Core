@@ -64,15 +64,20 @@ class NexumInterpreter:
     AGENT_BUILD_KEYWORDS = ['ابني وكيل', 'انشئ وكيل', 'صمم وكيل', 'build agent']
     BOT_BUILD_KEYWORDS = ['ابني بوت', 'انشئ بوت', 'build bot', 'telegram bot']
     MONITOR_KEYWORDS = ['حالة النظام', 'status', 'النبض', 'pulse', 'موارد']
-    EXECUTE_KEYWORDS = ['انشئ ملف', 'اكتب', 'نفذ', 'شغل']
+    EXECUTE_KEYWORDS = [
+        'انشئ', 'انشي', 'اكتب', 'نفذ', 'شغل', 'build', 'create', 
+        'ملف', 'فولدر', 'مجعد', 'directory', 'file', 'touch'
+    ]
 
     def classify(self, text: str) -> str:
         text_lower = text.lower()
-        if any(w in text_lower for w in self.EXECUTE_KEYWORDS): return "execute"
-        if any(w in text_lower for w in self.WEBFORGE_KEYWORDS): return "webforge"
-        if any(w in text_lower for w in self.AGENT_BUILD_KEYWORDS): return "agent_build"
-        if any(w in text_lower for w in self.BOT_BUILD_KEYWORDS): return "bot_build"
-        if any(w in text_lower for w in self.MONITOR_KEYWORDS): return "monitor"
+        # إذا كانت الرسالة تحتوي على أمر لملف أو تنفيذ، نوجهها للمخطط
+        if any(w in text_lower for w in self.EXECUTE_KEYWORDS): 
+            return "execute"
+        
+        if any(w in text_lower for w in self.MONITOR_KEYWORDS): 
+            return "monitor"
+            
         return "chat"
 
 interpreter = NexumInterpreter()
@@ -130,7 +135,12 @@ def handle_universal(message):
         full_prompt = f"{history_prompt}الرسالة الحالية: {text}"
         res, _ = _gemini_svc.ask(
             full_prompt,
-            system_instruction="أنت NEXUM OS نظام تشغيل ذكاء اصطناعي سيادي. تحدث بالعربية دائماً وباختصار."
+            system_instruction=(
+                "أنت NEXUM OS نظام تشغيل ذكاء اصطناعي سيادي. "
+                "تحدث بالعربية دائماً وباختصار. "
+                "تحذير هام: لا تتظاهر أبداً بأنك نفذت أمراً تقنياً (مثل إنشاء ملف أو تشغيل كود) إذا لم يتم تزويدك بنتائج حقيقية من النظام. "
+                "إذا طلب المستخدم إنشاء ملف، أخبره أنك ستقوم بذاريك عبر المنسق (Orchestrator)."
+            )
         )
         bot.reply_to(message, res)
         _memory.save_context(message.from_user.id, res[:500], role='assistant')

@@ -27,6 +27,7 @@ class TaskExecutor:
                 capture_output=True,
                 text=True,
                 timeout=self.timeout,
+                cwd=BASE_DIR,
             )
             if os.name != 'nt' and os.path.exists('/bin/bash'):
                 run_kwargs['executable'] = '/bin/bash'
