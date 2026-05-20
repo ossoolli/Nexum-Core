@@ -14,6 +14,8 @@ from core.tool_registry import tool_registry
 from core.sandbox import sandbox
 from core.executor import executor
 
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+
 def fetch_webpage(url: str) -> Dict[str, Any]:
     """
     يقرأ محتويات صفحة ويب (رابط) لاستخراج النصوص والمعلومات منها (Scraping).
@@ -76,6 +78,10 @@ def write_file(filepath: str, content: str) -> Dict[str, Any]:
     يستخدم لإنشاء ملفات Dockerfile، Python، أو ملفات Configuration.
     """
     try:
+        # تحويل المسار إلى مسار مطلق يبدأ من BASE_DIR إذا كان نسبياً
+        if not os.path.isabs(filepath):
+            filepath = os.path.abspath(os.path.join(BASE_DIR, filepath))
+            
         # التأكد من وجود المجلد
         directory = os.path.dirname(filepath)
         if directory and not os.path.exists(directory):
@@ -93,6 +99,9 @@ def list_directory(path: str = ".") -> Dict[str, Any]:
     يسرد محتويات مجلد معين. استخدم هذا 'لرؤية' هيكل المشروع والملفات الموجودة.
     """
     try:
+        if not os.path.isabs(path):
+            path = os.path.abspath(os.path.join(BASE_DIR, path))
+            
         files = os.listdir(path)
         return {"status": "success", "files": files}
     except Exception as e:
@@ -104,6 +113,9 @@ def read_file(filepath: str) -> Dict[str, Any]:
     يقرأ محتويات ملف نصي. استخدم هذا لفحص الكود البرمجي الحالي أو قراءة السجلات (Logs).
     """
     try:
+        if not os.path.isabs(filepath):
+            filepath = os.path.abspath(os.path.join(BASE_DIR, filepath))
+            
         with open(filepath, "r", encoding="utf-8") as f:
             content = f.read()
         return {"status": "success", "content": content[:5000]} # تقليل حجم البيانات للـ LLM

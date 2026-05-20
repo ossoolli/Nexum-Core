@@ -3,12 +3,16 @@ import os
 from typing import Dict, List, Optional
 from datetime import datetime
 
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+
 class AgentRegistry:
     """
     سجل الوكلاء (Agent Registry)
     قاعدة بيانات قدرات الوكلاء المستندة إلى الصلاحيات والقيود (Capability-Based Agent System).
     """
     def __init__(self, registry_file="storage/agent_registry.json"):
+        if not os.path.isabs(registry_file):
+            registry_file = os.path.join(BASE_DIR, registry_file)
         self.registry_file = registry_file
         self.agents: Dict[str, dict] = {}
         self._load_registry()

@@ -1,17 +1,22 @@
-# 🔱 NEXUM CORE OS v7.0 | Sovereign Agentic Operating System
+# 🔱 NEXUM CORE OS v7.1 | Sovereign Agentic Operating System
 
-> **نظام تشغيل سيادي ذكي متكامل.** NEXUM v7.0 هو تحول جذري من بوت ذكي إلى نظام تشغيل وكلاء مستقل (Sovereign Agentic OS) يقوم بالبناء، الإدارة، والتواصل الذاتي.
+> **نظام تشغيل سيادي ذكي متكامل.** NEXUM v7.1 هو تحول جذري من بوت ذكي إلى نظام تشغيل وكلاء مستقل (Sovereign Agentic OS) يقوم بالبناء، الإدارة، والتواصل الذاتي عبر واجهة Telegram Mini App متقدمة.
 
 [![Python](https://img.shields.io/badge/Python-3.10+-green?style=for-the-badge&logo=python)](https://python.org)
 [![Telegram](https://img.shields.io/badge/Telegram-Bot%20API-blue?style=for-the-badge&logo=telegram)](https://core.telegram.org/bots/api)
-[![Version](https://img.shields.io/badge/Version-7.0--ULTRA-gold?style=for-the-badge)](#)
+[![Version](https://img.shields.io/badge/Version-7.1--ULTRA-gold?style=for-the-badge)](#)
 [![AI](https://img.shields.io/badge/AI-Gemini%20Flash/Pro%20+%20Claude-purple?style=for-the-badge&logo=google)](#)
 
 ---
 
-## 🚀 ما الجديد في الإصدار 7.0؟
+## 🚀 ما الجديد في الإصدار 7.1؟
 
-تم إعادة بناء النظام ليدعم بنية **الوكلاء المتعددي المهام (Multi-Agent System)** مع القدرة على توليد وتشغيل تطبيقات وبوتات ووكلاء جدد في ثوانٍ.
+تم تقديم المعمارية الكاملة لواجهة التحكم داخل تيليجرام (Telegram UI/UX Architecture) والـ Mini App:
+- **Smart Callback Router:** موجه مركزي لمعالجة الأزرار بأمان (Sync-safe).
+- **Security Middlewares:** نظام متكامل لتفادي السبام (Rate Limit) والتحكم بالصلاحيات (RBAC).
+- **Mini App Integration:** لوحة تحكم WebApp متصلة بـ WebSocket لعرض موارد السيرفر حياً.
+- **BotFather Auto-Sync:** مزامنة آلية لاسم البوت وأوامره وقائمة الـ Menu عند الإقلاع.
+- **FSM Manager:** مدير حالات المحادثة لإعداد الوكلاء والمشاريع المتسلسلة بدون تداخل.
 
 ### 🧠 المحركات الجديدة (v7.0 Core)
 | المحرك | الوصف |
@@ -106,4 +111,4 @@ pm2 start ecosystem.config.js
 ## 👨‍💻 المطوّر
 تم تطوير **NEXUM CORE OS** بواسطة **معتز إسماعيل تيلخ (Mutaz Tailakh)**.
 
-*🔱 NEXUM CORE OS v7.0 — Sovereign Agentic Operating System*
+*🔱 NEXUM CORE OS v7.1 — Sovereign Agentic Operating System*

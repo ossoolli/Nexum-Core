@@ -1,7 +1,8 @@
 import json
 import os
 
-MEMORY_FILE = "/home/madarmutaz/Mutaz-dev/registry/system_memory.json"
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+MEMORY_FILE = os.path.join(BASE_DIR, "registry", "system_memory.json")
 
 def save_memory(data):
     with open(MEMORY_FILE, 'w', encoding='utf-8') as f:

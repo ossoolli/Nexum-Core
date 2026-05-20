@@ -7,7 +7,10 @@ import json
 import re
 import uuid
 
+import os
 from core.execution_graph import ExecutionGraph, TaskNode
+
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 
 class AIPlanner:
@@ -21,12 +24,12 @@ class AIPlanner:
 Your ONLY job is to return a valid JSON execution plan.
 
 Environment:
-- Base directory: /home/madarmutaz/Mutaz-dev
-- Apps directory: /home/madarmutaz/Mutaz-dev/registry/apps/
+- Base directory: {BASE_DIR}
+- Apps directory: {BASE_DIR}/registry/apps/
 - Available tools: write_file, run_host_terminal, read_file, list_directory, search_web, fetch_webpage, run_in_sandbox
 
 Rules:
-1. All file paths MUST be absolute starting with /home/madarmutaz/Mutaz-dev/
+1. All file paths MUST be absolute starting with {BASE_DIR}/
 2. New apps MUST go in registry/apps/<app_name>/
 3. Return ONLY valid JSON, no explanation, no markdown.
 

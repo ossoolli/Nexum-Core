@@ -10,8 +10,12 @@ import json
 import threading
 from datetime import datetime
 
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+
 class KnowledgeBase:
     def __init__(self, storage_path: str = "storage/knowledge"):
+        if not os.path.isabs(storage_path):
+            storage_path = os.path.join(BASE_DIR, storage_path)
         self.storage_path = storage_path
         self._lock = threading.Lock()
         
