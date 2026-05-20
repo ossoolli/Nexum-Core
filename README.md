@@ -1,90 +1,78 @@
-# 🔱 NEXUM CORE OS v7.1 | Sovereign Agentic Operating System
+# 🔱 NEXUM CORE OS v7.2 | Sovereign Agentic Operating System
 
-> **نظام تشغيل سيادي ذكي متكامل.** NEXUM v7.1 هو تحول جذري من بوت ذكي إلى نظام تشغيل وكلاء مستقل (Sovereign Agentic OS) يقوم بالبناء، الإدارة، والتواصل الذاتي عبر واجهة Telegram Mini App متقدمة.
+> **نظام تشغيل سيادي ذكي متكامل.** NEXUM v7.2 هو القفزة الكبرى نحو الاستقلالية التامة، مع "وعي" نظام تشغيل مركزي وقدرات تخزين سحابية هجينة لضمان كفاءة السيرفر المطلقة.
 
 [![Python](https://img.shields.io/badge/Python-3.10+-green?style=for-the-badge&logo=python)](https://python.org)
 [![Telegram](https://img.shields.io/badge/Telegram-Bot%20API-blue?style=for-the-badge&logo=telegram)](https://core.telegram.org/bots/api)
-[![Version](https://img.shields.io/badge/Version-7.1--ULTRA-gold?style=for-the-badge)](#)
+[![Version](https://img.shields.io/badge/Version-7.2--ULTRA-gold?style=for-the-badge)](#)
 [![AI](https://img.shields.io/badge/AI-Gemini%20Flash/Pro%20+%20Claude-purple?style=for-the-badge&logo=google)](#)
 
 ---
 
-## 🚀 ما الجديد في الإصدار 7.1؟
+## 🚀 ما الجديد في الإصدار 7.2؟ (إصدار الكفاءة والوعي)
 
-تم تقديم المعمارية الكاملة لواجهة التحكم داخل تيليجرام (Telegram UI/UX Architecture) والـ Mini App:
-- **Smart Callback Router:** موجه مركزي لمعالجة الأزرار بأمان (Sync-safe).
-- **Security Middlewares:** نظام متكامل لتفادي السبام (Rate Limit) والتحكم بالصلاحيات (RBAC).
-- **Mini App Integration:** لوحة تحكم WebApp متصلة بـ WebSocket لعرض موارد السيرفر حياً.
-- **BotFather Auto-Sync:** مزامنة آلية لاسم البوت وأوامره وقائمة الـ Menu عند الإقلاع.
-- **FSM Manager:** مدير حالات المحادثة لإعداد الوكلاء والمشاريع المتسلسلة بدون تداخل.
-
-### 🧠 المحركات الجديدة (v7.0 Core)
-| المحرك | الوصف |
-|---|---|
-| 🌐 **WebForge** | محرك بناء مواقع ويب (Landing Pages, Dashboards, APIs) بملف واحد وأسلوب عصري. |
-| 🤖 **AgentSmith** | مصنع الوكلاء؛ يصمم ويبني ويشغل وكلاء مخصصين من وصف نصي فقط. |
-| 🏗️ **BotBuilder** | يولّد بوتات Telegram كاملة بشخصيات وقدرات محددة ويشغلها كعمليات PM2. |
-| 📡 **BotNetwork** | ناقل تواصل بين البوتات والوكلاء عبر Redis Pub/Sub مع fallback محلي. |
-| 📢 **ChannelManager** | مدير بث متقدم للنشر والجدولة المتزامنة عبر قنوات متعددة. |
-| 🟢 **BotFleet** | أسطول بوتات يعمل بشكل مستقل ومدار بالكامل عبر لوحة التحكم. |
+تم تقديم ميزات ثورية لضمان بقاء السيرفر خفيفاً ومنظماً مهما كثرت المشاريع:
+- **Hybrid Cloud Storage Manager:** نظام تخزين هجين يربط السيرفر بـ **Supabase** وقنوات **Telegram** للتخزين الخارجي.
+- **Auto-Archiving (Zip & Offload):** قدرة النظام على أرشفة المشاريع المكتملة في ملفات ZIP ورفعها للسحاب وحذفها محلياً لتوفير مساحة السيرفر.
+- **OS Consciousness Layer:** تحديث "وعي" النظام ليدرك دوره كقائد مركزي (Central Orchestrator) مع تحسين فهم النوايا (Intent Recognition) حتى مع الاختلافات اللغوية.
+- **Strict Organizational Hierarchy:** فرض هيكلية تنظيمية صارمة للمجلدات لضمان عدم تراكم الملفات العشوائية في جذر النظام.
 
 ---
 
-## 🏗️ المعمارية المحدثة (Architecture)
+## 🧠 المحركات المركزية (v7.2 Core)
+| المحرك | الوصف | المجلد المخصص |
+|---|---|---|
+| ☁️ **CloudManager** | مدير التخزين السحابي؛ يرفع النسخ الاحتياطية لتيليجرام وسوباباس. | `core/cloud_storage.py` |
+| 🌐 **WebForge** | محرك بناء المواقع والتطبيقات السحابية. | `registry/apps/` |
+| 🤖 **AgentSmith** | مصنع الوكلاء الذكي وتصميم الشخصيات الرقمية. | `registry/agents/` |
+| 🏗️ **BotBuilder** | توليد وتشغيل أسطول بوتات تيليجرام المستقلة. | `registry/bots/` |
+| 📦 **Storage Engine** | إدارة الملفات والوثائق والأرشفة التلقائية. | `storage/` |
+
+---
+
+## 🏗️ المعمارية السحابية المحدثة (Architecture)
 
 ```
 ┌─────────────────────────────────────────────────────────┐
-│              🌐 Web Dashboard (v5.0 UI)                 │
-│    (Status | WebForge | Agents | Bots | Channels)       │
+│              🌐 Web Dashboard (v7.2 UI)                 │
+│    (Status | Cloud Backups | Apps | Bots | Storage)     │
 └──────────────┬──────────────────────┬───────────────────┘
                ↓                      ↓
 ┌──────────────────────┐      ┌───────────────────────────┐
-│ 🔱 NEXUM CORE MAIN  │ ←──→ │   FastAPI Gateway (v5.0)  │
-│ (Telegram Interface) │      │   (18+ API Endpoints)     │
+│ 🔱 NEXUM CORE MAIN  │ ←──→ │   Supabase Cloud Sync     │
+│ (Telegram Interface) │      │   (Database & Storage)    │
 └──────────────┬───────┘      └───────────────────────────┘
-               ↓
+               ↓                       |
 ┌─────────────────────────────────────────────────────────┐
 │            🧠 OS ORCHESTRATOR & PLANNER                 │
-│         (Dynamic DAG + Tool Execution Layer)            │
+│         (Cloud-Aware Task Execution Layer)              │
 └──────────────┬──────────────────────────────────────────┘
                ↓
 ┌───────┬───────────────┬───────────────┬────────────────┐
-│  🌐   │      🤖       │      🏗️       │       📢       │
-│WebForge│ AgentSmith   │  BotBuilder   │ ChannelManager │
+│  ☁️    │      🌐       │      🤖       │       🏗️       │
+│Backup │ WebForge      │ AgentSmith   │  BotBuilder    │
 └───────┴───────────────┴───────────────┴────────────────┘
 ```
 
 ---
 
-## 💻 التفاعل والأوامر (Interpreter v7.0)
+## 💻 التفاعل والوعي (Intelligence Layer)
 
-النظام الآن يفهم سياقات معقدة ويوجهها للوكيل المناسب:
+النظام الآن يمتلك "وعياً" بالمكان والزمان والمساحة التخزينية:
 
-*   **🌐 بناء الويب:** "انشئ صفحة هبوط لشركة عقارية" → WebForge
-*   **🤖 بناء الوكلاء:** "ابني وكيل يراقب أسعار العملات" → AgentSmith
-*   **🏗️ بناء البوتات:** "انشئ بوت تواصل لعملاء أصولي" → BotBuilder
-*   **📢 القنوات:** "انشر هذا العرض في كل قنواتي" → ChannelManager
-*   **📊 المراقبة:** "وضعية أسطول البوتات" → BotFleet
-
----
-
-## 🖥️ لوحة التحكم (FastAPI Dashboard)
-
-تأتي النسخة السابعة بواجهة ويب احترافية (Premium Dark Mode) تحتوي على 5 تبويبات:
-1.  **📊 النظام:** مراقبة الموارد (CPU, RAM, Disk) والعمليات.
-2.  **🌐 المواقع:** عرض المواقع المبنية بـ WebForge مع روابط معاينة حية.
-3.  **🤖 الوكلاء:** إدارة وتصدير الوكلاء المخصصين المولّدين بـ AgentSmith.
-4.  **🤖 البوتات:** مراقبة أسطول البوتات المستقلة وإعادة تشغيلها.
-5.  **📢 القنوات:** إدارة قنوات التلجرام والنشر المتزامن.
+*   **📦 الأرشفة:** "اضغط مشروع WebApp وارفعه للقناة" → (Build > Zip > Upload > Local Delete).
+*   **☁️ السحاب:** "احفظ هذه النسخة في سوباباس" → CloudBackup Tool.
+*   **📂 التنظيم:** أي رسائل أو وثائق يتم تخزينها تلقائياً في `storage/docs/` لضمان نظافة النظام.
+*   **🛡️ الأمان:** يتم فحص جميع الأوامر والمسارات لمنع الخروج عن نطاق مجلد العمل (`BASE_DIR`).
 
 ---
 
 ## 🚀 التثبيت والتشغيل السريع
 
-### 1- المتطلبات
-- Python 3.10+
-- Redis (اختياري، يوصى به لـ BotNetwork)
-- PM2 (لإدارة العمليات)
+### 1- المتطلبات السحابية
+للحصول على كامل قدرات الإصدار 7.2، أضف هذه القيم لملف الـ `.env`:
+- `SUPABASE_URL` & `SUPABASE_KEY` (للتخزين السحابي)
+- `TELEGRAM_CHANNEL_ID` (لقناة التخزين الاحتياطي)
 
 ### 2- التثبيت
 ```bash
@@ -93,22 +81,14 @@ cd Nexum-Core
 pip install -r requirements.txt
 ```
 
-### 3- التشغيل عبر PM2 (5 عمليات نشطة)
+### 3- التشغيل
 ```bash
 pm2 start ecosystem.config.js
 ```
 
 ---
 
-## 📁 هيكل التخزين والنتائج
-- `registry/apps/`: المواقع والتطبيقات التي بناها WebForge.
-- `registry/bots/`: البوتات المستقلة التي بناها BotBuilder.
-- `agents/generated/`: الوكلاء الذين صممهم AgentSmith.
-- `storage/templates/`: قوالب البوتات والمواقع الاحترافية.
-
----
-
 ## 👨‍💻 المطوّر
 تم تطوير **NEXUM CORE OS** بواسطة **معتز إسماعيل تيلخ (Mutaz Tailakh)**.
 
-*🔱 NEXUM CORE OS v7.1 — Sovereign Agentic Operating System*
+*🔱 NEXUM CORE OS v7.2 — Sovereign Agentic Operating System*
