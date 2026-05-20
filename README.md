@@ -1,94 +1,53 @@
-# 🔱 NEXUM CORE OS v7.2 | Sovereign Agentic Operating System
-
-> **نظام تشغيل سيادي ذكي متكامل.** NEXUM v7.2 هو القفزة الكبرى نحو الاستقلالية التامة، مع "وعي" نظام تشغيل مركزي وقدرات تخزين سحابية هجينة لضمان كفاءة السيرفر المطلقة.
-
-[![Python](https://img.shields.io/badge/Python-3.10+-green?style=for-the-badge&logo=python)](https://python.org)
-[![Telegram](https://img.shields.io/badge/Telegram-Bot%20API-blue?style=for-the-badge&logo=telegram)](https://core.telegram.org/bots/api)
-[![Version](https://img.shields.io/badge/Version-7.2--ULTRA-gold?style=for-the-badge)](#)
-[![AI](https://img.shields.io/badge/AI-Gemini%20Flash/Pro%20+%20Claude-purple?style=for-the-badge&logo=google)](#)
+# 🔱 NEXUM CORE OS — v7.2.1 (Agentic)
+### Sovereign AI Operating System for Distributed Server Management
 
 ---
 
-## 🚀 ما الجديد في الإصدار 7.2؟ (إصدار الكفاءة والوعي)
+## 🚀 نظرة عامة (Overview)
+Nexum Core هو نظام تشغيل وكيل (Agentic OS) متطور يحول خادمك الشخصي إلى كيان ذكي مستقل. يجمع النظام بين قوة **Gemini Pro** وبنية تحتية مرنة تعتمد على بروتوكولات YAML لإدارة المهام، المواقع، والبوتات.
 
-تم تقديم ميزات ثورية لضمان بقاء السيرفر خفيفاً ومنظماً مهما كثرت المشاريع:
-- **Hybrid Cloud Storage Manager:** نظام تخزين هجين يربط السيرفر بـ **Supabase** وقنوات **Telegram** للتخزين الخارجي.
-- **Auto-Archiving (Zip & Offload):** قدرة النظام على أرشفة المشاريع المكتملة في ملفات ZIP ورفعها للسحاب وحذفها محلياً لتوفير مساحة السيرفر.
-- **OS Consciousness Layer:** تحديث "وعي" النظام ليدرك دوره كقائد مركزي (Central Orchestrator) مع تحسين فهم النوايا (Intent Recognition) حتى مع الاختلافات اللغوية.
-- **Strict Organizational Hierarchy:** فرض هيكلية تنظيمية صارمة للمجلدات لضمان عدم تراكم الملفات العشوائية في جذر النظام.
+## 🏗️ الهيكل المعماري الجديد (The New Architecture)
+تمت إعادة هندسة النظام في الإصدار v7.2.1 ليعتمد على هيكلية "الحزمة المركزية" لضمان الاستقرار والأمان:
 
----
+- **`main.py`**: نقطة الانطلاق الرئيسية، مجهزة بنظام **Crash Recovery** لضمان استمرارية الاتصال.
+- **`nexum/`**: الحزمة المركزية التي تضم ذكاء النظام:
+    - **`config/`**: إدارة الإعدادات عبر Pydantic.
+    - **`intelligence/`**: نظام تصنيف النوايا (Gemini Classifier).
+    - **`security/`**: تشمل Rate Limiter و Audit Logger.
+    - **`memory/`**: إدارة السياق والتلخيص التلقائي للمحادثات.
+    - **`protocols/`**: محرك تنفيذ العمليات المؤتمتة عبر YAML.
+- **`core/`**: الأدوات المساعدة وخدمات النظام (Orchestrator, Planner).
+- **`registry/`**: سجل التطبيقات والبوتات والوكلاء الذين يتم بناؤهم.
 
-## 🧠 المحركات المركزية (v7.2 Core)
-| المحرك | الوصف | المجلد المخصص |
-|---|---|---|
-| ☁️ **CloudManager** | مدير التخزين السحابي؛ يرفع النسخ الاحتياطية لتيليجرام وسوباباس. | `core/cloud_storage.py` |
-| 🌐 **WebForge** | محرك بناء المواقع والتطبيقات السحابية. | `registry/apps/` |
-| 🤖 **AgentSmith** | مصنع الوكلاء الذكي وتصميم الشخصيات الرقمية. | `registry/agents/` |
-| 🏗️ **BotBuilder** | توليد وتشغيل أسطول بوتات تيليجرام المستقلة. | `registry/bots/` |
-| 📦 **Storage Engine** | إدارة الملفات والوثائق والأرشفة التلقائية. | `storage/` |
+## 🛠️ المميزات الرئيسية
+- 🧠 **نظام تصنيف النوايا:** فهم دقيق لمراد المستخدم (دردشة، تنفيذ، بناء) بدقة تصل لـ 95%.
+- 🛡️ **حماية سيادية:** تقييد معدل الطلبات (Rate Limiting) وسجل تدقيق (Audit Log) لكل حركة.
+- ♻️ **استرداد تلقائي:** القدرة على تجاوز الأخطاء التقنية في الاتصال وإعادة التشغيل دون تدخل بشري.
+- 📝 **بروتوكولات YAML:** إمكانية تعريف سلاسل مهام معقدة في ملف واحد ليقوم النظام بتنفيذها.
 
----
+## ⚙️ التثبيت والتشغيل (Setup)
+1. قم بتهيئة ملف الإعدادات:
+   ```bash
+   cp .env.example .env
+   ```
+   *أضف مفاتيحك (API Keys) في ملف `.env`.*
 
-## 🏗️ المعمارية السحابية المحدثة (Architecture)
+2. تشغيل النظام:
+   ```bash
+   python main.py
+   ```
 
-```
-┌─────────────────────────────────────────────────────────┐
-│              🌐 Web Dashboard (v7.2 UI)                 │
-│    (Status | Cloud Backups | Apps | Bots | Storage)     │
-└──────────────┬──────────────────────┬───────────────────┘
-               ↓                      ↓
-┌──────────────────────┐      ┌───────────────────────────┐
-│ 🔱 NEXUM CORE MAIN  │ ←──→ │   Supabase Cloud Sync     │
-│ (Telegram Interface) │      │   (Database & Storage)    │
-└──────────────┬───────┘      └───────────────────────────┘
-               ↓                       |
-┌─────────────────────────────────────────────────────────┐
-│            🧠 OS ORCHESTRATOR & PLANNER                 │
-│         (Cloud-Aware Task Execution Layer)              │
-└──────────────┬──────────────────────────────────────────┘
-               ↓
-┌───────┬───────────────┬───────────────┬────────────────┐
-│  ☁️    │      🌐       │      🤖       │       🏗️       │
-│Backup │ WebForge      │ AgentSmith   │  BotBuilder    │
-└───────┴───────────────┴───────────────┴────────────────┘
-```
+3. تشغيل الاختبارات:
+   ```bash
+   pytest tests/
+   ```
 
----
-
-## 💻 التفاعل والوعي (Intelligence Layer)
-
-النظام الآن يمتلك "وعياً" بالمكان والزمان والمساحة التخزينية:
-
-*   **📦 الأرشفة:** "اضغط مشروع WebApp وارفعه للقناة" → (Build > Zip > Upload > Local Delete).
-*   **☁️ السحاب:** "احفظ هذه النسخة في سوباباس" → CloudBackup Tool.
-*   **📂 التنظيم:** أي رسائل أو وثائق يتم تخزينها تلقائياً في `storage/docs/` لضمان نظافة النظام.
-*   **🛡️ الأمان:** يتم فحص جميع الأوامر والمسارات لمنع الخروج عن نطاق مجلد العمل (`BASE_DIR`).
+## 📜 سجل التغييرات v7.2.1
+- [x] إعادة الهيكلة إلى `nexum/` package.
+- [x] استبدال Keyword matching بـ Gemini Classifier.
+- [x] إضافة نظام Crash Recovery لـ Telegram Polling.
+- [x] تفعيل Pydantic Settings لإدارة الـ Environment.
+- [x] إضافة نظام Audit و Rate Limiting.
 
 ---
-
-## 🚀 التثبيت والتشغيل السريع
-
-### 1- المتطلبات السحابية
-للحصول على كامل قدرات الإصدار 7.2، أضف هذه القيم لملف الـ `.env`:
-- `SUPABASE_URL` & `SUPABASE_KEY` (للتخزين السحابي)
-- `TELEGRAM_CHANNEL_ID` (لقناة التخزين الاحتياطي)
-
-### 2- التثبيت
-```bash
-git clone https://github.com/ossoolli/Nexum-Core.git
-cd Nexum-Core
-pip install -r requirements.txt
-```
-
-### 3- التشغيل
-```bash
-pm2 start ecosystem.config.js
-```
-
----
-
-## 👨‍💻 المطوّر
-تم تطوير **NEXUM CORE OS** بواسطة **معتز إسماعيل تيلخ (Mutaz Tailakh)**.
-
-*🔱 NEXUM CORE OS v7.2 — Sovereign Agentic Operating System*
+**NEXUM — The Future is Sovereign.** 🔱

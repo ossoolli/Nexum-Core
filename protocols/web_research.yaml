@@ -1,0 +1,33 @@
+name: web_research
+version: "1.0"
+description: "بحث ويب + تلخيص + بث للقناة"
+timeout: 120
+
+steps:
+  - id: search
+    tool: web_search
+    input:
+      query: "{{goal}}"
+    output: search_results
+
+  - id: fetch
+    tool: fetch_page
+    input:
+      url: "{{search_results.top_url}}"
+    output: page_content
+    depends_on: [search]
+
+  - id: summarize
+    tool: llm_summarize
+    input:
+      text: "{{page_content.text}}"
+      language: "ar"
+    output: summary
+    depends_on: [fetch]
+
+  - id: broadcast
+    tool: telegram_broadcast
+    input:
+      message: "📊 {{summary.text}}"
+    depends_on: [summarize]
+    condition: "{{config.broadcast_enabled}}"

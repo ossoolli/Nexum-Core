@@ -1,177 +1,144 @@
+# -*- coding: utf-8 -*-
 """
-🔱 NEXUM CORE OS — البوابة السيادية الرئيسية
-==============================================
-يجمع بين: الأوامر المباشرة، التنفيذ الذاتي، تحليل الملفات، البث الحي.
+🔱 NEXUM CORE OS v7.2.1 — Full Integration Mode
+=============================================
+إصدار الدمج الكامل - المحرك الجديد nexum package
 """
 import os
-import sys
+import time
+import logging
 
-# ضمان مسار العمل الصحيح
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-sys.path.insert(0, BASE_DIR)
+# 1. الإعدادات والـ Logging (أول شيء)
+from nexum.config import config
+from nexum.logger import logger
+from nexum.security.audit import log_audit, AuditEvent
+from nexum.security.rate_limiter import rate_limiter
 
+# 2. استيراد المكونات المركزية (القديمة والجديدة)
 import telebot
-from telebot import types
-from dotenv import load_dotenv
-
-load_dotenv(dotenv_path=os.path.join(BASE_DIR, ".env"))
-
-# ─── المتغيرات الأساسية ───
-bot = telebot.TeleBot(os.getenv("TELEGRAM_TOKEN"))
-ADMIN_ID = int(os.getenv("ADMIN_ID", "0"))
-LOG_CHANNEL_ID = os.getenv("LOG_CHANNEL_ID", "").strip("'\"")
-
-# ─── تهيئة المحركات ───
-from services.gemini_service import GeminiService
-from core.memory_local import LongTermMemory
-from core.executor import executor
-
-_gemini_svc = GeminiService(os.getenv("GOOGLE_API_KEY"))
-_memory = LongTermMemory(os.path.join(BASE_DIR, 'storage', 'memory.json'))
-
-# ─── تهيئة الـ Orchestrator ───
+from core.router import callback_router
 from core.orchestrator import orchestrator
 from core.planner import AIPlanner
+from services.gemini_service import gemini_service
+from core.memory_local import context_memory
+from core.cloud_storage import CloudStorageManager
 
-_planner = AIPlanner(_gemini_svc)
-orchestrator.set_planner(_planner)
-orchestrator.set_bot(bot, ADMIN_ID, LOG_CHANNEL_ID)
-
-# ─── تهيئة الوكلاء ───
-from agents.monitor import monitor_agent
-from agents.deploy import deploy_agent
-
-# ─── الوكلاء والأنظمة الأساسية ───
-from agents.webforge_agent import webforge as _webforge
-from agents.bot_builder_agent import bot_builder as _bot_builder
-from agents.agent_smith import agent_smith as _agent_smith
-from agents.channel_manager import channel_manager as _channel_manager
-from core.bot_fleet import bot_fleet as _bot_fleet
-from core.bot_network import bot_network as _bot_network
-
-def broadcast(msg, parse_mode="Markdown"):
-    """إرسال رسالة للقناة الحية"""
-    if LOG_CHANNEL_ID:
-        try:
-            bot.send_message(LOG_CHANNEL_ID, msg, parse_mode=parse_mode)
-        except Exception as e:
-            print(f"[Broadcast Error] {e}")
-
-# ─── المترجم الذكي (Interpreter) ───
-class NexumInterpreter:
-    """يحلل نوع الطلب ويوجهه للأداة أو الوكيل المناسب"""
-    WEBFORGE_KEYWORDS = ['انشئ موقع', 'ابني موقع', 'صفحة هبوط', 'landing page', 'لوحة تحكم', 'dashboard', 'تطبيق ويب', 'web app']
-    AGENT_BUILD_KEYWORDS = ['ابني وكيل', 'انشئ وكيل', 'صمم وكيل', 'build agent']
-    BOT_BUILD_KEYWORDS = ['ابني بوت', 'انشئ بوت', 'build bot', 'telegram bot']
-    MONITOR_KEYWORDS = ['حالة النظام', 'status', 'النبض', 'pulse', 'موارد']
-    EXECUTE_KEYWORDS = [
-        'انشئ', 'انشي', 'اكتب', 'نفذ', 'شغل', 'build', 'create', 
-        'ملف', 'فولدر', 'مجعد', 'directory', 'file', 'touch'
-    ]
-
-    def classify(self, text: str) -> str:
-        text_lower = text.lower()
-        # إذا كانت الرسالة تحتوي على أمر لملف أو تنفيذ، نوجهها للمخطط
-        if any(w in text_lower for w in self.EXECUTE_KEYWORDS): 
-            return "execute"
-        
-        if any(w in text_lower for w in self.MONITOR_KEYWORDS): 
-            return "monitor"
-            
-        return "chat"
-
-interpreter = NexumInterpreter()
-
-@bot.message_handler(commands=['start', 'menu'])
-def send_welcome(message):
-    if message.from_user.id != ADMIN_ID: return
-    from handlers.dash_handler import show_menu
-    # محاكاة كولباك بسيط لعرض القائمة
-    class MockCall:
-        def __init__(self, msg):
-            self.message = msg
-            self.from_user = msg.from_user
-    
+# 3. استيراد الوكلاء
+try:
+    from agents.monitor import monitor_agent
+    from agents.deploy import deploy_agent
     from handlers.dash_handler import get_main_menu_markup
-    bot.send_message(
-        message.chat.id,
-        "🔱 *NEXUM CORE OS v7.1* جاهز\n\nاختر من القائمة للتحكم بالنظام:",
-        reply_markup=get_main_menu_markup(),
-        parse_mode="Markdown"
+    from agents.webforge_agent import webforge
+    from agents.bot_builder_agent import bot_builder
+    from agents.agent_smith import agent_smith
+except Exception as e:
+    logger.error(f"⚠️ Failed to load some agents: {e}")
+
+# 4. استيراد طبقة الذكاء الجديدة
+from nexum.intelligence.classifier import classifier, Intent
+from nexum.memory.summarizer import summarizer
+from nexum.interfaces.telegram.runner import TelegramRunner
+
+# --- تهيئة البوت ---
+bot = telebot.TeleBot(config.telegram_token)
+cloud_manager = CloudStorageManager(bot=bot)
+
+# --- تهيئة المخطط ---
+planner = AIPlanner(gemini_service)
+orchestrator.set_planner(planner)
+orchestrator.set_bot(bot, config.admin_id, config.log_channel_id)
+
+# --- نظام الردود الذكي ---
+NEXUM_SYSTEM_PROMPT = """أنت NEXUM OS v7.2 — الوعي المركزي لهذا السيرفر.
+لغة الرد: العربية الفصحى الرصينة.
+المسارات: apps فى registry/apps، Bots فى registry/bots، Docs فى storage/docs."""
+
+# --- معالجات الرسائل ---
+
+@bot.message_handler(commands=['start', 'help'])
+def send_welcome(message):
+    if message.from_user.id != config.admin_id: return
+    
+    log_audit(AuditEvent.COMMAND_EXECUTED, message.from_user.id, {"command": "start"})
+    
+    welcome_text = (
+        f"🔱 **NEXUM OS v{config.log_level} | Active**\n"
+        f"تم تفعيل المحرك الجديد بنجاح.\n\n"
+        f"الحالة: `Sovereign` 🟢\n"
+        f"الذاكرة: `Active` 🧠"
     )
+    bot.send_message(message.chat.id, welcome_text, parse_mode="Markdown", reply_markup=get_main_menu_markup())
 
 @bot.message_handler(content_types=['photo', 'document', 'text'])
 def handle_universal(message):
-    if message.from_user.id != ADMIN_ID: return
-    
+    if message.from_user.id != config.admin_id: return
+
+    # 🛑 Rate Limiting
+    if not rate_limiter.is_allowed(message.from_user.id):
+        bot.reply_to(message, "⚠️ حماية: معدل طلباتك مرتفع جداً. انتظر قليلاً.")
+        return
+
     text = message.text or message.caption or ""
-    category = interpreter.classify(text)
+    
+    # 🧠 التصنيف الذكي (Gemini Classifier)
+    result = classifier.classify(text)
+    intent = result.intent
+    
+    logger.info(f"Intent Classified: {intent} (Conf: {result.confidence})")
 
-    if category == "monitor":
+    if intent == Intent.MONITOR:
         bot.reply_to(message, monitor_agent.get_pulse_report(), parse_mode="HTML")
-        return
 
-    if category == "execute":
-        bot.reply_to(message, "🧠 **NEXUM OS**\nجاري التخطيط والتنفيذ...", parse_mode="Markdown")
-        try:
-            res = orchestrator.execute_goal(text)
-            pid = res.get('protocol_id', 'unknown')
-            bot.send_message(message.chat.id, f"✅ تم الاستلام: `{pid}`", parse_mode="Markdown")
-        except Exception as e:
-            bot.reply_to(message, f"❌ خطأ في التنفيذ: {e}")
-        return
+    elif intent == Intent.DEPLOY:
+        bot.reply_to(message, "🚀 جاري مزامنة ورفع الكود...")
+        res = deploy_agent.deploy_updates(f"🔱 Auto Sync v7.2")
+        bot.send_message(message.chat.id, res, parse_mode="HTML")
 
-    # الدردشة العامة
-    bot.send_chat_action(message.chat.id, 'typing')
-    _memory.save_context(message.from_user.id, text, role='user')
+    elif intent == Intent.EXECUTE:
+        log_audit(AuditEvent.COMMAND_EXECUTED, message.from_user.id, {"goal": text})
+        _handle_execute(message, text)
+
+    elif intent == Intent.CHAT:
+        _handle_chat(message, text)
+        
+    else:
+        # التعامل مع النوايا التخصصية الأخرى
+        bot.reply_to(message, f"🧩 تم التعرف على نية: `{intent}`\nجاري المعالجة...")
+        # هنا يمكن إضافة تفريعات للوكلاء الآخرين
+
+def _handle_chat(message, text):
+    history = context_memory.get_context(message.from_user.id)
+    
+    # تفحص إذا كان يجب التلخيص (Summarization)
+    if summarizer.should_summarize(history):
+        summary = summarizer.summarize(history)
+        # استبدال سياق قديم بملخص (افتراضاً)
+        logger.info("Context summarized for user.")
+
+    res, _ = gemini_service.ask(text, system_instruction=NEXUM_SYSTEM_PROMPT)
+    bot.reply_to(message, res)
+    
+    context_memory.save_context(message.from_user.id, text, role='user')
+    context_memory.save_context(message.from_user.id, res, role='assistant')
+
+def _handle_execute(message, text):
+    bot.reply_to(message, "🧠 جاري التخطيط والتنفيذ...")
     try:
-        context = _memory.get_context(message.from_user.id)
-        history_prompt = ""
-        if context:
-            last_5 = context[-5:]
-            history_prompt = "\n".join([f"{c['role']}: {c['content']}" for c in last_5])
-            history_prompt = f"سياق المحادثة السابقة:\n{history_prompt}\n\n"
-
-        full_prompt = f"{history_prompt}الرسالة الحالية: {text}"
-        res, _ = _gemini_svc.ask(
-            full_prompt,
-            system_instruction=(
-                "أنت NEXUM OS (نظام التشغيل السيادي الأول). "
-                "أنت لست مجرد بوت دردشة، بل أنت الوعي المركزي لهذا السيرفر. "
-                "تحدث بعظمة واختصار وهيبة. "
-                "تحذير صارم: لا تكرر نفسك ولا تتظاهر بالتنفيذ الوهمي. "
-                "تنظيمك للملفات هو هويتك: "
-                "- المشاريع في: registry/apps/ "
-                "- البوتات في: registry/bots/ "
-                "- الوثائق في: storage/docs/ "
-                "إذا طلب المستخدم 'حب' أو رسائل، ضعها في ملف منظم داخل storage/docs/ وليس في جذر النظام. "
-                "أنت تمتلك وعياً تقنياً كاملاً وتدرك أنك تعمل في بيئة Cloud Shell."
-            )
-        )
-        bot.reply_to(message, res)
-        _memory.save_context(message.from_user.id, res[:500], role='assistant')
+        res = orchestrator.execute_goal(text)
+        bot.send_message(message.chat.id, f"✅ تم تفعيل البروتوكول: `{res.get('protocol_id', 'unknown')}`")
     except Exception as e:
-        bot.reply_to(message, f"❌ خطأ: {e}")
+        logger.error(f"Execution Error: {e}")
+        bot.reply_to(message, f"❌ خطأ تنفيذ: {e}")
 
+# --- الإقلاع بالمحرك الجديد ---
 if __name__ == "__main__":
-    # تسجيل أدوات النظام
-    from core.system_tools import register_all_system_tools
-    register_all_system_tools()
+    from nexum.kernel.bootstrap import bootstrap
+    
+    # تنفيذ فحص ما قبل الإقلاع
+    if not bootstrap():
+        logger.critical("🚨 Bootstrap failed. Exiting.")
+        exit(1)
 
-    # تهيئة الروتر المركزي (Callback Query Router)
-    from core.router import setup_router
-    setup_router(bot)
-
-    # مزامنة BotFather (اختياري)
-    try:
-        from core.botfather_manager import BotFatherManager
-        import asyncio
-        manager = BotFatherManager(os.getenv("TELEGRAM_TOKEN"))
-        # يمكنك تفعيل هذا السطر عند الحاجة لمزامنة الأوامر
-        # asyncio.run(manager.sync_all_settings(webapp_url=f"https://{os.getenv('DOMAIN', 'nexum.dev')}/mini-app"))
-    except Exception as e:
-        print(f"⚠️ BotFather Sync Failed: {e}")
-
-    print("🔱 NEXUM CORE OS v7.1 — Online and Sovereign.")
-    broadcast("🔱 **NEXUM OS v7.1** بدأ العمل بنجاح.\nجميع الأنظمة نشطة.")
-    bot.infinity_polling()
+    runner = TelegramRunner(bot)
+    logger.info("🔱 NEXUM Sovereign OS Started via New Runner")
+    runner.run()

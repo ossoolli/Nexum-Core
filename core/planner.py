@@ -16,6 +16,14 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 class AIPlanner:
     def __init__(self, llm):
         self.llm = llm
+        self.ALLOWED_BASE_PATHS = {
+            "apps":    os.path.join(BASE_DIR, "registry", "apps"),
+            "bots":    os.path.join(BASE_DIR, "registry", "bots"),
+            "agents":  os.path.join(BASE_DIR, "registry", "agents"),
+            "storage": os.path.join(BASE_DIR, "storage"),
+            "docs":    os.path.join(BASE_DIR, "storage", "docs"),
+            "tmp":     "/tmp/nexum",
+        }
 
     def generate_execution_graph(self, goal: str, protocol_id: str) -> ExecutionGraph:
         """يولد مخطط تنفيذ من هدف نصي عبر الذكاء الاصطناعي"""
@@ -90,6 +98,9 @@ Return format:
             tid = t.get('task_id', f"task_{uuid.uuid4().hex[:4]}")
             action = t.get('action', 'run_host_terminal')
             params = t.get('params', {})
+            
+            # ترسيخ المسارات (v7.2)
+            params = self._ground_params(params)
 
             node = TaskNode(
                 task_id=tid,
@@ -106,3 +117,23 @@ Return format:
             graph.add_node(node)
 
         return graph
+
+    def _ground_params(self, params: dict) -> dict:
+        """يستبدل المسارات الوهمية بمسارات حقيقية ضمن BASE_DIR."""
+        for key in ["filepath", "path", "file_path", "directory", "output_dir"]:
+            raw_path = params.get(key, "")
+            if not raw_path: continue
+            
+            # إذا كان المسار يحتوي على {BASE_DIR}
+            if "{BASE_DIR}" in str(raw_path):
+                raw_path = raw_path.replace("{BASE_DIR}", BASE_DIR)
+            
+            if not os.path.isabs(raw_path):
+                # مسار نسبي -> حوّله لمطلق داخل BASE_DIR
+                params[key] = os.path.normpath(os.path.join(BASE_DIR, raw_path))
+            elif not raw_path.startswith(BASE_DIR):
+                # مسار مطلق خارج البروجكت -> أعد توجيهه لمجلد مؤقت آمن
+                file_name = os.path.basename(raw_path)
+                params[key] = os.path.join(self.ALLOWED_BASE_PATHS["tmp"], file_name)
+        
+        return params
