@@ -1,40 +1,34 @@
-from typing import Dict, Any, Optional
-
-# تخزين لحالة كل مستخدم 
-# الهيكل: { user_id: {"state": "STATE_NAME", "data": {}} }
-_USER_STATES: Dict[int, Dict[str, Any]] = {}
+from collections import defaultdict
 
 class FSMManager:
-    """ مدير الحالات (State Machine) للعمليات المتسلسلة """
-    
-    @staticmethod
-    def set_state(user_id: int, state: str):
-        if user_id not in _USER_STATES:
-            _USER_STATES[user_id] = {"state": None, "data": {}}
-        _USER_STATES[user_id]["state"] = state
+    """
+    مدير آلة الحالات المحدودة (FSM) لإدارة تدفق المحادثات وجلسات المستخدمين.
+    """
+    def __init__(self):
+        # قاموس لحفظ حالة كل مستخدم، وهيكله: {user_id: state_name}
+        self._states = defaultdict(lambda: "IDLE")
+        # قاموس لحفظ البيانات المؤقتة لكل مستخدم خلال الجلسة
+        self._data = defaultdict(dict)
 
-    @staticmethod
-    def get_state(user_id: int) -> Optional[str]:
-        return _USER_STATES.get(user_id, {}).get("state")
+    def set_state(self, user_id: int, state: str):
+        """تعيين حالة مستخدم معين"""
+        self._states[user_id] = state
 
-    @staticmethod
-    def clear_state(user_id: int):
-        if user_id in _USER_STATES:
-            _USER_STATES[user_id]["state"] = None
-            _USER_STATES[user_id]["data"] = {}
+    def get_state(self, user_id: int) -> str:
+        """جلب الحالة الحالية للمستخدم"""
+        return self._states[user_id]
 
-    @staticmethod
-    def save_data(user_id: int, key: str, value: Any):
-        if user_id not in _USER_STATES:
-            _USER_STATES[user_id] = {"state": None, "data": {}}
-        _USER_STATES[user_id]["data"][key] = value
+    def clear(self, user_id: int):
+        """تصفير حالة وبيانات المستخدم"""
+        self._states[user_id] = "IDLE"
+        self._data[user_id] = {}
 
-    @staticmethod
-    def get_data(user_id: int, key: str, default: Any = None) -> Any:
-        return _USER_STATES.get(user_id, {}).get("data", {}).get(key, default)
-        
-    @staticmethod
-    def get_all_data(user_id: int) -> dict:
-        return _USER_STATES.get(user_id, {}).get("data", {})
+    def update_data(self, user_id: int, **kwargs):
+        """تحديث أو إضافة بيانات مؤقتة لجلسة المستخدم"""
+        self._data[user_id].update(kwargs)
 
-fsm = FSMManager()
+    def get_data(self, user_id: int) -> dict:
+        """جلب البيانات المؤقتة الخاصة بالمستخدم"""
+        return self._data[user_id]
+
+fsm_manager = FSMManager()

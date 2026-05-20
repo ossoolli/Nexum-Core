@@ -1,41 +1,25 @@
 import sys
+import logging
 from telebot import TeleBot
 from core.middlewares import rate_limit
 
-from handlers import dash_handler, webforge_handler, agents_bots_handler
-
-CALLBACK_ROUTES = {
-    "menu": dash_handler.show_menu,
-    "wf": webforge_handler.route,
-    "ag": agents_bots_handler.route_agents,
-    "bt": agents_bots_handler.route_bots,
-}
+logger = logging.getLogger("nexum.router")
 
 def setup_router(bot: TeleBot):
     """
-    تهيئة الموجه المركزي وربطه بنسخة البوت
+    تهيئة الموجه المركزي وربطه بنسخة البوت.
+    هذا يجمع الحبال المفقودة في v7.2.1.
     """
+    
     @bot.callback_query_handler(func=lambda call: True)
     @rate_limit(cooldown=1.0)
     def central_router(call):
         try:
-            # استخراج النطاق (namespace)، مثال: "menu:main" -> "menu"
-            namespace = call.data.split(":")[0]
-            handler = CALLBACK_ROUTES.get(namespace)
-            
-            if handler:
-                handler(call, bot)
-            else:
-                # إذا لم يكن هناك handler
-                bot.answer_callback_query(call.id, "المسار غير مدعوم حالياً 🚧", show_alert=True)
-                
+            # هنا يتم الاستيراد بشكل متأخر لتجنب Circular Imports
+            from main import handle_callbacks
+            handle_callbacks(call)
         except Exception as e:
-            # معالجة الأخطاء بشكل صامت وتنبيه المستخدم
-            print(f"[Router Error] {e}")
-            bot.answer_callback_query(call.id, "حدث خطأ غير متوقع ❌", show_alert=True)
-        finally:
-            # تأكيد استلام الحدث لمنع تعليق واجهة تيليجرام
+            logger.error(f"[Router Error] {e}")
             try:
-                bot.answer_callback_query(call.id)
-            except Exception:
-                pass
+                bot.answer_callback_query(call.id, "حدث خطأ في الموجه ❌", show_alert=True)
+            except: pass

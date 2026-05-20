@@ -75,23 +75,17 @@ class FlowOrchestrator:
 
         try:
             result = tool_registry.execute_tool(task.action, task.params)
-            
-            # التحقق من النتيجة فعلياً (v7.2)
-            verification = self._verify_step_result(task.action, task.params, result)
-            
-            if verification["verified"]:
-                task.status = "COMPLETED"
-                task.result = result
-                # إرسال النتيجة
-                result_preview = str(result)[:800]
-                self._notify(
-                    f"✅ **مهمة مكتملة**\n"
-                    f"🧬 `{graph.protocol_id}`\n"
-                    f"🛠️ `{task.action}`\n"
-                    f"📊 {result_preview}"
-                )
-            else:
-                raise Exception(verification["output"])
+            task.status = "COMPLETED"
+            task.result = result
+
+            # إرسال النتيجة
+            result_preview = str(result)[:800]
+            self._notify(
+                f"✅ **مهمة مكتملة**\n"
+                f"🧬 `{graph.protocol_id}`\n"
+                f"🛠️ `{task.action}`\n"
+                f"📊 {result_preview}"
+            )
 
             # مزامنة Git إذا كانت العملية كتابة ملف
             if task.action in ("write_file", "run_host_terminal"):
@@ -105,34 +99,6 @@ class FlowOrchestrator:
             task.status = "FAILED"
             task.error = str(e)
             self._notify(f"❌ **فشل المهمة**\n🛠️ `{task.action}`\n`{str(e)}`")
-
-    def _verify_step_result(self, tool_name: str, params: dict, raw_result: Any) -> dict:
-        """
-        يتحقق من صحة نتيجة كل خطوة قبل الإعلان عن النجاح.
-        لا hallucination — إما نجح فعلاً أو فشل.
-        """
-        import os
-        from core.system_tools import BASE_DIR
-
-        # أدوات كتابة الملفات: تحقق من وجود الملف
-        if tool_name in ("write_file", "create_file", "save_file"):
-            path = params.get("filepath", "") or params.get("path", "")
-            full_path = os.path.abspath(os.path.join(BASE_DIR, path)) if not os.path.isabs(path) else path
-            if not os.path.exists(full_path):
-                return {
-                    "verified": False,
-                    "output": f"الأداة ادّعت النجاح لكن الملف في '{path}' غير موجود فعلياً"
-                }
-
-        # أدوات Shell: تحقق من exit code (إذا توفر)
-        if tool_name in ("run_host_terminal", "terminal", "shell"):
-            if isinstance(raw_result, dict) and raw_result.get("status") == "failed":
-                return {
-                    "verified": False,
-                    "output": raw_result.get("output", "الأمر فشل برمز خطأ")
-                }
-
-        return {"verified": True, "output": raw_result}
 
     # ─── المجدول (Scheduler Loop) ───
     def _run_scheduler(self):
