@@ -59,22 +59,6 @@
 
 ---
 
-## 📂 هيكل المجلدات (Project DNA)
-
-```text
-Nexum-Core/
-├── main.py                 # 🔱 العقل المركزي (النقطة السيادية)
-├── nexum/                  # 📦 الحزمة النواتية (Kernel, Intelligence, Security)
-├── core/                   # 🧠 العضلات (Orchestrator, Planner, Router, Keyboards)
-├── agents/                 # 🤖 الوكلاء (WebForge, BotBuilder, AgentSmith, ChannelManager)
-├── handlers/               # 🔗 المعالجات (توجيه الأزرار والقوائم)
-├── ui/                     # 🎨 المكونات البصرية (Components, Messages)
-├── services/               # ☁️ الخدمات الخارجية (Gemini, API Clients)
-└── storage/                # 💾 الذاكرة الدائمة (Bots, Projects, Logs)
-```
-
----
-
 ## 🚀 التثبيت والتشغيل السريع (Installation)
 
 ### 📂 التشغيل عبر Google Cloud Shell
@@ -95,13 +79,16 @@ python main.py
 ```
 
 ### ♾️ التشغيل المستمر (Continuous Awareness)
-لضمان عمل النظام 24/7 دون "هذيان" وبذاكرة واعية لا تتأثر بالانهيارات:
+لضمان عمل النظام 24/7 دون "هذيان" وبذاكرة واعية لا تتأثر بالانهيارات يتم استخدام PM2:
 
 ```bash
-# استخدام PM2 للإدارة الاحترافية
+# 1. تثبيت PM2 (إذا لم يكن متاحاً في Cloud Shell)
+npm install -g pm2
+
+# 2. إطلاق "النظام السيادي"
 pm2 start ecosystem.config.js
 
-# الأوامر الحيوية
+# 3. الأوامر الحيوية
 pm2 status          # عرض الحالة
 pm2 logs nexum-core  # متابعة سجل الوعي
 pm2 restart all      # إعادة تشغيل السيادة
@@ -109,11 +96,19 @@ pm2 restart all      # إعادة تشغيل السيادة
 
 ---
 
-## 📜 خارطة الطريق وشهادة السيادة
+## 📂 هيكل المجلدات (Project DNA)
 
-*   **v7.3.0 [CURRENT]**: استعادة كامل الميزات المفقودة ودمج الإصدارات.
-*   **v7.5.0**: تفعيل نظام "متجر الأدوات" (Tool Registry) الكامل لدعم MCP.
-*   **v8.0.0**: إطلاق واجهة الويب المتكاملة (Sovereign Mini App).
+```text
+Nexum-Core/
+├── main.py                 # 🔱 العقل المركزي (النقطة السيادية)
+├── nexum/                  # 📦 الحزمة النواتية (Kernel, Intelligence, Security)
+├── core/                   # 🧠 العضلات (Orchestrator, Planner, Router, Keyboards)
+├── agents/                 # 🤖 الوكلاء (WebForge, BotBuilder, AgentSmith, ChannelManager)
+├── handlers/               # 🔗 المعالجات (توجيه الأزرار والقوائم)
+├── ui/                     # 🎨 المكونات البصرية (Components, Messages)
+├── services/               # ☁️ الخدمات الخارجية (Gemini, API Clients)
+└── storage/                # 💾 الذاكرة الدائمة (Bots, Projects, Logs)
+```
 
 ---
 
@@ -121,4 +116,4 @@ pm2 restart all      # إعادة تشغيل السيادة
 تم تطوير نظام **Nexum Core OS** بواسطة المبرمج **معتز إسماعيل تيلخ (Mutaz Tailakh)**، كجزء من رؤية Ossoolli للأنظمة المستقلة.
 
 ---
-🔱 **NEXUM — The Sovereign Union.**
+🔱 **NEXUM — The Future is Sovereign.**
