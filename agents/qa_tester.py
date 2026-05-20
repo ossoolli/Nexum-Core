@@ -21,6 +21,7 @@ def verify_file_production(path):
 
 if __name__ == "__main__":
     # اختبار تطبيق الحاسبة على سبيل المثال
+    from core.system_tools import BASE_DIR
     print("🔍 [QA-Tester] Starting diagnostics...")
     print(check_app_health(8081, "NASA-App"))
-    print(verify_file_production("/home/madarmutaz/Mutaz-dev/registry/apps/advanced_calculator/results.txt"))
+    print(verify_file_production(os.path.join(BASE_DIR, "registry", "apps", "advanced_calculator", "results.txt")))

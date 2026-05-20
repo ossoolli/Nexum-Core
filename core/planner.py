@@ -41,12 +41,12 @@ Return format:
     {{
       "task_id": "step_1",
       "action": "write_file",
-      "params": {{"filepath": "/home/madarmutaz/Mutaz-dev/registry/apps/myapp/app.py", "content": "..."}}
+      "params": {{"filepath": "{BASE_DIR}/registry/apps/myapp/app.py", "content": "..."}}
     }},
     {{
       "task_id": "step_2", 
       "action": "run_host_terminal",
-      "params": {{"command": "cd /home/madarmutaz/Mutaz-dev && python3 registry/apps/myapp/app.py"}}
+      "params": {{"command": "cd {BASE_DIR} && python3 registry/apps/myapp/app.py"}}
     }}
   ]
 }}"""

@@ -1,7 +1,8 @@
 import os
+from core.system_tools import BASE_DIR
 
 def scan_core_files():
-    core_path = '/home/madarmutaz/Mutaz-dev/core'
+    core_path = os.path.join(BASE_DIR, 'core')
     vulnerabilities = []
     for root, dirs, files in os.walk(core_path):
         for file in files:
