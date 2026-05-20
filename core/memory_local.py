@@ -11,8 +11,10 @@ class LongTermMemory:
         self._ensure_file()
 
     def _ensure_file(self):
+        directory = os.path.dirname(self.path)
+        if directory and not os.path.exists(directory):
+            os.makedirs(directory, exist_ok=True)
         if not os.path.exists(self.path):
-            os.makedirs(os.path.dirname(self.path), exist_ok=True)
             with open(self.path, "w", encoding="utf-8") as f:
                 json.dump({}, f)
 
@@ -38,9 +40,19 @@ class LongTermMemory:
 
     def get_context(self, user_id: int) -> list:
         data = self._load()
-        return data.get(str(user_id), [])
+        # تحويل الشكل بما يتناسب مع متطلبات Gemini (role, parts)
+        history = []
+        for msg in data.get(str(user_id), []):
+            history.append({
+                "role": "user" if msg["role"] == "user" else "model",
+                "parts": [msg["content"]]
+            })
+        return history
 
     def clear_context(self, user_id: int):
         data = self._load()
         data.pop(str(user_id), None)
         self._save(data)
+
+# Singleton Instance for Global Access
+context_memory = LongTermMemory("storage/memory/context.json")
