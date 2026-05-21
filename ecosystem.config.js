@@ -1,20 +1,33 @@
-module.exports = {
+module67.exports = {
   apps: [
     {
-      name: "nexum-core",
-      script: "./main.py",
-      interpreter: "python3",
-      autorestart: true,
+      name: 'nexum-core',
+      script: 'main.py',
+      interpreter: 'python3',
       watch: false,
-      max_memory_restart: "1G",
+      max_memory_restart: '800M',
       env: {
-        PYTHONPATH: ".",
-        PYTHONUNBUFFERED: "1"
+        NODE_ENV: 'production',
+        PYTHONUNBUFFERED: '1'
       },
-      error_file: "./storage/logs/err.log",
-      out_file: "./storage/logs/out.log",
-      log_date_format: "YYYY-MM-DD HH:mm:ss Z",
-      restart_delay: 5000
+      log_date_format: 'YYYY-MM-DD HH:mm:ss Z',
+      error_file: 'storage/logs/err.log',
+      out_file: 'storage/logs/out.log',
+      merge_logs: true
+    },
+    {
+      name: 'nexum-api',
+      script: 'webapp/api_server.py',
+      interpreter: 'python3',
+      watch: false,
+      max_memory_restart: '400M',
+      env: {
+        PORT: '8080',
+        PYTHONUNBUFFERED: '1'
+      },
+      log_date_format: 'YYYY-MM-DD HH:mm:ss Z',
+      error_file: 'storage/logs/api_err.log',
+      out_file: 'storage/logs/api_out.log'
     }
   ]
 };

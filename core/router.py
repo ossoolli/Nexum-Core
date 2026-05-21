@@ -1,49 +1,54 @@
-from telebot import TeleBot
-from core.middlewares import rate_limit
-from handlers import dash_handler, webforge_handler, agents_bots_handler
+import logging
+from telebot import types
 
-# خريطة توجيه النطاقات (Namespaces)
-CALLBACK_ROUTES = {
-    "menu": dash_handler.show_menu,
-    "wf":   webforge_handler.route,
-    "ag":   agents_bots_handler.route_agents,
-    "bt":   agents_bots_handler.route_bots,
-    # سيتم إضافة المعالجات الأخرى (mon, st, ch) تباعاً عند اكتمال ملفاتها
-}
+logger = logging.getLogger("nexum.router")
 
-def setup_router(bot: TeleBot):
+def setup_router(bot):
     """
-    تهيئة الموجه المركزي وربطه بنسخة البوت.
-    يعالج جميع ضغطات الأزرار (Callback Queries) بشكل نظامي.
+    موجه مركز لجميع الـ Callbacks في النظام.
+    يوزع المهام على المعالجات المتخصصة بناءً على الـ Namespace.
     """
     
     @bot.callback_query_handler(func=lambda call: True)
-    @rate_limit(cooldown=0.5)
-    def central_router(call):
+    def universal_callback_router(call):
+        data = call.data
+        user_id = call.from_user.id
+        
+        # حماية: التحقق من الأدمن
+        from nexum.config import config
+        if user_id != config.admin_id:
+            bot.answer_callback_query(call.id, "🚫 غير مصرح لك.")
+            return
+
         try:
-            # استخراج النطاق، مثال: "wf:main" -> "wf"
-            if ":" not in call.data:
-                # إذا كان الزر لا يتبع نظام النطاقات (مثل status القديم)
-                from main import handle_callbacks
-                return handle_callbacks(call)
+            # 1. توجيه لوحة التحكم (menu_...)
+            if data.startswith('menu_'):
+                from handlers.dash_handler import handle_dashboard
+                handle_dashboard(bot, call)
                 
-            namespace = call.data.split(":")[0]
-            handler = CALLBACK_ROUTES.get(namespace)
+            # 2. توجيه WebForge (wf_...)
+            elif data.startswith('wf_'):
+                # سيتم معالجتها داخل wf_handler لاحقاً أو هنا
+                bot.answer_callback_query(call.id, "🌐 WebForge: قيد التطوير...")
+                
+            # 3. توجيه الوكلاء (ag_...)
+            elif data.startswith('ag_'):
+                bot.answer_callback_query(call.id, "🤖 Agents: جاري التحميل...")
+                
+            # 4. توجيه البوتات (bt_...)
+            elif data.startswith('bt_'):
+                bot.answer_callback_query(call.id, "🤖 Bot Fleet: جاري الفحص...")
+
+            # 5. التوجيهات القديمة/المباشرة
+            elif data == "status":
+                from agents.monitor import monitor_agent
+                bot.send_message(call.message.chat.id, monitor_agent.get_pulse_report(), parse_mode="HTML")
+                bot.answer_callback_query(call.id)
             
-            if handler:
-                handler(call, bot)
             else:
-                # إذا كان المسار غير مسجل، نحاول توجيهه لـ main handler للملائمة
-                from main import handle_callbacks
-                handle_callbacks(call)
+                bot.answer_callback_query(call.id, f"📡 Callback: {data}")
                 
         except Exception as e:
-            import logging
-            logging.error(f"[Router Error] {e}")
-            try:
-                bot.answer_callback_query(call.id, "حدث خطأ في التوجيه ❌", show_alert=True)
-            except: pass
-        finally:
-            try:
-                bot.answer_callback_query(call.id)
-            except: pass
+            logger.error(f"Routing Error for {data}: {e}")
+            bot.answer_callback_query(call.id, "❌ حدث خطأ في التوجيه الداخلي.")
+            bot.send_message(call.message.chat.id, f"⚠️ **خطأ راوتر:**\n`<pre>{str(e)}</pre>`", parse_mode="HTML")
