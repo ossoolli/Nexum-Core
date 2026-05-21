@@ -1,10 +1,6 @@
-import json
 import logging
-import re
 from dataclasses import dataclass
 from enum import Enum
-# ملاحظة: سنستخدم الخدمة الحالية مؤقتاً حتى يتم النقل الكامل
-from services.gemini_service import gemini_service
 
 logger = logging.getLogger(__name__)
 
@@ -21,51 +17,46 @@ class ClassificationResult:
     confidence: float
     reasoning: str
 
-_SYSTEM = """
-أنت مصنّف نوايا لنظام NEXUM OS.
-مهمتك: تحليل رسالة المستخدم وتحديد نيته الأساسية.
-
-أجب بـ JSON فقط بهذا الشكل بالضبط (بلا أي نص خارجه):
-{
-  "intent": "broadcast|monitor|deploy|execute|chat",
-  "confidence": 0.0-1.0,
-  "reasoning": "سبب مختصر بجملة واحدة"
+# تصنيف محلي سريع بدون استهلاك API — أسرع وأذكى
+_KEYWORD_MAP = {
+    Intent.MONITOR: [
+        'حالة', 'status', 'النبض', 'pulse', 'cpu', 'ram', 'disk',
+        'موارد', 'سيرفر', 'server', 'health', 'نظام', 'مراقبة'
+    ],
+    Intent.DEPLOY: [
+        'ارفع', 'انشر', 'deploy', 'push', 'sync', 'git', 'نشر',
+        'مزامنة', 'رفع', 'تحديث الكود'
+    ],
+    Intent.BROADCAST: [
+        'بث', 'broadcast', 'ارسل للقناة', 'انشر للكل', 'قنواتي'
+    ],
+    Intent.EXECUTE: [
+        'انشئ ملف', 'انشيء ملف', 'اكتب ملف', 'احذف ملف', 'شغل', 'نفذ',
+        'execute', 'run', 'mkdir', 'touch', 'rm', 'cat', 'ls',
+        'pip', 'npm', 'python', 'node', 'bash', 'sh',
+        'افتح', 'اغلق', 'اعد تشغيل', 'restart', 'reboot',
+        'ثبت', 'install', 'حدث', 'update', 'اصنع', 'ابني',
+        'create', 'write', 'delete', 'make', 'build',
+        'فولدر', 'مجلد', 'folder', 'directory',
+    ],
 }
 
-تعريف كل نية:
-- broadcast: المستخدم يريد إرسال شيء للقناة
-- monitor: يريد معرفة حالة السيرفر أو الموارد
-- deploy: يريد رفع كود أو نشر تحديث
-- execute: يريد تنفيذ مهمة معقدة (إنشاء، بناء، بحث، برمجة)
-- chat: محادثة عادية أو سؤال
-"""
-
-class GeminiClassifier:
+class LocalClassifier:
+    """مصنف محلي فوري — لا يستهلك API calls"""
     def classify(self, text: str) -> ClassificationResult:
-        try:
-            # استخدام gemini_service الحالية
-            response, _ = gemini_service.ask(
-                prompt=f"الرسالة: {text}",
-                system_instruction=_SYSTEM
-            )
-            
-            # استخراج JSON من الرد
-            json_match = re.search(r'\{.*\}', response, re.DOTALL)
-            if not json_match:
-                raise ValueError("No JSON found")
-                
-            data = json.loads(json_match.group(0))
-            return ClassificationResult(
-                intent=Intent(data["intent"]),
-                confidence=float(data["confidence"]),
-                reasoning=data.get("reasoning", ""),
-            )
-        except Exception as e:
-            logger.warning(f"Classifier failed, falling back to CHAT: {e}")
-            return ClassificationResult(
-                intent=Intent.CHAT,
-                confidence=0.5,
-                reasoning="classification failed",
-            )
+        lower = text.lower().strip()
 
-classifier = GeminiClassifier()
+        # أوامر Shell المباشرة (تبدأ بـ !)
+        if lower.startswith('!'):
+            return ClassificationResult(Intent.EXECUTE, 1.0, "shell command prefix")
+
+        # بحث بالكلمات المفتاحية
+        for intent, keywords in _KEYWORD_MAP.items():
+            for kw in keywords:
+                if kw in lower:
+                    return ClassificationResult(intent, 0.9, f"keyword match: {kw}")
+
+        # الافتراضي: محادثة ذكية
+        return ClassificationResult(Intent.CHAT, 0.7, "default chat")
+
+classifier = LocalClassifier()

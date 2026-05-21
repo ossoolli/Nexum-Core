@@ -167,6 +167,13 @@ def handle_universal(message):
         _handle_execute(message, cmd)
         return
 
+    # 7.5 عمليات الملفات باللغة الطبيعية (انشئ ملف، اكتب، احذف...)
+    if any(k in lower_text for k in ['انشئ ملف', 'انشيء ملف', 'اكتب ملف', 'احذف ملف',
+                                     'اصنع ملف', 'انشئ مجلد', 'create file', 'make file',
+                                     'اعرض ملف', 'افتح ملف']):
+        _handle_file_operation(message, text)
+        return
+
     # 8. الصور والملفات
     if message.content_type in ['photo', 'document']:
         _handle_media(message, text)
@@ -191,6 +198,33 @@ def _handle_execute(message, cmd):
         bot.reply_to(message, f"⚠️ **أمر حساس:**\n<pre>{cmd}</pre>", reply_markup=markup, parse_mode="HTML")
     else:
         bot.reply_to(message, f"💻 **المخرجات:**\n<pre>{result['output'][:3500]}</pre>", parse_mode="HTML")
+
+def _handle_file_operation(message, text):
+    """معالج عمليات الملفات باللغة الطبيعية"""
+    bot.send_chat_action(message.chat.id, 'typing')
+    # نطلب من Gemini تحويل الطلب إلى أمر Shell
+    gen_prompt = (
+        f"أنت NEXUM OS. المستخدم يريد: {text}\n"
+        f"حوّل هذا الطلب إلى أمر bash واحد قابل للتنفيذ في Linux.\n"
+        f"أجب بالأمر فقط بدون شرح. مثال: echo 'hello' > file.txt"
+    )
+    shell_cmd, _ = gemini_service.ask(gen_prompt)
+    shell_cmd = shell_cmd.strip().strip('`').strip()
+    
+    if shell_cmd.startswith('❌'):
+        bot.reply_to(message, shell_cmd)
+        return
+    
+    # تنفيذ الأمر المُولّد
+    result = executor.execute(shell_cmd, force=True)
+    status_icon = "✅" if result['status'] == 'success' else "❌"
+    bot.reply_to(
+        message,
+        f"{status_icon} **NEXUM OS تنفيذ:**\n"
+        f"<pre>$ {shell_cmd}</pre>\n"
+        f"<pre>{result['output'][:3000]}</pre>",
+        parse_mode="HTML"
+    )
 
 def _handle_webforge(message, text):
     bot.reply_to(message, "🌐 **WebForge:** جاري تحليل المتطلبات وبناء المشروع...")
@@ -231,9 +265,23 @@ def _handle_media(message, text):
     except Exception as e:
         bot.reply_to(message, f"❌ خطأ في التحليل: {e}")
 
+NEXUM_SYSTEM_INSTRUCTION = """أنت NEXUM OS v7.3.0 — نظام تشغيل سيادي ذكي.
+لست شات بوت عادي. أنت نظام تشغيل يعمل على سيرفر Linux حقيقي.
+يمكنك تنفيذ الأوامر، إنشاء الملفات، برمجة البوتات، بناء المواقع، وإدارة السيرفرات.
+عندما يطلب المستخدم إنشاء ملف أو تنفيذ عملية، افعلها مباشرة — لا تشرح له كيف يفعلها بنفسه.
+أجب بالعربية بشكل مختصر وحاسم.
+"""
+
 def _handle_chat(message, text):
     history = context_memory.get_context(ADMIN_ID)
-    res, _ = gemini_service.ask(text, history=history, system_instruction="You are NEXUM OS. Efficient and advanced.")
+    
+    # تحقق إذا كان النص يحتوي على طلب عملي ولم يتم التقاطه سابقاً
+    action_keywords = ['انشئ', 'انشيء', 'اكتب', 'احذف', 'شغل', 'نفذ', 'افتح', 'اصنع', 'ابني']
+    if any(k in text for k in action_keywords):
+        _handle_file_operation(message, text)
+        return
+    
+    res, _ = gemini_service.ask(text, history=history, system_instruction=NEXUM_SYSTEM_INSTRUCTION)
     
     # إذا كان هناك خطأ تقني، نرسل تقريراً للقناة
     if "❌ خطأ تقني" in res or "❌ خطأ:" in res:
