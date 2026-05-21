@@ -1,34 +1,22 @@
-# Core
-pyTelegramBotAPI
-python-dotenv
-requests
-httpx
+# Core Telegram
+pyTelegramBotAPI==4.19.1
+python-dotenv==1.0.1
 
-# FastAPI
-fastapi
-uvicorn[standard]
-websockets
+# HTTP
+requests==2.31.0
+httpx==0.27.0
+aiohttp==3.9.3
+
+# AI & Data
+google-generativeai==0.7.2
+openai==1.30.0
 pydantic>=2.0
-pydantic-settings>=2.0
-
-# AI
-google-generativeai
-openai
 
 # Infrastructure
-redis
-psutil
-gitpython
-docker
+psutil==5.9.8
+gitpython==3.1.43
 
-# Web
-aiohttp
-beautifulsoup4
-
-# Database (optional)
-psycopg2-binary
-supabase
-
-# Utils
-schedule
-cryptography
+# Utilities
+beautifulsoup4==4.12.3
+schedule==1.2.1
+cryptography==42.0.5
