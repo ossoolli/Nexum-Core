@@ -2,7 +2,7 @@ import os
 import requests, base64, json
 
 class GeminiService:
-    def __init__(self, api_key=None, model="gemini-pro"): # تغيير إلى الطراز الكلاسيكي المستقر
+    def __init__(self, api_key=None, model="gemini-3.5-flash"): # ترقية للطراز الحديث في عام 2026
         raw_key = api_key or os.getenv("GOOGLE_API_KEY", "")
         self.api_key = raw_key.strip() 
         self.model = model

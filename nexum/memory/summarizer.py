@@ -14,7 +14,7 @@ class MemorySummarizer:
 
     def summarize(self, messages: list) -> str:
         history = "\n".join(
-            f"{m['role']}: {m['content']}" for m in messages
+            f"{m['role']}: {m.get('parts', [{'text': ''}])[0].get('text', '')}" for m in messages
         )
         prompt = (
             f"لخّص هذه المحادثة باللغة العربية في 3 جمل مختصرة تحافظ على "
