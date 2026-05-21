@@ -2,7 +2,7 @@ import os
 import requests, base64, json
 
 class GeminiService:
-    def __init__(self, api_key=None, model="gemini-3.5-flash"):
+    def __init__(self, api_key=None, model="gemini-1.5-flash"):
         if api_key:
             raw_key = api_key
         else:
@@ -14,7 +14,7 @@ class GeminiService:
         
         self.api_key = raw_key.strip() if raw_key else ""
         self.model = model
-        self.url = f'https://generativelanguage.googleapis.com/v1/models/{self.model}:generateContent?key={self.api_key}'
+        self.url = f'https://generativelanguage.googleapis.com/v1beta/models/{self.model}:generateContent?key={self.api_key}'
 
     def ask(self, prompt, history=None, system_instruction=None, file_data=None, mime_type=None):
         if not self.api_key:
@@ -48,7 +48,7 @@ class GeminiService:
         
         payload = {'contents': contents}
         if system_instruction:
-            payload['system_instruction'] = {
+            payload['systemInstruction'] = {
                 "parts": [{"text": system_instruction}]
             }
 
