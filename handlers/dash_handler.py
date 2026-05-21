@@ -14,23 +14,29 @@ def handle_dashboard(bot, call):
     chat_id = call.message.chat.id
     message_id = call.message.message_id
 
-    if data == "menu_runtime":
-        show_runtime(bot, chat_id, message_id)
-    elif data == "menu_agents":
-        show_agents_hub(bot, chat_id, message_id)
-    elif data == "menu_security":
-        show_security(bot, chat_id, message_id)
-    elif data == "menu_logs":
-        show_logs_preview(bot, chat_id, message_id)
-    elif data == "menu_settings":
-        show_settings(bot, chat_id, message_id)
-    elif data == "menu_back":
-        # العودة للوحة الأساسية (تستدعي بناء الـ Dashboard من main)
-        from core.keyboards import SovereignUIBuilder
-        text = "🔱 *NEXUM CORE OS v7.3.0*\n\nمرحباً بك مجدداً في مركز التحكم السيادي."
-        bot.edit_message_text(text, chat_id, message_id, parse_mode="Markdown", reply_markup=SovereignUIBuilder.build_main_dashboard())
-    else:
-        bot.answer_callback_query(call.id, f"🛠️ القسم [{data}] قيد التفعيل...")
+    # استيراد الـ Builder
+    from core.keyboards import ui_builder
+
+    try:
+        if data == "menu_runtime":
+            show_runtime(bot, chat_id, message_id)
+        elif data == "menu_agents":
+            show_agents_hub(bot, chat_id, message_id)
+        elif data == "menu_security":
+            show_security(bot, chat_id, message_id)
+        elif data == "menu_logs":
+            show_logs_preview(bot, chat_id, message_id)
+        elif data == "menu_settings":
+            show_settings(bot, chat_id, message_id)
+        elif data == "menu_back" or data == "back_main":
+            # العودة للوحة الأساسية
+            text = "🔱 *NEXUM CORE OS v7.3.0*\n\nمرحباً بك مجدداً في مركز التحكم السيادي."
+            bot.edit_message_text(text, chat_id, message_id, parse_mode="Markdown", reply_markup=ui_builder.build_main_control_plane())
+        else:
+            bot.answer_callback_query(call.id, f"🛠️ القسم [{data}] قيد التفعيل...")
+    except Exception as e:
+        bot.answer_callback_query(call.id, "❌ فشل تحديث الواجهة.")
+        print(f"UI Update Error: {e}")
 
 def show_runtime(bot, chat_id, message_id):
     """عرض تفاصيل التشغيل الحية"""
@@ -90,13 +96,12 @@ def show_security(bot, chat_id, message_id):
 def show_logs_preview(bot, chat_id, message_id):
     """معاينة السجلات الحية"""
     log_path = "storage/logs/out.log"
+    logs = "لا توجد سجلات حالية."
     try:
         if os.path.exists(log_path):
             with open(log_path, "r", encoding="utf-8") as f:
-                lines = f.readlines()[-10:] # آخر 10 أسطر
-                logs = "".join(lines)
-        else:
-            logs = "لا توجد سجلات حالية."
+                lines = f.readlines()
+                logs = "".join(lines[-10:]) # آخر 10 أسطر
     except Exception as e:
         logs = f"فشل قراءة السجلات: {e}"
 

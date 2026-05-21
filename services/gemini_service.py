@@ -3,7 +3,9 @@ import requests, base64, json
 
 class GeminiService:
     def __init__(self, api_key=None, model="gemini-1.5-flash"):
-        self.api_key = api_key or os.getenv("GOOGLE_API_KEY")
+        # تنظيف المفتاح من المسافات لضمان القبول
+        raw_key = api_key or os.getenv("GOOGLE_API_KEY", "")
+        self.api_key = raw_key.strip() 
         self.model = model
         self.url = f'https://generativelanguage.googleapis.com/v1beta/models/{self.model}:generateContent?key={self.api_key}'
 
@@ -11,6 +13,9 @@ class GeminiService:
         """
         يرسل استفساراً مع دعم كامل لتاريخ المحادثة (History) والملفات المتعددة الوسائط (Multimodal).
         """
+        if not self.api_key:
+            return "❌ خطأ: مفتاح GOOGLE_API_KEY غير موجود في الإعدادات.", history or []
+
         contents = history or []
         
         parts = []
@@ -51,7 +56,6 @@ class GeminiService:
                     contents.append({'role': 'model', 'parts': [{'text': text_response}]})
                     return text_response, contents
                 
-                # التقاط رسالة الخطأ بدقة
                 error_msg = res_json.get('error', {}).get('message', 'Unknown Error')
                 return f"❌ خطأ تقني: {error_msg}", contents
 
