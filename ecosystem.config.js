@@ -1,4 +1,4 @@
-module67.exports = {
+module.exports = {
   apps: [
     {
       name: 'nexum-core',
