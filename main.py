@@ -1,11 +1,11 @@
 # -*- coding: utf-8 -*-
 """
-🔱 NEXUM CORE OS v7.3.0 — Sovereign Restoration
+🔱 NEXUM CORE OS v7.4.0 — Sovereign Evolution
 ================================================
-إصدار التجميع السيادي النهائي:
-- يدمج ذكاء التفسير v5.0 (NexumInterpreter Keywords)
-- يدمج واجهة v7.1 السيادية (Sovereign UI / 9-Sector Dashboard)
-- يربط الموجه الموحد v7.3 وحماية v7.2.1
+إصدار الترقية السيادية v7.4:
+- بيئة عمل معزولة (Sovereign Workspace) لحماية الملفات الأساسية.
+- محرك استجابة صارم يمنع الخلط بين اللغة الطبيعية والأوامر التقنية.
+- ترقية نظام التشغيل والتوجيه الذكي.
 """
 
 import os
@@ -93,13 +93,14 @@ def send_welcome(message):
     
     bot.send_message(
         message.chat.id,
-        "🔱 <b>NEXUM CORE OS v7.3.0</b>\n"
+        "🔱 <b>NEXUM CORE OS v7.4.0</b>\n"
         "━━━━━━━━━━━━━━\n"
         "📡 القناة الحية: 🟢 متصلة\n"
-        "🧠 المصنف: v7.2-Agentic\n"
-        "🛡️ الحماية: نشطة (v7.2)\n"
+        "📂 منطقة العمل: <code>/workspace</code>\n"
+        "🧠 المصنف: v7.4-Strict\n"
+        "🛡️ الحماية: سيادية كاملة\n"
         "━━━━━━━━━━━━━━\n"
-        "مرحباً بك في مركز التحكم. اختر قسماً للإدارة:",
+        "مرحباً بك في الإصدار المطور. اختر قسماً للإدارة:",
         reply_markup=markup,
         parse_mode="HTML"
     )
@@ -200,19 +201,37 @@ def _handle_execute(message, cmd):
         bot.reply_to(message, f"💻 **المخرجات:**\n<pre>{result['output'][:3500]}</pre>", parse_mode="HTML")
 
 def _handle_file_operation(message, text):
-    """معالج عمليات الملفات باللغة الطبيعية"""
+    """معالج عمليات الملفات v7.4 - ذكاء معزول ومحمي"""
     bot.send_chat_action(message.chat.id, 'typing')
-    # نطلب من Gemini تحويل الطلب إلى أمر Shell
-    gen_prompt = (
-        f"أنت NEXUM OS. المستخدم يريد: {text}\n"
-        f"حوّل هذا الطلب إلى أمر bash واحد قابل للتنفيذ في Linux.\n"
-        f"أجب بالأمر فقط بدون شرح. مثال: echo 'hello' > file.txt"
-    )
-    shell_cmd, _ = gemini_service.ask(gen_prompt)
-    shell_cmd = shell_cmd.strip().strip('`').strip()
     
-    if shell_cmd.startswith('❌'):
-        bot.reply_to(message, shell_cmd)
+    # ضمان وجود مجلد العمل
+    workspace_dir = os.path.join(os.getcwd(), "workspace")
+    if not os.path.exists(workspace_dir):
+        os.makedirs(workspace_dir, exist_ok=True)
+
+    # نطلب من Gemini تحويل الطلب إلى أمر Shell صارم
+    gen_prompt = (
+        f"أنت محرك تنفيذ NEXUM OS. المستخدم يريد: {text}\n"
+        f"قواعد صارمة:\n"
+        f"1. استخدم فقط أوامر Linux (touch, mkdir, echo, rm, cat).\n"
+        f"2. اجعل كل المسارات داخل مجلد 'workspace/'.\n"
+        f"3. لا تكتب أي كلمة عربية داخل الأمر.\n"
+        f"4. المخرجات يجب أن تكون الأمر فقط.\n"
+        f"استخدم صيغة: echo 'content' > workspace/filename.txt"
+    )
+    
+    shell_cmd, _ = gemini_service.ask(gen_prompt)
+    # تنظيف المخرجات من أي نص زائد
+    shell_cmd = shell_cmd.strip().strip('`').split('\n')[0].strip()
+    
+    # حماية: منع الكتابة فوق الملفات الأساسية (مثل main.py)
+    forbidden = ['main.py', 'nexum/', 'core/', 'services/', 'agents/', 'credentials.txt', '.env']
+    if any(f in shell_cmd and 'workspace/' not in shell_cmd for f in forbidden):
+        bot.reply_to(message, "⚠️ **حماية النظام:** لا يمكنك التعديل على ملفات النواة مباشرة. استخدم مجلد /workspace.")
+        return
+
+    if shell_cmd.startswith('❌') or not any(k in shell_cmd for k in ['workspace', 'mkdir', 'touch', 'echo']):
+        bot.reply_to(message, "❌ فشل توليد أمر آمن. حاول صياغة الطلب بشكل أوضح.")
         return
     
     # تنفيذ الأمر المُولّد
@@ -220,7 +239,7 @@ def _handle_file_operation(message, text):
     status_icon = "✅" if result['status'] == 'success' else "❌"
     bot.reply_to(
         message,
-        f"{status_icon} **NEXUM OS تنفيذ:**\n"
+        f"{status_icon} **NEXUM OS v7.4 EXECUTOR:**\n"
         f"<pre>$ {shell_cmd}</pre>\n"
         f"<pre>{result['output'][:3000]}</pre>",
         parse_mode="HTML"
@@ -265,11 +284,11 @@ def _handle_media(message, text):
     except Exception as e:
         bot.reply_to(message, f"❌ خطأ في التحليل: {e}")
 
-NEXUM_SYSTEM_INSTRUCTION = """أنت NEXUM OS v7.3.0 — نظام تشغيل سيادي ذكي.
-لست شات بوت عادي. أنت نظام تشغيل يعمل على سيرفر Linux حقيقي.
-يمكنك تنفيذ الأوامر، إنشاء الملفات، برمجة البوتات، بناء المواقع، وإدارة السيرفرات.
-عندما يطلب المستخدم إنشاء ملف أو تنفيذ عملية، افعلها مباشرة — لا تشرح له كيف يفعلها بنفسه.
-أجب بالعربية بشكل مختصر وحاسم.
+NEXUM_SYSTEM_INSTRUCTION = """أنت NEXUM OS v7.4.0 — نظام تشغيل سيادي متطور.
+أنت تدير سيرفر Linux حقيقي. مهمتك تنفيذ أوامر المستخدم بدقة تقنية.
+عندما يطلب المستخدم إنشاء ملف أو مجلد، استخدم مجلد 'workspace/' دائماً.
+تجنب شرح 'كيف يفعل المستخدم ذلك بنفسه'، بل افعل ذلك أنت بالنيابة عنه.
+أجب بالعربية وبأسلوب نظام تشغيل حازم.
 """
 
 def _handle_chat(message, text):
@@ -330,8 +349,8 @@ if __name__ == "__main__":
     # 3. تفعيل الموجه السيادي (The Router)
     setup_router(bot)
 
-    print("🔱 NEXUM CORE OS v7.3.0 is Online.")
-    broadcast("🔱 **NEXUM OS v7.3.0** استعاد كامل وعيه السيادي.\nجميع البروتوكولات والواجهات التفاعلية نشطة.")
+    print("🔱 NEXUM CORE OS v7.4.0 is Online.")
+    broadcast("🔱 **NEXUM OS v7.4.0** (Evolved Sovereign) نشط الآن.\n- حماية النواة فعالة.\n- مجلد العمل المعزول جاهز.")
     
     # حلقة الاستقرار (Crash Recovery)
     while True:
