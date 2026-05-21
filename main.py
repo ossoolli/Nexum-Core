@@ -26,6 +26,7 @@ from core.file_agent import file_agent
 from core.inter_bot_protocol import inter_bot_protocol
 from core.keyboards import SovereignUIBuilder
 from core.router import setup_router
+from nexum.cloud.cloud_agent import cloud_agent
 
 # تهيئة البوت
 if not config:
@@ -103,6 +104,31 @@ def fs_commands_proxy(message):
     
     # ... بقية الأوامر تعمل عبر ExecutionEngine الآن بشكل أذكى
 
+# ─── Callback Queries Handling (UI Navigation) ───
+@bot.callback_query_handler(func=lambda call: call.data.startswith('menu_') or call.data == 'back_main' or call.data.startswith('cloud_'))
+def handle_menu_navigation(call):
+    if call.from_user.id != ADMIN_ID: return
+    
+    if call.data == 'back_main':
+        markup = ui_builder.build_main_control_plane()
+        bot.edit_message_text("🔱 <b>NEXUM Main Interface</b>", call.message.chat.id, call.message.message_id, reply_markup=markup, parse_mode="HTML")
+    
+    elif call.data == 'menu_cloud':
+        markup = ui_builder.build_cloud_menu()
+        bot.edit_message_text("☁️ <b>Google Cloud Command Center</b>\nتحكم كامل في موارد GCP السيادية.", call.message.chat.id, call.message.message_id, reply_markup=markup, parse_mode="HTML")
+    
+    elif call.data.startswith('cloud_'):
+        service_map = {
+            "cloud_storage": "أهلاً بك في GCS. ماذا تريد أن نفعل بالملفات؟",
+            "cloud_bq": "محرك BigQuery جاهز. اكتب استعلامك.",
+            "cloud_vms": "جارِ جلب حالة أجهزة الـ VM...",
+            "cloud_logs": "سأعرض لك آخر سجلات النظام من GCP.",
+            "cloud_ai": "Vertex AI في وضع الانتظار. ما المهمة المطلوبة؟"
+        }
+        msg = service_map.get(call.data, "نظام GCP جاهز للأوامر.")
+        bot.answer_callback_query(call.id, "☁️ Cloud Mode Active")
+        bot.send_message(call.message.chat.id, f"⚡ {msg}")
+
 # ╔══════════════════════════════════════════╗
 # ║        2. المعالج الشامل (The Processor) ║
 # ╚══════════════════════════════════════════╝
@@ -132,10 +158,21 @@ def handle_universal(message):
     # تصنيف النية
     intent_result = classifier.classify(text) if text else None
     
-    # تنفيذ (Execute)
-    if text.startswith('!') or (intent_result and intent_result.intent == Intent.EXECUTE):
-        goal = text[1:] if text.startswith('!') else text
-        execution_engine.execute_goal(goal=goal, bot=bot, chat_id=chat_id)
+    # ─── Google Cloud Commands 🔱 ───
+    if intent_result and intent_result.intent in [
+        Intent.CLOUD_STORAGE, Intent.CLOUD_BIGQUERY, Intent.CLOUD_COMPUTE,
+        Intent.CLOUD_MONITOR, Intent.CLOUD_AI, Intent.CLOUD_GENERAL
+    ]:
+        bot.reply_to(message, "☁️ **NEXUM Cloud** جاري التنفيذ السيادي...", parse_mode="Markdown")
+        try:
+            res = cloud_agent.run({"text": text})
+            if res["status"] == "success":
+                output = res["output"][:3500]
+                bot.send_message(chat_id, f"✅ <b>GCP Result:</b>\n{output}", parse_mode="HTML")
+            else:
+                bot.reply_to(message, f"❌ <b>Cloud Error:</b>\n<code>{res['error']}</code>", parse_mode="HTML")
+        except Exception as e:
+            bot.reply_to(message, f"❌ خطأ غير متوقع في Cloud: {e}")
         return
 
     # محادثة (Chat/Vision)
@@ -162,5 +199,5 @@ def _handle_chat(message, text, file_data=None, mime_type=None):
     context_memory.save_context(ADMIN_ID, res, role='assistant')
 
 if __name__ == "__main__":
-    print(f"🔱 NEXUM CORE OS v7.5.1 is Online (Admin: {ADMIN_ID})")
+    print(f"🔱 NEXUM CORE OS v3.6.0 [Cloud Edition] is Online (Admin: {ADMIN_ID})")
     bot.infinity_polling(timeout=60, long_polling_timeout=30)

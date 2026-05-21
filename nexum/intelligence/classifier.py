@@ -10,6 +10,14 @@ class Intent(str, Enum):
     DEPLOY    = "deploy"
     EXECUTE   = "execute"
     CHAT      = "chat"
+    
+    # ─── Google Cloud Intents ───
+    CLOUD_STORAGE   = "cloud_storage"    # "ارفع ملف لـ Storage"
+    CLOUD_BIGQUERY  = "cloud_bigquery"   # "اعمل query على BigQuery"
+    CLOUD_COMPUTE   = "cloud_compute"    # "شغل VM" / "أوقف VM"
+    CLOUD_MONITOR   = "cloud_monitor"    # "حالة السيرفرات" / "logs"
+    CLOUD_AI        = "cloud_ai"         # "شغل Vertex AI model"
+    CLOUD_GENERAL   = "cloud_general"    # أي أمر cloud عام
 
 @dataclass
 class ClassificationResult:
@@ -31,14 +39,13 @@ _KEYWORD_MAP = {
         'بث', 'broadcast', 'ارسل للقناة', 'انشر للكل', 'قنواتي'
     ],
     Intent.EXECUTE: [
-        'انشئ ملف', 'انشيء ملف', 'اكتب ملف', 'احذف ملف', 'شغل', 'نفذ',
-        'execute', 'run', 'mkdir', 'touch', 'rm', 'cat', 'ls',
-        'pip', 'npm', 'python', 'node', 'bash', 'sh',
-        'افتح', 'اغلق', 'اعد تشغيل', 'restart', 'reboot',
-        'ثبت', 'install', 'حدث', 'update', 'اصنع', 'ابني',
-        'create', 'write', 'delete', 'make', 'build',
         'فولدر', 'مجلد', 'folder', 'directory',
     ],
+    Intent.CLOUD_STORAGE:  ["storage", "باكت", "bucket", "ارفع ملف", "حمّل ملف", "gcs"],
+    Intent.CLOUD_BIGQUERY: ["bigquery", "query", "جدول", "dataset", "sql", "استعلام"],
+    Intent.CLOUD_COMPUTE:  ["vm", "instance", "سيرفر", "شغل جهاز", "أوقف جهاز", "compute"],
+    Intent.CLOUD_MONITOR:  ["logs", "سجلات", "monitoring", "تنبيه", "alert", "أداء"],
+    Intent.CLOUD_AI:       ["vertex", "model", "تدريب", "vertex ai", "aiplatform"],
 }
 
 class LocalClassifier:

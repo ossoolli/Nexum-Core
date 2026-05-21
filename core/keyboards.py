@@ -55,6 +55,8 @@ class SovereignUIBuilder:
             InlineKeyboardButton("⚙️ Settings", callback_data="menu_settings"),
             InlineKeyboardButton("📋 Audit Logs", callback_data="audit_logs")
         )
+        # الصف السادس: Google Cloud (جديد) 🔱
+        m.add(InlineKeyboardButton("☁️ Google Cloud", callback_data="menu_cloud"))
         return m
 
     # ╔══════════════════════════════════════════╗
@@ -245,6 +247,26 @@ class SovereignUIBuilder:
         m.row(
             InlineKeyboardButton("ℹ️ System Info", callback_data="set_sysinfo"),
             InlineKeyboardButton("🔄 Restart Bot", callback_data="set_restart_bot")
+        )
+        m.add(InlineKeyboardButton("⬅️ Back to Main", callback_data="back_main"))
+        return m
+
+    # ╔══════════════════════════════════════════╗
+    # ║          قائمة Google Cloud             ║
+    # ╚══════════════════════════════════════════╝
+    def build_cloud_menu(self) -> InlineKeyboardMarkup:
+        m = InlineKeyboardMarkup(row_width=2)
+        m.row(
+            InlineKeyboardButton("☁️ Cloud Storage", callback_data="cloud_storage"),
+            InlineKeyboardButton("📊 BigQuery", callback_data="cloud_bq")
+        )
+        m.row(
+            InlineKeyboardButton("🖥️ Compute VMs", callback_data="cloud_vms"),
+            InlineKeyboardButton("📋 Cloud Logs", callback_data="cloud_logs")
+        )
+        m.row(
+            InlineKeyboardButton("🧠 Vertex AI", callback_data="cloud_ai"),
+            InlineKeyboardButton("🛡️ Cloud Shell", callback_data="cloud_shell")
         )
         m.add(InlineKeyboardButton("⬅️ Back to Main", callback_data="back_main"))
         return m

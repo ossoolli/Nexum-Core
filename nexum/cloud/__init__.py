@@ -1,0 +1,1 @@
+# GCP MCP Gateway Initialization
