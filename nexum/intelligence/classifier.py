@@ -51,12 +51,13 @@ class LocalClassifier:
         if lower.startswith('!'):
             return ClassificationResult(Intent.EXECUTE, 1.0, "shell prefix")
 
-        # بحث بالكلمات المفتاحية (تطابق الكلمات الكاملة فقط)
+        # بحث بالكلمات المفتاحية (تطابق الكلمات الكاملة)
         for intent, keywords in _KEYWORD_MAP.items():
             for kw in keywords:
-                # نستخدم Regex للتأكد من أنها كلمة منفصلة وليست جزءاً من كلمة (مثلاً "ينفذ" لا تُفعل "نفذ")
-                if re.search(r'(?<![^\W_])' + re.escape(kw) + r'(?![^\W_])', lower):
-                    return ClassificationResult(intent, 0.9, f"exact keyword: {kw}")
+                # نمط بسيط وفعال لاكتشاف الكلمة ككتلة واحدة
+                pattern = rf'(?:\s|^){re.escape(kw)}(?:\s|$)'
+                if re.search(pattern, lower):
+                    return ClassificationResult(intent, 0.9, f"keyword: {kw}")
 
         # الافتراضي
         return ClassificationResult(Intent.CHAT, 0.7, "default chat")
