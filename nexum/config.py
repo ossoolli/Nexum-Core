@@ -43,6 +43,10 @@ class NexumConfig(BaseSettings):
     supabase_url: Optional[str] = Field(default=None, alias="SUPABASE_URL")
     supabase_key: Optional[str] = Field(default=None, alias="SUPABASE_KEY")
 
+    # Internal paths & configs
+    storage_dir: Path = Field(default=BASE_DIR / "storage")
+    log_level: str = Field(default="INFO")
+
     class Config:
         env_file = selected_file
         env_file_encoding = "utf-8"
