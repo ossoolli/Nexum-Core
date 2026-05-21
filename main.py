@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-🔱 NEXUM CORE OS v7.5.1 — The Sovereign Architect
+🔱 NEXUM CORE OS v3.5.0 — The Sovereign Architect
 ================================================
 إصدار الإصلاح الشامل (Audit & Clean):
 - تنظيف شامل للمكتبات غير المستخدمة.
@@ -49,10 +49,10 @@ def send_welcome(message):
     markup = ui_builder.build_main_control_plane()
     bot.send_message(
         message.chat.id,
-        "🔱 <b>NEXUM CORE OS v7.5.1</b>\n"
+        "🔱 <b>NEXUM CORE OS v3.5</b>\n"
         "━━━━━━━━━━━━━━\n"
         "🧠 الحالة: 🟢 بكامل الوعي التشغيلي\n"
-        "⚙️ العقل: <code>Gemini 2.0 Flash</code>\n"
+        "⚙️ العقل: <code>gemini-3.5-flash</code>\n"
         "🛡️ النمط: سيادي (Architect Mode)\n"
         "━━━━━━━━━━━━━━\n"
         "استخدم القائمة أدناه أو ابدأ بكتابة الأوامر مباشرة.",
@@ -144,7 +144,7 @@ def handle_universal(message):
 def _handle_chat(message, text, file_data=None, mime_type=None):
     history = context_memory.get_context(ADMIN_ID)
     system_instruction = (
-        "أنت NEXUM CORE OS v7.5.1. نظام تشغيل سيادي متكامل. "
+            "أنت NEXUM CORE OS v3.5.0. نظام تشغيل سيادي متكامل. "
         "تمتلك القدرة على رؤية الصور وتحليل الملفات عبر Gemini 2.0. "
         "تحدث بلهجة تقنية، واثقة، ومباشرة. أنت تبني الأنظمة ولا تكتفي بالشرح."
     )
