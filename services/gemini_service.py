@@ -2,7 +2,7 @@ import os
 import requests, base64, json
 
 class GeminiService:
-    def __init__(self, api_key=None, model="gemini-1.5-flash"):
+    def __init__(self, api_key=None, model="gemini-3.1-flash-lite-preview"):
         if api_key:
             raw_key = api_key
         else:
