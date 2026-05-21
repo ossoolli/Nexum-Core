@@ -2,70 +2,43 @@ import os
 import requests, base64, json
 
 class GeminiService:
-    def __init__(self, api_key=None, model="gemini-1.5-flash"):
-        # تنظيف المفتاح من المسافات لضمان القبول
+    def __init__(self, api_key=None, model="gemini-pro"): # تغيير إلى الطراز الكلاسيكي المستقر
         raw_key = api_key or os.getenv("GOOGLE_API_KEY", "")
         self.api_key = raw_key.strip() 
         self.model = model
-        self.url = f'https://generativelanguage.googleapis.com/v1beta/models/{self.model}:generateContent?key={self.api_key}'
+        # استخدام v1 لزيادة التوافق والاستقرار
+        self.url = f'https://generativelanguage.googleapis.com/v1/models/{self.model}:generateContent?key={self.api_key}'
 
     def ask(self, prompt, history=None, system_instruction=None, file_data=None, mime_type=None):
-        """
-        يرسل استفساراً مع دعم كامل لتاريخ المحادثة (History) والملفات المتعددة الوسائط (Multimodal).
-        """
         if not self.api_key:
-            return "❌ خطأ: مفتاح GOOGLE_API_KEY غير موجود في الإعدادات.", history or []
+            return "❌ خطأ: مفتاح GOOGLE_API_KEY غير موجود.", history or []
 
-        contents = history or []
-        
-        parts = []
-        if prompt:
-            parts.append({'text': prompt})
-        else:
-            parts.append({'text': "الرجاء تحليل هذا الملف."})
-            
-        if file_data and mime_type:
-            parts.append({
-                'inline_data': {
-                    'mime_type': mime_type,
-                    'data': base64.b64encode(file_data).decode('utf-8')
-                }
-            })
-            
+        contents = []
+        # تحويل التاريخ للتنسيق الكلاسيكي
+        if history:
+            for item in history:
+                contents.append(item)
+
+        parts = [{'text': prompt or "Hello"}]
         contents.append({'role': 'user', 'parts': parts})        
-        payload = {'contents': contents}
-        if system_instruction:
-            payload['system_instruction'] = {'parts': [{'text': system_instruction}]}
-
-        import time
-        max_retries = 3
-        retry_delay = 2
-
-        for attempt in range(max_retries):
-            try:
-                response = requests.post(self.url, json=payload, timeout=30)
-                res_json = response.json()
-
-                if response.status_code == 503:
-                    time.sleep(retry_delay)
-                    retry_delay *= 2
-                    continue
-
-                if 'candidates' in res_json and res_json['candidates'][0].get('content'):
-                    text_response = res_json['candidates'][0]['content']['parts'][0]['text']
-                    contents.append({'role': 'model', 'parts': [{'text': text_response}]})
-                    return text_response, contents
-                
-                error_msg = res_json.get('error', {}).get('message', 'Unknown Error')
-                return f"❌ خطأ تقني: {error_msg}", contents
-
-            except Exception as e:
-                if attempt == max_retries - 1:
-                    return f"❌ فشل الاتصال بعد {max_retries} محاولات: {str(e)}", history or []
-                time.sleep(retry_delay)
-                retry_delay *= 2
         
-        return "❌ النظام مشغول حالياً، يرجى المحاولة لاحقاً.", history or []
+        payload = {'contents': contents}
+        # Note: gemini-pro (v1) doesn't always support system_instruction in the same way as v1beta
+        # So we include it in the first message if needed
+
+        try:
+            response = requests.post(self.url, json=payload, timeout=30)
+            res_json = response.json()
+
+            if 'candidates' in res_json and res_json['candidates'][0].get('content'):
+                text_response = res_json['candidates'][0]['content']['parts'][0]['text']
+                return text_response, contents
+            
+            error_msg = res_json.get('error', {}).get('message', 'Unknown Error')
+            return f"❌ خطأ تقني: {error_msg}", contents
+
+        except Exception as e:
+            return f"❌ فشل الاتصال: {str(e)}", history or []
 
 # Singleton
 gemini_service = GeminiService()

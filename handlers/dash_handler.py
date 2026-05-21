@@ -3,126 +3,114 @@ import os
 import psutil
 from datetime import datetime
 
-# 🔱 Sovereign UI Handlers
-# ========================
+# 🔱 Sovereign Dashboard Controller v7.3.0
+# =========================================
 
 def handle_dashboard(bot, call):
-    """
-    المعالج الرئيسي للوحة التحكم السيادية (menu_*)
-    """
     data = call.data
     chat_id = call.message.chat.id
     message_id = call.message.message_id
-
-    # استيراد الـ Builder
     from core.keyboards import ui_builder
 
     try:
-        if data == "menu_runtime":
+        # --- القوائم الرئيسية ---
+        if data == "menu_runtime" or data == "hw_status":
             show_runtime(bot, chat_id, message_id)
-        elif data == "menu_agents":
+        elif data == "menu_agents" or data == "list_agents":
             show_agents_hub(bot, chat_id, message_id)
+        elif data == "menu_protocols":
+            show_protocols(bot, chat_id, message_id)
+        elif data == "menu_deploy":
+            show_deploy(bot, chat_id, message_id)
+        elif data == "menu_ai":
+            show_ai_brain(bot, chat_id, message_id)
         elif data == "menu_security":
             show_security(bot, chat_id, message_id)
-        elif data == "menu_logs":
-            show_logs_preview(bot, chat_id, message_id)
+        elif data == "menu_memory":
+            show_memory(bot, chat_id, message_id)
+        elif data == "menu_docker":
+            show_docker(bot, chat_id, message_id)
         elif data == "menu_settings":
             show_settings(bot, chat_id, message_id)
-        elif data == "menu_back" or data == "back_main":
-            # العودة للوحة الأساسية
-            text = "🔱 *NEXUM CORE OS v7.3.0*\n\nمرحباً بك مجدداً في مركز التحكم السيادي."
+        elif data == "audit_logs" or data == "menu_logs":
+            show_logs_preview(bot, chat_id, message_id)
+            
+        # --- العودة للميكانيكا الأساسية ---
+        elif data in ["menu_back", "back_main"]:
+            text = "🔱 *NEXUM CORE OS v7.3.0*\n\nمركز التحكم السيادي جاهز."
             bot.edit_message_text(text, chat_id, message_id, parse_mode="Markdown", reply_markup=ui_builder.build_main_control_plane())
+        
         else:
-            bot.answer_callback_query(call.id, f"🛠️ القسم [{data}] قيد التفعيل...")
+            bot.answer_callback_query(call.id, f"🛠️ القسم [{data}] تحت التجهيز السيادي...")
+            
     except Exception as e:
-        bot.answer_callback_query(call.id, "❌ فشل تحديث الواجهة.")
-        print(f"UI Update Error: {e}")
+        bot.answer_callback_query(call.id, "❌ خطأ في المعالجة.")
+        print(f"Dashboard Error: {e}")
 
 def show_runtime(bot, chat_id, message_id):
-    """عرض تفاصيل التشغيل الحية"""
     cpu = psutil.cpu_percent()
     ram = psutil.virtual_memory().percent
     disk = psutil.disk_usage('/').percent
-    uptime = datetime.fromtimestamp(psutil.boot_time()).strftime("%Y-%m-%d %H:%M")
-    
     text = (
-        "⚡ *NEXUM RUNTIME STATUS*\n"
+        "⚡ *SYSTEM RUNTIME ANALYSIS*\n"
         "━━━━━━━━━━━━━━━━━━━\n"
-        f"🖥️ **CPU Usage:** {cpu}%\n"
-        f"🧠 **RAM Usage:** {ram}%\n"
-        f"💾 **Disk Space:** {disk}%\n"
-        f"⏱️ **Last Boot:** {uptime}\n"
+        f"🖥️ **CPU:** {cpu}% | 🧠 **RAM:** {ram}%\n"
+        f"💾 **Disk:** {disk}% | 📡 **Net:** Active\n"
         "━━━━━━━━━━━━━━━━━━━\n"
-        "✅ النظام يعمل ضمن النطاق الآمن."
+        "✅ جميع العمليات الحيوية تعمل بكفاءة."
     )
-    markup = types.InlineKeyboardMarkup()
-    markup.add(types.InlineKeyboardButton("🔄 تحديث", callback_data="menu_runtime"))
-    markup.add(types.InlineKeyboardButton("🔙 عودة", callback_data="menu_back"))
-    bot.edit_message_text(text, chat_id, message_id, parse_mode="Markdown", reply_markup=markup)
+    from core.keyboards import ui_builder
+    bot.edit_message_text(text, chat_id, message_id, parse_mode="Markdown", reply_markup=ui_builder.build_runtime_menu())
 
 def show_agents_hub(bot, chat_id, message_id):
-    """مركز إدارة الوكلاء"""
-    text = (
-        "🤖 *AGENTS CONTROL HUB*\n"
-        "━━━━━━━━━━━━━━━━━━━\n"
-        "🎭 **Active Agents:** 4\n"
-        "🧠 **Memory Load:** Low\n\n"
-        "اختر وكيل لإدارته أو إنشاء وكيل جديد:"
-    )
-    markup = types.InlineKeyboardMarkup(row_width=2)
-    markup.add(
-        types.InlineKeyboardButton("🌐 WebForge", callback_data="wf_manage"),
-        types.InlineKeyboardButton("🏗️ BotBuilder", callback_data="bt_manage")
-    )
-    markup.add(types.InlineKeyboardButton("➕ إنشاء وكيل جديد (AgentSmith)", callback_data="ag_smith"))
-    markup.add(types.InlineKeyboardButton("🔙 عودة", callback_data="menu_back"))
-    bot.edit_message_text(text, chat_id, message_id, parse_mode="Markdown", reply_markup=markup)
+    text = "🤖 *AGENTS CONTROL HUB*\n\nإدارة الوكلاء النشطين وتحديد المهام السيادية."
+    from core.keyboards import ui_builder
+    bot.edit_message_text(text, chat_id, message_id, parse_mode="Markdown", reply_markup=ui_builder.build_agents_menu())
+
+def show_protocols(bot, chat_id, message_id):
+    text = "🧬 *SOVEREIGN PROTOCOLS*\n\nتحميل وتشغيل بروتوكولات الأتمتة المتقدمة."
+    from core.keyboards import ui_builder
+    bot.edit_message_text(text, chat_id, message_id, parse_mode="Markdown", reply_markup=ui_builder.build_protocols_menu())
+
+def show_deploy(bot, chat_id, message_id):
+    text = "🚀 *DEPLOYMENT GATEWAY*\n\nمزامنة الكود مع GitHub والنشر على السحابة."
+    from core.keyboards import ui_builder
+    bot.edit_message_text(text, chat_id, message_id, parse_mode="Markdown", reply_markup=ui_builder.build_deploy_menu())
+
+def show_ai_brain(bot, chat_id, message_id):
+    text = "🧠 *AI BRAIN CONSOLE*\n\nالتحكم في أنماط التفكير (Gemini/OpenAI) وتحليل البيانات."
+    from core.keyboards import ui_builder
+    bot.edit_message_text(text, chat_id, message_id, parse_mode="Markdown", reply_markup=ui_builder.build_ai_menu())
 
 def show_security(bot, chat_id, message_id):
-    """لوحة التحكم الأمنية"""
-    text = (
-        "🛡️ *SECURITY PERIMETER*\n"
-        "━━━━━━━━━━━━━━━━━━━\n"
-        "🔒 **Shield Status:** ACTIVE\n"
-        "🌐 **Proxy:** Disabled\n"
-        "🔑 **Master Key:** Validated\n\n"
-        "النظام محمي ضد التهديدات الخارجية."
-    )
-    markup = types.InlineKeyboardMarkup()
-    markup.add(types.InlineKeyboardButton("🔐 تغيير الـ Master Key", callback_data="sec_reset"))
-    markup.add(types.InlineKeyboardButton("🔙 عودة", callback_data="menu_back"))
-    bot.edit_message_text(text, chat_id, message_id, parse_mode="Markdown", reply_markup=markup)
+    text = "🛡️ *SECURITY COMMAND*\n\nمراقبة حواجز الحماية وإدارة مفاتيح الوصول."
+    from core.keyboards import ui_builder
+    bot.edit_message_text(text, chat_id, message_id, parse_mode="Markdown", reply_markup=ui_builder.build_security_menu())
+
+def show_memory(bot, chat_id, message_id):
+    text = "💾 *CORE MEMORY*\n\nإدارة الذاكرة السياقية وقواعد البيانات المحلية."
+    from core.keyboards import ui_builder
+    bot.edit_message_text(text, chat_id, message_id, parse_mode="Markdown", reply_markup=ui_builder.build_memory_menu())
+
+def show_docker(bot, chat_id, message_id):
+    text = "🐳 *DOCKER ORCHESTRATION*\n\nإدارة الحاويات والبيئات المعزولة."
+    from core.keyboards import ui_builder
+    bot.edit_message_text(text, chat_id, message_id, parse_mode="Markdown", reply_markup=ui_builder.build_docker_menu())
+
+def show_settings(bot, chat_id, message_id):
+    text = "⚙️ *SYSTEM SETTINGS*\n\nتعديل بارامترات التشغيل للـ Nexum Core."
+    from core.keyboards import ui_builder
+    bot.edit_message_text(text, chat_id, message_id, parse_mode="Markdown", reply_markup=ui_builder.build_settings_menu())
 
 def show_logs_preview(bot, chat_id, message_id):
-    """معاينة السجلات الحية"""
     log_path = "storage/logs/out.log"
     logs = "لا توجد سجلات حالية."
     try:
         if os.path.exists(log_path):
             with open(log_path, "r", encoding="utf-8") as f:
-                lines = f.readlines()
-                logs = "".join(lines[-10:]) # آخر 10 أسطر
-    except Exception as e:
-        logs = f"فشل قراءة السجلات: {e}"
-
-    text = f"📜 *RECENT AUDIT LOGS*\n\n`<pre>{logs}</pre>`"
+                logs = "".join(f.readlines()[-10:])
+    except: pass
+    text = f"📜 *AUDIT LOGS*\n\n`<pre>{logs}</pre>`"
     markup = types.InlineKeyboardMarkup()
-    markup.add(types.InlineKeyboardButton("📥 تحميل السجل الكامل", callback_data="menu_logs_dl"))
-    markup.add(types.InlineKeyboardButton("🔙 عودة", callback_data="menu_back"))
+    markup.add(types.InlineKeyboardButton("🔙 Back", callback_data="back_main"))
     bot.edit_message_text(text, chat_id, message_id, parse_mode="HTML", reply_markup=markup)
-
-def show_settings(bot, chat_id, message_id):
-    """إعدادات النظام"""
-    from nexum.config import config
-    text = (
-        "⚙️ *SYSTEM SETTINGS*\n"
-        "━━━━━━━━━━━━━━━━━━━\n"
-        f"👤 **Admin ID:** {config.admin_id}\n"
-        f"🤖 **Version:** 7.3.0\n"
-        f"📁 **Storage:** Local JSON\n\n"
-        "قم بتعديل ملف .env لتغيير الإعدادات الأساسية."
-    )
-    markup = types.InlineKeyboardMarkup()
-    markup.add(types.InlineKeyboardButton("🛠️ اختبار الاتصال", callback_data="st_test"))
-    markup.add(types.InlineKeyboardButton("🔙 عودة", callback_data="menu_back"))
-    bot.edit_message_text(text, chat_id, message_id, parse_mode="Markdown", reply_markup=markup)

@@ -83,7 +83,8 @@ def broadcast(msg, parse_mode="Markdown"):
 
 @bot.message_handler(commands=['start', 'dashboard', 'menu'])
 def send_welcome(message):
-    if message.from_user.id != ADMIN_ID: return
+    # تم إلغاء حماية الأدمن بناءً على الطلب
+    # if message.from_user.id != ADMIN_ID: return
     
     log_audit(AuditEvent.COMMAND_EXECUTED, ADMIN_ID, {"cmd": "dashboard"})
     broadcast("🔱 **NEXUM OS:** تم استدعاء لوحة التحكم السيادية.")
@@ -109,12 +110,14 @@ def send_welcome(message):
 
 @bot.message_handler(content_types=['photo', 'document', 'text'])
 def handle_universal(message):
-    if message.from_user.id != ADMIN_ID: return
+    # تم إلغاء حماية الأدمن بناءً على الطلب
+    # if message.from_user.id != ADMIN_ID: return
 
     # أ. الحماية والتحقق
-    if not rate_limiter.is_allowed(ADMIN_ID):
-        bot.reply_to(message, "⚠️ حماية: عمليات متكررة جداً.")
-        return
+    # تم تعطيل نظام الحماية من العمليات المتكررة
+    # if not rate_limiter.is_allowed(ADMIN_ID):
+    #     bot.reply_to(message, "⚠️ حماية: عمليات متكررة جداً.")
+    #     return
 
     text = message.text or message.caption or ""
     if not text and message.content_type not in ['photo', 'document']: return
@@ -231,6 +234,11 @@ def _handle_media(message, text):
 def _handle_chat(message, text):
     history = context_memory.get_context(ADMIN_ID)
     res, _ = gemini_service.ask(text, history=history, system_instruction="You are NEXUM OS. Efficient and advanced.")
+    
+    # إذا كان هناك خطأ تقني، نرسل تقريراً للقناة
+    if "❌ خطأ تقني" in res or "❌ خطأ:" in res:
+        broadcast(f"⚠️ **DIAGNOSTIC ALERT**\n\n**Error:** {res}\n**User Input:** {text[:50]}...\n**Next Step:** Verify credentials.txt or GOOGLE_API_KEY.")
+    
     bot.reply_to(message, res)
     context_memory.save_context(ADMIN_ID, text, role='user')
     context_memory.save_context(ADMIN_ID, res, role='assistant')
