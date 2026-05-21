@@ -11,10 +11,13 @@ class NexumConfig(BaseSettings):
     admin_id: int = Field(alias="ADMIN_ID")
     google_api_key: str = Field(alias="GOOGLE_API_KEY")
 
-    # Optional / Compatibility aliases
-    log_channel_id: int = Field(default=0, alias="LOG_CHANNEL_ID")
+    # Tokens & Services
+    github_token: str = Field(default="", alias="GITHUB_TOKEN")
     openai_api_key: str = Field(default="", alias="OPENAI_API_KEY")
     openrouter_api_key: str = Field(default="", alias="OPENROUTER_API_KEY")
+    
+    # Optional / Compatibility aliases
+    log_channel_id: int = Field(default=0, alias="LOG_CHANNEL_ID")
     db_connection: str = Field(default="", alias="DB_CONNECTION")
     master_key: str = Field(default="", alias="MASTER_KEY")
     webapp_url: str = Field(default="https://ossoolli.github.io/Nexum-Core/", alias="WEBAPP_URL")
@@ -30,6 +33,6 @@ class NexumConfig(BaseSettings):
         env_file = ".env"
         env_file_encoding = "utf-8"
         extra = "ignore"
-        populate_by_name = True  # يسمح باستخدام الاسم الأصلي أو الـ alias
+        populate_by_name = True
 
 config = NexumConfig()

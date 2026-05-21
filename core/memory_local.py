@@ -40,12 +40,12 @@ class LongTermMemory:
 
     def get_context(self, user_id: int) -> list:
         data = self._load()
-        # تحويل الشكل بما يتناسب مع متطلبات Gemini (role, parts)
+        # التنسيق الدقيق المطلوب لـ Gemini 1.5
         history = []
         for msg in data.get(str(user_id), []):
             history.append({
                 "role": "user" if msg["role"] == "user" else "model",
-                "parts": [msg["content"]]
+                "parts": [{"text": msg["content"]}] # تأكدنا من استخدام {"text": ...}
             })
         return history
 

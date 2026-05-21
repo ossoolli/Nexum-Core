@@ -2,7 +2,7 @@ import os
 import requests, base64, json
 
 class GeminiService:
-    def __init__(self, api_key=None, model="gemini-3.1-flash-lite"):
+    def __init__(self, api_key=None, model="gemini-1.5-flash"):
         self.api_key = api_key or os.getenv("GOOGLE_API_KEY")
         self.model = model
         self.url = f'https://generativelanguage.googleapis.com/v1beta/models/{self.model}:generateContent?key={self.api_key}'
@@ -42,7 +42,6 @@ class GeminiService:
                 res_json = response.json()
 
                 if response.status_code == 503:
-                    print(f"📡 [Gemini Service] Model busy (503). Retrying in {retry_delay}s... (Attempt {attempt+1}/{max_retries})")
                     time.sleep(retry_delay)
                     retry_delay *= 2
                     continue
@@ -52,6 +51,7 @@ class GeminiService:
                     contents.append({'role': 'model', 'parts': [{'text': text_response}]})
                     return text_response, contents
                 
+                # التقاط رسالة الخطأ بدقة
                 error_msg = res_json.get('error', {}).get('message', 'Unknown Error')
                 return f"❌ خطأ تقني: {error_msg}", contents
 
@@ -62,7 +62,6 @@ class GeminiService:
                 retry_delay *= 2
         
         return "❌ النظام مشغول حالياً، يرجى المحاولة لاحقاً.", history or []
-
 
 # Singleton
 gemini_service = GeminiService()

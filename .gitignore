@@ -1,31 +1,53 @@
+# 🔱 NEXUM CORE - Git Ignore Rules
+# ================================
+
+# Environment Variables (CRITICAL)
 .env
-venv/
-.venv/
+.env.local
+config.local.js
+
+# Python Cache
 __pycache__/
-*.pyc
-*.pyo
-*.pyd
-*.jar
-*.bak
+*.py[cod]
+*$py.class
+*.so
 .Python
+env/
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
 
-# Storage (بيانات حساسة)
-storage/
-storage/memory.json
-storage/bots_registry.json
-storage/channels_registry.json
-storage/logs/
-storage/exports/
+# Storage & Runtime Logs
+storage/logs/*
+storage/temp/*
+storage/memory/*
+storage/exports/*
+registry/apps/*
+registry/bots/*
+registry/agents/*
+!storage/logs/.gitkeep
+!storage/memory/.gitkeep
+!registry/apps/.gitkeep
 
-# Generated content
-registry/apps/*/
-registry/bots/*/
-agents/generated/
-storage/agent_specs/
+# OS Files
+.DS_Store
+Thumbs.db
+desktop.ini
 
-# IDE
+# IDES
 .vscode/
 .idea/
 *.swp
-.claude/
-node_modules/
+*.swo
