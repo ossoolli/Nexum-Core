@@ -2,7 +2,7 @@ import os
 import requests, base64, json
 
 class GeminiService:
-    def __init__(self, api_key=None, model="gemini-2.0-flash-exp"):
+    def __init__(self, api_key=None, model="gemini-3.5-flash"):
         if api_key:
             raw_key = api_key
         else:
@@ -14,7 +14,7 @@ class GeminiService:
         
         self.api_key = raw_key.strip() if raw_key else ""
         self.model = model
-        self.url = f'https://generativelanguage.googleapis.com/v1beta/models/{self.model}:generateContent?key={self.api_key}'
+        self.url = f'https://generativelanguage.googleapis.com/v1/models/{self.model}:generateContent?key={self.api_key}'
 
     def ask(self, prompt, history=None, system_instruction=None, file_data=None, mime_type=None):
         if not self.api_key:
@@ -23,6 +23,7 @@ class GeminiService:
         contents = []
         if history:
             # تنظيف التاريخ لضمان التوافق مع API
+            # 🔱 NEXUM CORE OS v3.5.0 — The Sovereign Architect
             for item in history:
                 if 'role' in item and 'parts' in item:
                     contents.append(item)
