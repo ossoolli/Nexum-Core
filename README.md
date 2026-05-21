@@ -1,119 +1,55 @@
-# 🔱 NEXUM CORE OS — v7.3.0 (The Sovereign Restoration)
+# 🔱 NEXUM CORE OS v7.4.0 (Evolved Sovereign)
+![Security Status](https://img.shields.io/badge/Security-Sovereign-gold)
+![Kernel](https://img.shields.io/badge/Kernel-v7.4--Evolved-blue)
+![Intelligence](https://img.shields.io/badge/AI-Gemini--3.5--Flash-green)
 
-> **"حيث يلتقي التاريخ بالحداثة، والذكاء بالسيادة."** — نظام تشغيل وكيل سيادي (Sovereign Agentic OS) لإدارة السيرفرات، بناء المواقع، وتوليد الوكلاء والبوتات.
-
----
-
-[![Version](https://img.shields.io/badge/Version-7.3.0--RESTORED-gold?style=for-the-badge)](#)
-[![Architecture](https://img.shields.io/badge/Architecture-Agentic%20Nervous%20System-blue?style=for-the-badge)](#)
-[![AI](https://img.shields.io/badge/Intelligence-Hybrid%20Intent%20Engine-purple?style=for-the-badge)](#)
-[![Security](https://img.shields.io/badge/Security-Sovereign%20Guard-red?style=for-the-badge)](#)
+> "ليس مجرد بوت، بل نظام تشغيل سيادي متكامل لإدارة الأصول الرقمية والوكلاء."
 
 ---
 
-## 🏛️ رحلة الاتحاد (The Evolution of Nexum)
-
-في الإصدار **v7.3.0**، قمنا بعملية **"الترميم السيادي"**، حيث تم دمج أقوى الميزات التي فُقدت عبر تاريخ المشروع في بنية واحدة حديثة:
-
-*   🔄 **Restored from v5.0 (The Soul)**: استعادة محرك `NexumInterpreter` للتعرف اللحظي على الكلمات المفتاحية (قنوات، بوتات، وكلاء) لضمان سرعة رد فعل لا تضاهى.
-*   🎨 **Restored from v7.1 (The UI)**: إعادة إحياء واجهة `SovereignUIBuilder` العملاقة المكونة من 9 أقسام تخصصية ودعم الـ Telegram Mini Apps.
-*   ☁️ **Inherited from v7.2 (The Cloud)**: الحفاظ على استقرار التخزين السحابي وتحسينات استهلاك الموارد.
-*   🧠 **Advanced v7.3 (The Brain)**: نظام التخطيط الآلي (AI Planner) والتشفير السيادي والربط المعياري (Modular Router).
+## 🚀 ما الجديد في الإصدار v7.4.0؟
+تم الانتقال من مرحلة "الشات بوت" إلى مرحلة **"نظام التشغيل التفاعلي"**:
+- 📂 **Sovereign Workspace**: بيئة عمل معزولة في مجلد `/workspace` لحماية نواة النظام.
+- 🧠 **Strict Execution Engine**: محرك ذكاء اصطناعي يحول اللغة الطبيعية إلى أوامر Linux تقنية صرفة دون أخطاء لغوية.
+- 🛡️ **Kernel Protection**: جدار حماية يمنع الكتابة فوق ملفات النظام الأساسية.
+- ⚡ **Local Classifier**: مصنف نوايا فوري محلي يوفر استهلاك الـ API ويضمن سرعة الاستجابة.
 
 ---
 
-## 🏗️ البنية المعمارية (The Nervous System)
+## 🛠️ كيف تتحكم في النظام؟
 
-يعمل Nexum Core كـ "جهاز عصبي" متكامل يربط بين أربعة مجالات حيوية:
+### 1️⃣ الأوامر المباشرة (Shell Mode)
+يمكنك تنفيذ أي أمر Linux مباشرة بوضع علامة `!` في البداية:
+- `!ls -la` (لعرض الملفات)
+- `!pip install requests` (تثبيت مكتبات)
 
-### 1. العقل المدبر (Intelligence & Core)
-*   **Hybrid Classifier**: يجمع بين ذكاء Gemini وسرعة regex-based classification لفهم أوامرك فورياً.
-*   **Flow Orchestrator**: يحول أهدافك المعقدة إلى خطوات تنفيذية متسلسلة (Execution Graphs).
-*   **Modular Router**: الموجه المركزي الذي يربط 50+ زر تفاعلي بمعالجاتها الخاصة.
+### 2️⃣ اللغة الطبيعية (AI Executor)
+تحدث مع النظام كأنك تتحدث مع مهندس سيرفرات:
+- "انشئ ملف باسم mutaz.txt واكتب بداخله ترحيب"
+- "اصنع مجلد للمشروع الجديد"
+- "اعرض لي محتوى ملف السجلات"
 
-### 2. أسطول البناء (Creation Fleet)
-*   🌐 **WebForge Agent**: بناء المواقع (Landing Pages, Dashboards) برمجياً في ثوانٍ.
-*   🤖 **Bot Builder**: صناعة بوتات تلجرام مخصصة بمهام وشخصيات فريدة.
-*   🎨 **Agent Smith**: تصميم وكلاء ذكاء اصطناعي متخصصين (مثل وكيل المراقبة أو البرمجة).
-
-### 3. العمليات والسيادة (Ops & Sovereignty)
-*   📢 **Channel Manager**: بث المنشورات للقنوات المربوطة وجدولة المحتوى (Cross-Posting).
-*   🚀 **Auto-Deploy**: نشر وتحديث الكود مباشرة من GitHub للسيرفر.
-*   📊 **Pulse Monitor**: مراقبة حية لموارد السيرفر (CPU, RAM, Network) مع تنبيهات ذكية.
-
----
-
-## 🎛️ لوحة التحكم السيادية (The 9-Sector Dashboard)
-
-بمجرد إرسال `/start` أو `/dashboard` تظهر اللوحة العملاقة التي تتيح لك التحكم بـ 9 عوالم مختلفة:
-
-1.  ⚡ **Runtime**: مراقبة العمليات الحية واستقرار السيرفر.
-2.  🤖 **Agents**: إدارة وتصميم أسطول الوكلاء الذكية.
-3.  🧬 **Protocols**: عرض وتعديل بروتوكولات العمل الآلي.
-4.  🚀 **Deploy**: إدارة عمليات النشر والـ CI/CD اليدوي.
-5.  🧠 **AI Brain**: التحكم بنوافذ السياق والذاكرة والتلخيص.
-6.  🛡️ **Security**: عرض سجل التدقيق (Audit Logs) وضبط الحماية.
-7.  💾 **Memory**: إدارة التخزين المحلي والسحابي للمشروع.
-8.  🐳 **Docker**: التحكم في الحاويات والخدمات المعزولة.
-9.  ⚙️ **Settings**: ضبط الهوية، التوكنات، وصلاحيات المسؤول.
+### 3️⃣ لوحة التحكم السيادية (9-Sector Dashboard)
+اضغط `/start` للوصول إلى مركز التحكم الشامل:
+- **Runtime**: مراقبة موارد السيرفر حياً.
+- **Agents**: إدارة أسطول الوكلاء (WebForge, AgentSmith).
+- **Security**: التحكم في جدران الحماية والولوج.
+- **Memory**: إدارة الذاكرة السياقية والتلخيص.
 
 ---
 
-## 🚀 التثبيت والتشغيل السريع (Installation)
-
-### 📂 التشغيل عبر Google Cloud Shell
-للتنفيذ المباشر من بيئة الـ Cloud Shell الخاصة بك:
-
-```bash
-# الانتقال لمجلد المشروع
-madarmutaz@cloudshell:~$ cd Nexum-Core
-
-# تنصيب المكتبات اللازمة
-pip install -r requirements.txt
-
-# تهيئة الإعدادات
-nano .env # أضف BOT_TOKEN, ADMIN_ID, GOOGLE_API_KEY
-
-# إطلاق النواة (Test Mode)
-python main.py
-```
-
-### ♾️ التشغيل المستمر (Continuous Awareness)
-لضمان عمل النظام 24/7 دون "هذيان" وبذاكرة واعية لا تتأثر بالانهيارات يتم استخدام PM2:
-
-```bash
-# 1. تثبيت PM2 (إذا لم يكن متاحاً في Cloud Shell)
-npm install -g pm2
-
-# 2. إطلاق "النظام السيادي"
-pm2 start ecosystem.config.js
-
-# 3. الأوامر الحيوية
-pm2 status          # عرض الحالة
-pm2 logs nexum-core  # متابعة سجل الوعي
-pm2 restart all      # إعادة تشغيل السيادة
-```
+## ⚙️ الإعدادات السريعة
+يستخدم النظام ملف `credentials.txt` في المجلد الرئيسي لإدارة المفاتيح:
+- `TELEGRAM_TOKEN`: توكن البوت.
+- `GOOGLE_API_KEY`: مفتاح Gemini 3.5 (العقل المدبر).
+- `ADMIN_ID`: هويتك كمدير سيادي.
 
 ---
 
-## 📂 هيكل المجلدات (Project DNA)
+## 🔐 فلسفة الأمان (The Sovereign Code)
+نظام NEXUM مصمم ليعمل بخصوصية كاملة. البيانات تُعالج في سيرفرك الخاص، والقرارات تُتخذ بناءً على توجيهاتك المباشرة.
 
-```text
-Nexum-Core/
-├── main.py                 # 🔱 العقل المركزي (النقطة السيادية)
-├── nexum/                  # 📦 الحزمة النواتية (Kernel, Intelligence, Security)
-├── core/                   # 🧠 العضلات (Orchestrator, Planner, Router, Keyboards)
-├── agents/                 # 🤖 الوكلاء (WebForge, BotBuilder, AgentSmith, ChannelManager)
-├── handlers/               # 🔗 المعالجات (توجيه الأزرار والقوائم)
-├── ui/                     # 🎨 المكونات البصرية (Components, Messages)
-├── services/               # ☁️ الخدمات الخارجية (Gemini, API Clients)
-└── storage/                # 💾 الذاكرة الدائمة (Bots, Projects, Logs)
-```
+**تنبيه:** يمنع النظام التعديل على ملفات النواة (`main.py`, `nexum/`) عبر الدردشة لضمان استقرار التشغيل. خذ مساحتك كاملة داخل المجلد `/workspace`.
 
 ---
-
-## 👨‍💻 المايسترو
-تم تطوير نظام **Nexum Core OS** بواسطة المبرمج **معتز إسماعيل تيلخ (Mutaz Tailakh)**، كجزء من رؤية Ossoolli للأنظمة المستقلة.
-
----
-🔱 **NEXUM — The Future is Sovereign.**
+🔱 **Produced by Ossoolli / Nexum Core Team**
