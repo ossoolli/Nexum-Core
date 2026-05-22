@@ -1,0 +1,1 @@
+from google.genai import types; config_args = {'tools': [execute_bash, read_file, write_file], 'system_instruction': 'You are Nexum Core OS Sovereign Controller.'}; gen_config = types.GenerateContentConfig(**config_args)

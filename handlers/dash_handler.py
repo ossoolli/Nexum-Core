@@ -96,7 +96,7 @@ def show_docker(bot, chat_id, message_id):
     text = "🐳 *DOCKER ORCHESTRATION*\n\nإدارة الحاويات والبيئات المعزولة."
     from core.keyboards import ui_builder
     bot.edit_message_text(text, chat_id, message_id, parse_mode="Markdown", reply_markup=ui_builder.build_docker_menu())
-
+4
 def show_settings(bot, chat_id, message_id):
     text = "⚙️ *SYSTEM SETTINGS*\n\nتعديل بارامترات التشغيل للـ Nexum Core."
     from core.keyboards import ui_builder
