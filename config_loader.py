@@ -15,6 +15,24 @@ def _load_yaml(path: str) -> dict:
         # If yaml is not installed or file missing, return empty dict
         return {}
 
+def _load_env_file(path: str) -> dict:
+    env_dict = {}
+    if os.path.isfile(path):
+        try:
+            with open(path, "r", encoding="utf-8") as f:
+                for line in f:
+                    line = line.strip()
+                    if not line or line.startswith("#"):
+                        continue
+                    if "=" in line:
+                        k, v = line.split("=", 1)
+                        k = k.strip()
+                        v = v.strip().strip("'").strip('"')
+                        env_dict[k] = v
+        except Exception:
+            pass
+    return env_dict
+
 def get_config() -> SimpleNamespace:
     """Return a configuration object with required attributes.
     Expected keys (at minimum):
@@ -23,6 +41,26 @@ def get_config() -> SimpleNamespace:
         - ``project`` (optional, used by cloud agent)
     Environment variables override values from ``config.yaml``.
     """
+    # Load .env / credentials.txt directly from possible root files to populate os.environ
+    base_dir = os.path.dirname(os.path.abspath(__file__))
+    possible_env_files = [
+        os.path.join(base_dir, ".env"),
+        os.path.join(base_dir, "credentials.txt"),
+        os.path.join(os.getcwd(), ".env"),
+        os.path.join(os.getcwd(), "credentials.txt")
+    ]
+    
+    env_vars = {}
+    for pf in possible_env_files:
+        if os.path.isfile(pf):
+            env_vars = _load_env_file(pf)
+            break
+            
+    # Populate os.environ with variables loaded from file if they aren't already set
+    for k, v in env_vars.items():
+        if not os.getenv(k):
+            os.environ[k] = v
+
     cfg = {}
     yaml_path = os.path.join(os.path.dirname(__file__), "config.yaml")
     if os.path.isfile(yaml_path):
