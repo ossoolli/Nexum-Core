@@ -70,9 +70,20 @@
    ADMIN_ID=your_telegram_numeric_id
    GOOGLE_API_KEY=your_gemini_api_key_here
    ```
-3. لتشغيل البوت ولوحة التحكم السيادية فوراً:
+3. للتشغيل التفاعلي (للتجربة والتحري المباشر):
    ```bash
    python main.py
+   ```
+4. للتشغيل الإنتاجي المستمر في الخلفية (الوضع السيادي للخدمة الدائمة) باستخدام **PM2**:
+   ```bash
+   # بدء تشغيل البوت ولوحة التحكم والـ API معاً
+   pm2 start ecosystem.config.js
+   
+   # لمراقبة الحالة الحية
+   pm2 status
+   
+   # لمشاهدة سجل المخرجات الفورية
+   pm2 logs nexum-core
    ```
 
 **Sovereign Cluster Status:** `NOMINAL`  
