@@ -4,7 +4,6 @@ import telebot
 from nexum.config import config
 from core.executive_agent import executive_agent
 
-<<<<<<< HEAD
 # 2. ─── المحركات المركزية ───
 from services.gemini_service import gemini_service
 from core.memory_local import context_memory
@@ -22,11 +21,7 @@ if not config:
 
 bot = telebot.TeleBot(config.telegram_token)
 ui_builder = SovereignUIBuilder()
-=======
->>>>>>> 3fb894a401daa626b29ed13c7d2cfd8dea723fd5
 ADMIN_ID = config.admin_id
-BOT_TOKEN = "8910270011:AAESyFAu4N_sbWFzGu_ds23W6cu4ETKuZR8"
-bot = telebot.TeleBot(BOT_TOKEN)
 
 @bot.message_handler(func=lambda msg: msg.from_user.id == ADMIN_ID and (msg.text.startswith('$ ') or msg.text.startswith('cmd ')))
 def remote_terminal_executor(msg):
