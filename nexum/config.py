@@ -9,10 +9,10 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 # قائمة بالملفات الممكنة للمفاتيح
 POSSIBLE_FILES = [
-    BASE_DIR / "credentials.txt",
     BASE_DIR / ".env",
-    Path.cwd() / "credentials.txt",
-    Path.cwd() / ".env"
+    BASE_DIR / "credentials.txt",
+    Path.cwd() / ".env",
+    Path.cwd() / "credentials.txt"
 ]
 
 selected_file = None
