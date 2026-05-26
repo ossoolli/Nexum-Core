@@ -602,6 +602,19 @@ def _proactive_learning_loop():
             print(f"[Proactive Loop Error] {e}")
 
 
+@bot.message_handler(func=lambda msg: True)
+def catch_all_unauthorized(message):
+    """Catch-all handler to debug unauthorized access."""
+    if message.from_user.id != ADMIN_ID:
+        bot.reply_to(
+            message, 
+            f"⚠️ **مرفوض (Unauthorized)**\n\n"
+            f"الآي دي الخاص بك: `{message.from_user.id}`\n"
+            f"آي دي المدير المسجل: `{ADMIN_ID}`\n\n"
+            f"الرجاء التأكد من تطابق الأرقام في ملف `.env` وإعادة التشغيل.", 
+            parse_mode="Markdown"
+        )
+        
 # ═══════════════════════════════════════════════════════
 # ║  نقطة الدخول الرئيسية                               ║
 # ═══════════════════════════════════════════════════════
