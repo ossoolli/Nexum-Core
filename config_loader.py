@@ -85,6 +85,12 @@ def get_config() -> SimpleNamespace:
                 cfg[key] = getattr(legacy_cfg, key)
     except Exception:
         pass
+        
+    if "admin_id" in cfg:
+        try:
+            cfg["admin_id"] = int(cfg["admin_id"])
+        except ValueError:
+            pass
 
     # Validate required fields
     required = ["telegram_token", "admin_id"]
