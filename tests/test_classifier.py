@@ -1,22 +1,19 @@
 import pytest
 from unittest.mock import MagicMock, patch
-from nexum.intelligence.classifier import GeminiClassifier, Intent
+from nexum.intelligence.classifier import LocalClassifier, Intent
 
 def test_intent_classification():
-    clf = GeminiClassifier()
+    clf = LocalClassifier()
     
-    # محاكاة رد JSON من الجمناي
-    mock_response = '{"intent":"monitor","confidence":0.95,"reasoning":"سؤال عن النظام"}'
-    
-    with patch("services.gemini_service.gemini_service.ask", return_value=(mock_response, None)):
-        result = clf.classify("حالة النظام")
-        assert result.intent == Intent.MONITOR
-        assert result.confidence == 0.95
+    # تصنيف محلي بالكلمات المفتاحية
+    result = clf.classify("حالة النظام")
+    assert result.intent == Intent.MONITOR
+    assert result.confidence == 0.9
 
-def test_fallback_on_error():
-    clf = GeminiClassifier()
+def test_fallback_on_default():
+    clf = LocalClassifier()
     
-    # محاكاة فشل الـ API
-    with patch("services.gemini_service.gemini_service.ask", side_effect=Exception("API down")):
-        result = clf.classify("أي رسالة")
-        assert result.intent == Intent.CHAT  # يجب أن يعود للدردشة كخيار آمن
+    # رسالة عادية بدون كلمات مفتاحية — يجب أن يعود للدردشة
+    result = clf.classify("مرحبا كيف حالك")
+    assert result.intent == Intent.CHAT
+

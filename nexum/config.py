@@ -21,13 +21,13 @@ for pf in POSSIBLE_FILES:
         selected_file = str(pf)
         break
 
-print(f"🔱 [Config] Loading credentials from: {selected_file}")
+print(f"[Config] Loading credentials from: {selected_file}")
 
 class NexumConfig(BaseSettings):
     # Required
     telegram_token: str = Field(alias="TELEGRAM_TOKEN")
     admin_id: int = Field(alias="ADMIN_ID")
-    google_api_key: str = Field(alias="GOOGLE_API_KEY")
+    google_api_key: str = Field(default="", alias="GOOGLE_API_KEY")
 
     # Tokens & Services
     github_token: str = Field(default="", alias="GITHUB_TOKEN")
@@ -43,6 +43,13 @@ class NexumConfig(BaseSettings):
     supabase_url: Optional[str] = Field(default=None, alias="SUPABASE_URL")
     supabase_key: Optional[str] = Field(default=None, alias="SUPABASE_KEY")
 
+    # Gemini Enterprise Agent Platform (Vertex AI)
+    google_cloud_project: str = Field(default="", alias="GOOGLE_CLOUD_PROJECT")
+    google_cloud_location: str = Field(default="global", alias="GOOGLE_CLOUD_LOCATION")
+    google_genai_use_vertexai: bool = Field(default=False, alias="GOOGLE_GENAI_USE_VERTEXAI")
+    gemini_model: str = Field(default="gemini-2.5-flash", alias="GEMINI_MODEL")
+    gemini_image_model: str = Field(default="gemini-2.5-flash", alias="GEMINI_IMAGE_MODEL")
+
     # Internal paths & configs
     storage_dir: Path = Field(default=BASE_DIR / "storage")
     log_level: str = Field(default="INFO")
@@ -55,8 +62,13 @@ class NexumConfig(BaseSettings):
 
 try:
     config = NexumConfig()
-    print(f"✅ [Config] GOOGLE_API_KEY loaded: {'Yes' if config.google_api_key else 'No'}")
+    _auth_mode = "ADC/VertexAI" if config.google_genai_use_vertexai else (
+        "API Key" if config.google_api_key else "None"
+    )
+    print(f"[Config] Auth mode: {_auth_mode} | Model: {config.gemini_model}")
+    if config.google_genai_use_vertexai:
+        print(f"[Config] GCP Project: {config.google_cloud_project} | Location: {config.google_cloud_location}")
 except Exception as e:
-    print(f"❌ [Config] Error loading config: {e}")
+    print(f"[Config] Error loading config: {e}")
     # Fallback to empty config to prevent crash if not critical
     config = None

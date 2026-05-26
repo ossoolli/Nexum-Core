@@ -21,9 +21,13 @@ for d in [WORKSPACE_DIR, REGISTRY_DIR, STORAGE_DIR, LOGS_DIR, SANDBOX_DIR]:
     os.makedirs(d, exist_ok=True)
 
 # ─── بيئة Python الحالية ───
-PYTHON_BIN = os.path.join(BASE_DIR, "venv", "bin", "python3")
+import sys
+if sys.platform == "win32":
+    PYTHON_BIN = os.path.join(BASE_DIR, "venv", "Scripts", "python.exe")
+else:
+    PYTHON_BIN = os.path.join(BASE_DIR, "venv", "bin", "python3")
 if not os.path.exists(PYTHON_BIN):
-    PYTHON_BIN = "python3"  # fallback للـ system python
+    PYTHON_BIN = sys.executable  # fallback للـ Python الحالي
 
 # ─── Git config ───
 GIT_AUTO_PUSH = os.getenv("GIT_AUTO_PUSH", "false").lower() == "true"

@@ -1,36 +1,80 @@
-# 🔱 NEXUM CORE OS — v10.0.0 (Agentic Matrix Edition)
-### *Sovereign Autonomous Orchestration & Persistent Task-Scheduling Framework*
-
-Nexum Core OS is an enterprise-grade, high-performance autonomous agent orchestration and persistent event-dispatching framework. Engineered as a lightweight, secure, and hyper-resilient alternative to heavy middleware platforms like n8n, Nexum empowers decentralized AI agents, persistent workflow automation, and bulletproof hybrid inference inside ephemeral cloud instances.
+# 🔱 NEXUM PRO OS — v10.5.0 (Sovereign Swarm Edition)
+### *Sovereign Autonomous Agentic Operating System & Interactive Control Plane*
 
 ---
 
-## 🏛️ 1. THE TRI-ENGINE SWARM ARCHITECTURE
+## 🏛️ 1. المانيفستو والفلسفة المعمارية (Architectural Manifesto)
 
-Nexum operates on a decentralized **Hybrid Intelligence Swarm Engine** that strategically segregates cognitive duties across state-of-the-art Large Language Models (LLMs) to maximize code execution integrity and eradicate hallucinations:
-
-
+مشروع **Nexum Pro** هو نظام تشغيل سيادي قائم على الوكلاء المستقلين (**Agentic OS**)، تم ابتكاره وتطويره ليعمل كـ "مايسترو للبنية التحتية الذكية". تندمج فيه استقلالية القرار المعرفي للذكاء الاصطناعي مع آليات الحماية الأمنية المتقدمة لبيئات العمل المحلية والسحابية، مما يضمن استمرارية التشغيل التلقائي بالكامل (**Zero-Fault Tolerance**) ودون الحاجة لتدخل بشري مستمر.
 
 ---
 
-## ⚡ 2. CORE CAPABILITIES & ADVANCED IMMUNITY
+## ⚡ 2. الميزات والقدرات السيادية الجديدة (Core Advanced Capabilities)
 
-### 💾 Persistent Task-Scheduling Backend
-Unlike traditional automation platforms that cache execution context purely in volatile RAM, Nexum anchors its operational queue in a **thread-safe SQLite3 file storage layer**. In the event of abrupt container evictions or Google Cloud environment drops, the background dispatcher automatically restores remaining workflows without losing a single line of payload metadata.
+لقد تمت ترقية النظام بالكامل في إصدار **v10.5.0** ليشمل القدرات التالية:
 
-### 🧵 Thread-Safe Guard Modules
-All core input/output matrices are wrapped inside atomic `threading.Lock()` structures, effectively sanitizing the kernel from Race Conditions during concurrent webhooks spikes or parallel shell executions.
+### 1️⃣ لوحة تحكم التليجرام التفاعلية بالكامل (Interactive Telegram Control Plane)
+تحول واجهة البوت من مجرد أوامر نصية إلى لوحة تحكم سيادية شاملة مبنية على مبدأ **"Click-first, Type-never"**:
+* ⚡ **Runtime Hub**: عرض استهلاك الموارد المادية (`psutil` لحالة CPU وRAM ومساحة القرص) وتفاصيل معالجة البوت (Threads، استهلاك RSS للذاكرة، إحصائيات Watchdog).
+* 🤖 **Agents Hub**: الاستعلام الفوري عن سجل الوكلاء (`agent_registry`) واستعراض صلاحياتهم وقيودهم التشغيلية وتعديل حالاتهم.
+* 🧬 **Protocols Hub**: تمثيل بصري بياني للمخطط الشبكي للمهام وتدفق العمليات (Directed Acyclic Graph - DAG) لمنع الدوران والحلقات المفرغة.
+* 🚀 **Deployment command center**: فحص مستودع الـ Git حياً ودفع التحديثات بخطوط إنتاج سحابية أو التراجع عن الإصدارات بنقرة زر واحدة.
+* 🧠 **AI Brain Console**: لوحة تحكم بنمط تفكير العقل الاصطناعي، تتيح تغيير النماذج حياً وتدعم الأوامر المتطورة مثل `/imagine` لتوليد الصور وفهمها، و`/code` لتنفيذ الشيفرات محلياً.
+* 🛡️ **Security command center**: إدارة صمام الأمان وتفعيل حظر الوصول الفوري ونسخ السجلات الأمنية وفحص سلامة الملفات الأساسية.
+* 💾 **Core Memory Hub**: إحصائيات الذاكرة وقواعد البيانات، ومسح السياقات الطويلة، وخاصية **تصدير كامل الذاكرة السيادية كملف مضغوط (.zip) وإرساله مباشرة للمطور عبر التليجرام**.
+* 🐳 **Docker orchestration**: استعراض الحاويات النشطة وصور Docker مع fallback بـ mockup احترافي لسلامة التشغيل.
+* ⚙️ **Settings Dashboard**: تتيح تبديل نموذج التفكير حياً عبر أزرار تفاعلية واختيار السمات البصرية للوحة التحكم (Theme Switcher: Glassmorphism, Emerald Matrix, Cyber Neon, Cosmic Sovereign).
 
-### 👔 Executive CEO Agent (Automated Routing)
-A centralized orchestrator evaluates every raw prompt or inbound signal. It autonomously determines the path of least resistance, dynamically choosing whether to invoke standard bash compilers via the **Sovereign Shell Terminal** or command the Multi-Model Swarm for advanced cognitive logic.
+### 2️⃣ صمام الحماية والتعطيل الأمني الفوري (Zero-Fault Security Lockdown)
+تم تفعيل درع أمني مركزي في قلب متحكم الترمنال (`terminal_controller.py`):
+* **وضع الحظر التام (Lockdown Mode)**: عند تفعيل هذا الوضع، يتم تجميد ومنع تشغيل كافة أوامر النظام والترمنال عبر كافة الوكلاء لحماية بيئة السيرفر ضد أي اختراق أو هجوم.
+* **فحص فوري ضد الأوامر التدميرية**: تصفية وحظر كافة الأوامر الحساسة أو التدميرية عبر مرشحات Regex مطورة.
+
+### 3️⃣ المصادقة المعرفية المزدوجة (Dual-Authentication Core Layer)
+تمت ترقية محرك خدمات Gemini ليدعم بيئات التطوير والإنتاج بشكل مرن:
+* **دعم التطوير**: مصادقة سريعة ومبسطة عبر الـ API Key.
+* **دعم الإنتاج**: دمج مصادقة الهوية السحابية **Gemini Enterprise Agent Platform** (المعروف بـ Vertex AI) باستخدام حسابات ADC (Application Default Credentials).
 
 ---
 
-## 🛠️ 3. INSTANT DEPLOYMENT & ECOSYSTEM STATUS
+## 🛠️ 3. هيكلية الملفات النشطة والمعقمة (Clean System Layout)
 
-Managed under **PM2 (Process Manager 2)**, Nexum maintains continuous self-healing uptime scripts:
-* **`nexum-bot`:** Central telemetry command plane and Telegram interface.
-* **`nexum-webhook`:** Isolated HTTP API gateway for instant external automation.
+يتميز النظام بهيكلية معقمة بالكامل، حيث تم التخلص من كافة الملفات القديمة والمسودات المتراكمة، ليقتصر المجلد على الأصول الإنتاجية عالية الجودة:
+
+```
+├── main.py                    # النواة المركزية الموحدة ومحرك البوت
+├── config_loader.py           # مدير التكوينات الموحد ومتغيرات البيئة
+├── core/
+│   ├── terminal_controller.py # الحارس الأمني وصمام الحظر للترمنال
+│   ├── keyboards.py           # المحرك البصري السيادي لواجهات التليجرام
+│   ├── router.py              # موجه التفاعل المركزي للأزرار
+│   └── memory/
+│       └── sovereign_memory.py# محرك الذاكرة السيادية الفائقة
+├── handlers/
+│   └── dash_handler.py        # المحرك الخلفي لتفعيل لوحة التحكم والأزرار حياً
+└── services/
+    └── gemini_service.py      # خدمة Gemini المزدوجة وتوليد الصور والأكواد
+```
+
+---
+
+## 🚀 4. التشغيل والبدء الفوري (Instant Standup)
+
+1. قم بتثبيت المتطلبات البرمجية المعقمة:
+   ```bash
+   pip install -r requirements.txt
+   ```
+2. أضف بيانات المصادقة في ملف التكوين السري `.env`:
+   ```env
+   TELEGRAM_TOKEN=your_bot_token_here
+   ADMIN_ID=your_telegram_numeric_id
+   GOOGLE_API_KEY=your_gemini_api_key_here
+   ```
+3. لتشغيل البوت ولوحة التحكم السيادية فوراً:
+   ```bash
+   python main.py
+   ```
 
 **Sovereign Cluster Status:** `NOMINAL`  
-**Core Version:** `v10.0.0-Agentic`
+**Core Version:** `v10.5.0-Sovereign Swarm Edition`  
+**Security Level:** `AAA Sovereign Grade`

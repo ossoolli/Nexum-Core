@@ -17,7 +17,7 @@ def setup_router(bot):
             from handlers.dash_handler import handle_dashboard
             
             # معالجة واجهات التحكم الرئيسية
-            if any(data.startswith(prefix) for prefix in ['menu_', 'rt_', 'ag_', 'pr_', 'dp_', 'ai_', 'sec_', 'mem_', 'dk_', 'set_', 'hw_', 'back_']):
+            if any(data.startswith(prefix) for prefix in ['menu_', 'rt_', 'ag_', 'pr_', 'dp_', 'ai_', 'sec_', 'mem_', 'dk_', 'set_', 'hw_', 'back_', 'cloud_', 'setmod_', 'settheme_', 'confirm_', 'agent_']):
                 handle_dashboard(bot, call)
                 
             elif data.startswith('agctl_'):

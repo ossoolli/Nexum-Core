@@ -305,6 +305,34 @@ class SovereignUIBuilder:
         )
         return m
 
+    def build_model_selector_menu(self) -> InlineKeyboardMarkup:
+        """قائمة تبديل نموذج الذكاء الاصطناعي"""
+        m = InlineKeyboardMarkup(row_width=1)
+        m.row(
+            InlineKeyboardButton("⚡ Gemini 2.5 Flash (سريع واقتصادي)", callback_data="setmod_gemini-2.5-flash"),
+            InlineKeyboardButton("🧠 Gemini 2.5 Pro (ذكي وقوي)", callback_data="setmod_gemini-2.5-pro")
+        )
+        m.row(
+            InlineKeyboardButton("🧪 Gemini 2.0 Flash Exp (سريع تجريبي)", callback_data="setmod_gemini-2.0-flash-exp")
+        )
+        m.add(InlineKeyboardButton("⬅️ Back to Settings", callback_data="menu_settings"))
+        return m
+
+    def build_theme_selector_menu(self) -> InlineKeyboardMarkup:
+        """قائمة اختيار السمات المرئية للوحة التحكم"""
+        m = InlineKeyboardMarkup(row_width=2)
+        m.row(
+            InlineKeyboardButton("🖤 Glassmorphism", callback_data="settheme_glassmorphism"),
+            InlineKeyboardButton("💚 Emerald Matrix", callback_data="settheme_matrix")
+        )
+        m.row(
+            InlineKeyboardButton("💙 Cosmic Sovereign", callback_data="settheme_cosmic"),
+            InlineKeyboardButton("💜 Cyber Neon", callback_data="settheme_cyberpunk")
+        )
+        m.add(InlineKeyboardButton("⬅️ Back to Settings", callback_data="menu_settings"))
+        return m
+
 
 # Singleton
 ui_builder = SovereignUIBuilder()
+

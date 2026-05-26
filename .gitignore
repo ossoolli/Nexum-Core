@@ -37,6 +37,8 @@ storage/logs/*
 storage/temp/*
 storage/memory/*
 storage/exports/*
+storage/sovereign_memory/
+registry/system_memory.json
 registry/apps/*
 registry/bots/*
 registry/agents/*
