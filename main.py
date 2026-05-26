@@ -132,6 +132,18 @@ def execute_bash(cmd: str, timeout: int = 45) -> dict:
 # ║  1. معالجات الأوامر المباشرة (Commands)              ║
 # ═══════════════════════════════════════════════════════
 
+@bot.message_handler(func=lambda msg: msg.from_user.id != ADMIN_ID)
+def catch_all_unauthorized(message):
+    """Catch-all handler to debug unauthorized access. Must be at the top to intercept before other handlers."""
+    bot.reply_to(
+        message, 
+        f"⚠️ **مرفوض (Unauthorized)**\n\n"
+        f"الآي دي الخاص بك: `{message.from_user.id}`\n"
+        f"آي دي المدير المسجل: `{ADMIN_ID}`\n\n"
+        f"الرجاء التأكد من تطابق الأرقام في ملف `.env` وإعادة التشغيل.", 
+        parse_mode="Markdown"
+    )
+
 @bot.message_handler(commands=['start', 'menu'])
 @bot_error_handler
 def handle_start(message):
@@ -602,19 +614,10 @@ def _proactive_learning_loop():
             print(f"[Proactive Loop Error] {e}")
 
 
-@bot.message_handler(func=lambda msg: True)
-def catch_all_unauthorized(message):
-    """Catch-all handler to debug unauthorized access."""
-    if message.from_user.id != ADMIN_ID:
-        bot.reply_to(
-            message, 
-            f"⚠️ **مرفوض (Unauthorized)**\n\n"
-            f"الآي دي الخاص بك: `{message.from_user.id}`\n"
-            f"آي دي المدير المسجل: `{ADMIN_ID}`\n\n"
-            f"الرجاء التأكد من تطابق الأرقام في ملف `.env` وإعادة التشغيل.", 
-            parse_mode="Markdown"
-        )
-        
+        except Exception as e:
+            print(f"[Proactive Loop Error] {e}")
+
+
 # ═══════════════════════════════════════════════════════
 # ║  نقطة الدخول الرئيسية                               ║
 # ═══════════════════════════════════════════════════════
