@@ -32,13 +32,24 @@ MODEL_MAPPING = {
     "gemini-2.5-pro": "gemini-2.5-pro",
     "gemini-2.5-flash-lite": "gemini-2.5-flash-lite",
     # Third-party via Model Garden (Vertex AI publishers)
-    "anthropic/claude-sonnet-4": "publishers/anthropic/models/claude-sonnet-4",
-    "anthropic/claude-opus-4": "publishers/anthropic/models/claude-opus-4",
-    "anthropic/claude-sonnet-4.5": "publishers/anthropic/models/claude-sonnet-4.5",
-    "anthropic/claude-haiku-4": "publishers/anthropic/models/claude-haiku-4",
+    # ⚠️ خرائط مطابقة مع النماذج الفعلية المتوفرة على منصة Google Cloud
+    "anthropic/claude-3-5-sonnet": "publishers/anthropic/models/claude-3-5-sonnet",
+    "anthropic/claude-3-5-sonnet-v2": "publishers/anthropic/models/claude-3-5-sonnet-v2",
+    "anthropic/claude-3-5-haiku": "publishers/anthropic/models/claude-3-5-haiku",
+    "anthropic/claude-3-opus": "publishers/anthropic/models/claude-3-opus",
+    
+    # تحويل الموديلات الافتراضية والاسمية إلى النماذج المستقرة المتوفرة
+    "anthropic/claude-sonnet-4": "publishers/anthropic/models/claude-3-5-sonnet",
+    "anthropic/claude-opus-4": "publishers/anthropic/models/claude-3-opus",
+    "anthropic/claude-sonnet-4.5": "publishers/anthropic/models/claude-3-5-sonnet",
+    "anthropic/claude-haiku-4": "publishers/anthropic/models/claude-3-5-haiku",
+    
     # Legacy aliases
-    "claude-opus-4": "publishers/anthropic/models/claude-opus-4",
-    "claude-sonnet-4": "publishers/anthropic/models/claude-sonnet-4",
+    "claude-opus-4": "publishers/anthropic/models/claude-3-opus",
+    "claude-sonnet-4": "publishers/anthropic/models/claude-3-5-sonnet",
+    "claude-3-5-sonnet": "publishers/anthropic/models/claude-3-5-sonnet",
+    "claude-3-5-sonnet-v2": "publishers/anthropic/models/claude-3-5-sonnet-v2",
+    
     # GPT — يُعالج عبر OpenAI مباشرة (غير متاح في Model Garden)
     # يُوجّه كاحتياطي إلى Gemini إن لم يتوفر مفتاح OpenAI
     "gpt-4o": "gemini-3.5-flash",

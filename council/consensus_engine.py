@@ -68,7 +68,14 @@ class CouncilConsensusEngine:
             "Internal Server Error",
             "500",
             "Bad Gateway",
-            "502"
+            "502",
+            "404",
+            "NOT_FOUND",
+            "not found",
+            "خطأ في Agent Platform",
+            "Exception",
+            "exception",
+            "failed to"
         ]
         return any(ind in res_str for ind in error_indicators)
 
