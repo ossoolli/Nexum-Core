@@ -97,6 +97,9 @@ class SovereignUIBuilder:
             InlineKeyboardButton("🔌 Bridge Events", callback_data="bridge_events")
         )
         m.row(
+            InlineKeyboardButton("🧬 ADK Swarm Flow", callback_data="adk_swarm_hub")
+        )
+        m.row(
             InlineKeyboardButton("⏹️ Stop All", callback_data="ag_stop_all"),
             InlineKeyboardButton("🔄 Restart All", callback_data="ag_restart_all")
         )

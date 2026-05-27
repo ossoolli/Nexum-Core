@@ -11,9 +11,9 @@ if BASE_DIR not in sys.path:
     sys.path.insert(0, BASE_DIR)
 
 try:
-    from google.adk.agents.llm_agent import LlmAgent
+    from google.adk import Agent
 except ImportError:
-    LlmAgent = None
+    Agent = None
 
 from nexum.cloud.gcp_mcp import gcp_mcp
 from core.base_agent import BaseAgent
@@ -28,7 +28,7 @@ class CloudAgent(BaseAgent):
         )
         # تحميل الأدوات من MCP Servers
         self._tools = []
-        if LlmAgent:
+        if Agent:
             for service in ["storage", "bigquery", "compute", "logging", "monitoring", "aiplatform"]:
                 try:
                     toolset = gcp_mcp.get_toolset(service)
@@ -39,7 +39,7 @@ class CloudAgent(BaseAgent):
 
             # وكيل Gemini مع كل أدوات GCP
             try:
-                self._agent = LlmAgent(
+                self._agent = Agent(
                     model="gemini-1.5-flash-latest",
                     name="nexum_cloud_agent",
                     instruction="""
@@ -57,23 +57,60 @@ class CloudAgent(BaseAgent):
                     """,
                     tools=self._tools,
                 )
+                from google.adk.runners import InMemoryRunner
+                self._runner = InMemoryRunner(self._agent, app_name="NEXUM_Cloud")
             except Exception as e:
-                self.log(f"Failed to init LlmAgent: {e}", level="ERROR")
+                self.log(f"Failed to init Agent or InMemoryRunner: {e}", level="ERROR")
                 self._agent = None
+                self._runner = None
         else:
             self._agent = None
-            self.log("LlmAgent (ADK) not available", level="ERROR")
+            self._runner = None
+            self.log("Agent (ADK) not available", level="ERROR")
 
     def run(self, input_data: dict) -> dict:
         command = input_data.get("text", "")
-        if not self._agent:
-            return {"status": "error", "error": "Cloud Agent ADK is not initialized. Check dependencies."}
+        if not self._agent or not self._runner:
+            return {"status": "error", "error": "Cloud Agent ADK or runner is not initialized. Check dependencies."}
             
         try:
-            # تنفيذ الأمر عبر الوكيل الذكي
-            response = self._agent.run(command)
-            # استخراج النص من رد الوكيل (ADK response format)
-            return {"status": "success", "output": str(response)}
+            session_id = "cloud_session"
+            user_id = "admin"
+
+            # إنشاء الجلسة في InMemorySessionService إذا لم تكن موجودة لتجنب Session Not Found
+            session = self._runner.session_service.get_session_sync(
+                app_name=self._runner.app_name,
+                user_id=user_id,
+                session_id=session_id
+            )
+            if not session:
+                self._runner.session_service.create_session_sync(
+                    app_name=self._runner.app_name,
+                    user_id=user_id,
+                    session_id=session_id
+                )
+
+            from google.genai import types
+            msg = types.Content(parts=[types.Part(text=command)])
+
+            # تشغيل التدفق الرسومي التشاركي وجمع الأحداث حياً بشكل متزامن للمطور
+            events = self._runner.run(
+                user_id=user_id,
+                session_id=session_id,
+                new_message=msg
+            )
+
+            output_str = ""
+            for event in events:
+                if event.content and event.content.parts:
+                    for part in event.content.parts:
+                        if part.text:
+                            output_str += part.text
+
+            if not output_str:
+                output_str = "🟢 [Cloud Agent] Command executed, but returned an empty response."
+
+            return {"status": "success", "output": output_str}
         except Exception as e:
             self.log(f"Cloud command failure: {e}", level="ERROR")
             return {"status": "error", "error": str(e)}

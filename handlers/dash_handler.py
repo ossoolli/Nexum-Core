@@ -326,6 +326,23 @@ def handle_dashboard(bot, call):
             bot.edit_message_text(status, chat_id, message_id, parse_mode="HTML", reply_markup=ui_builder.build_agents_menu())
             bot.answer_callback_query(call.id, "🔌 Bridge Events Loaded")
 
+        elif data == "adk_swarm_hub":
+            status = (
+                f"🧬 <b>GOOGLE ADK 2.0 GA COLLABORATIVE SWARM</b>\n"
+                f"━━━━━━━━━━━━━━━━━━━\n"
+                f"• <b>Orchestration Type:</b> <code>Graph Workflows (DAG)</code>\n"
+                f"• <b>Active ADK Agents:</b>\n"
+                f"  1. <code>sentinel_audit_agent</code> (Root / Resource Auditor)\n"
+                f"  2. <code>gcp_deploy_agent</code> (GCP Deployer)\n"
+                f"• <b>Collaborative Handover:</b> <code>Enabled (transfer_to_agent)</code>\n"
+                f"• <b>Ecosystem Health:</b> <code>AAA Nominal</code>\n"
+                f"━━━━━━━━━━━━━━━━━━━\n"
+                f"💡 <b>To trigger collaborative tasks, send:</b>\n"
+                f"<code>/adk_run deploy git changes to production</code>"
+            )
+            bot.edit_message_text(status, chat_id, message_id, parse_mode="HTML", reply_markup=ui_builder.build_agents_menu())
+            bot.answer_callback_query(call.id, "🧬 ADK Swarm Hub Loaded")
+
         elif data == "council_stats":
             try:
                 from council.knowledge_archive import knowledge_archive

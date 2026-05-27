@@ -621,6 +621,39 @@ def handle_sentinel_status(message):
     bot.reply_to(message, status, parse_mode="Markdown")
 
 
+@bot.message_handler(commands=['adk_run'])
+@bot_error_handler
+def handle_adk_run(message):
+    """تشغيل مأمورية تشاركية بالاعتماد على Google ADK 2.0 GA: /adk_run [المهمة]"""
+    if message.from_user.id != ADMIN_ID:
+        return
+    task = message.text.replace('/adk_run', '', 1).strip()
+    if not task:
+        bot.reply_to(message, "⚠️ **الاستخدام:** `/adk_run [المهمة التشاركية المقترحة]`")
+        return
+        
+    bot.send_message(message.chat.id, "🧬 **[ADK Swarm Engine]:** جاري بناء خطة العمل وتشغيل الوكلاء المتعاونين (sentinel_audit + gcp_deploy)...", parse_mode="Markdown")
+    
+    try:
+        from swarm.adk_engine import adk_swarm
+        import asyncio
+        loop = asyncio.new_event_loop()
+        res = loop.run_until_complete(adk_swarm.execute_mission(task))
+        
+        status_icon = "🏆 SUCCESS" if res.get("status") == "success" else "⚠️ SIMULATED" if res.get("status") == "simulation" else "❌ FAILED"
+        output = (
+            f"🧬 **تقرير مأمورية ADK 2.0 التشاركية:**\n"
+            f"━━━━━━━━━━━━━━━━━━━\n"
+            f"📌 **المهمة:** `{task}`\n"
+            f"📊 **الحالة النهائية للمحرك:** `{status_icon}`\n"
+            f"━━━━━━━━━━━━━━━━━━━\n"
+            f"📝 **تفاصيل المخرجات والتحكيم:**\n<pre>{res.get('output', res.get('error', ''))}</pre>"
+        )
+        bot.send_message(message.chat.id, output, parse_mode="HTML")
+    except Exception as e:
+        bot.reply_to(message, f"❌ حدث خطأ أثناء تشغيل تدفق ADK التشاركي: {e}")
+
+
 @bot.message_handler(commands=['rag_search'])
 @bot_error_handler
 def handle_rag_search(message):

@@ -112,5 +112,21 @@ class TestConsensusSwarm(unittest.TestCase):
         self.assertEqual(recreated.votes[0].model_id, "claude")
         self.assertTrue(recreated.votes[0].approved)
 
+    def test_adk_swarm_engine_initialization(self):
+        """Verify ADKSwarmEngine initialization and collaborative Pydantic structures"""
+        from swarm.adk_engine import ADKSwarmEngine
+        engine = ADKSwarmEngine()
+        
+        # If Agent/ADK package is active, check structure, otherwise verify simulation
+        from google.adk import Agent
+        if Agent:
+            self.assertIsNotNone(engine.sentinel_agent)
+            self.assertEqual(engine.sentinel_agent.name, "sentinel_audit_agent")
+            self.assertEqual(len(engine.sentinel_agent.sub_agents), 1)
+            self.assertEqual(engine.sentinel_agent.sub_agents[0].name, "gcp_deploy_agent")
+            self.assertIsNotNone(engine.runner)
+        else:
+            self.assertIsNone(engine.sentinel_agent)
+
 if __name__ == "__main__":
     unittest.main()
