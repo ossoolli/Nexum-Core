@@ -32,19 +32,17 @@ MODEL_MAPPING = {
     "gemini-2.5-pro": "gemini-2.5-pro",
     "gemini-2.5-flash-lite": "gemini-2.5-flash-lite",
     # Third-party via Model Garden (Vertex AI publishers)
-    "anthropic/claude-opus-4.7": "publishers/anthropic/models/claude-opus-4.7",
-    "anthropic/claude-sonnet-4.6": "publishers/anthropic/models/claude-sonnet-4.6",
-    "anthropic/claude-opus-4.6": "publishers/anthropic/models/claude-opus-4.6",
-    "anthropic/claude-opus-4.5": "publishers/anthropic/models/claude-opus-4.5",
+    "anthropic/claude-sonnet-4": "publishers/anthropic/models/claude-sonnet-4",
+    "anthropic/claude-opus-4": "publishers/anthropic/models/claude-opus-4",
     "anthropic/claude-sonnet-4.5": "publishers/anthropic/models/claude-sonnet-4.5",
-    "anthropic/claude-haiku-4.5": "publishers/anthropic/models/claude-haiku-4.5",
-    "anthropic/claude-opus-4.1": "publishers/anthropic/models/claude-opus-4.1",
-    # Legacy fallback mappings for robustness
-    "anthropic/claude-opus-4.6-fallback": "publishers/anthropic/models/claude-opus-4",
+    "anthropic/claude-haiku-4": "publishers/anthropic/models/claude-haiku-4",
+    # Legacy aliases
     "claude-opus-4": "publishers/anthropic/models/claude-opus-4",
     "claude-sonnet-4": "publishers/anthropic/models/claude-sonnet-4",
-    # GPT ليس متاحاً في Model Garden — سيُعالج بالاحتياطي (نستخدم النموذج الحديث كبديل)
-    "gpt-5.4-nano": "gemini-3.5-flash",
+    # GPT — يُعالج عبر OpenAI مباشرة (غير متاح في Model Garden)
+    # يُوجّه كاحتياطي إلى Gemini إن لم يتوفر مفتاح OpenAI
+    "gpt-4o": "gemini-3.5-flash",
+    "gpt-4o-mini": "gemini-3.5-flash",
 }
 
 
@@ -115,7 +113,7 @@ class AgentPlatformEngine:
         """تحقق من جاهزية المحرك"""
         return self._available and self.client is not None
 
-    def ask(self, prompt: str, model: str = "gemini-2.5-flash") -> Tuple[str, None]:
+    def ask(self, prompt: str, model: str = "gemini-3.5-flash") -> Tuple[str, None]:
         """
         استدعاء موديل عبر Vertex AI Agent Platform.
 

@@ -6,11 +6,11 @@ name: "Council of Sages Multi-Model Consensus"
 version: "1.0"
 active_models:
   - id: "claude"
-    model_name: "anthropic/claude-opus-4.7"
+    model_name: "anthropic/claude-sonnet-4"
     weight: 1.0
     specialty: "logic, code audit, security check"
   - id: "gpt"
-    model_name: "gpt-5.4-nano"
+    model_name: "gpt-4o-mini"
     weight: 1.0
     specialty: "creativity, strategy, API design"
   - id: "gemini"

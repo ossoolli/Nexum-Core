@@ -3,7 +3,7 @@
 """
 🔱 CouncilConsensusEngine — المحرك المركزي لمجلس الحكماء (v1.0.0)
 ================================================================
-- تشغيل Claude 3.5 و Gemini 3.5 و GPT-4o بالتوازي لتقييم المهام الحساسة.
+- تشغيل Claude Sonnet 4 و Gemini 3.5 Flash و GPT-4o بالتوازي لتقييم المهام الحساسة.
 - حل وتمرير الاستدعاءات بالتزامن عبر asyncio.to_thread لعدم تجميد خادم التطبيق.
 - التكامل الفوري مع بروتوكول النقاش (Debate Protocol) لتصفية الخلافات.
 """
@@ -184,7 +184,7 @@ class CouncilConsensusEngine:
         """استدعاء كلود عبر Agent Platform (أو OpenRouter كاحتياطي)"""
         config = self._load_consensus_config()
         models = config.get("active_models", [])
-        claude_model = "anthropic/claude-opus-4.7"
+        claude_model = "anthropic/claude-sonnet-4"
         for m in models:
             if m.get("id") == "claude":
                 claude_model = m.get("model_name", claude_model)
@@ -204,7 +204,7 @@ class CouncilConsensusEngine:
         """استدعاء جي بي تي عبر Agent Platform (أو OpenAI كاحتياطي)"""
         config = self._load_consensus_config()
         models = config.get("active_models", [])
-        gpt_model = "gpt-5.4-nano"
+        gpt_model = "gpt-4o-mini"
         for m in models:
             if m.get("id") == "gpt":
                 gpt_model = m.get("model_name", gpt_model)
@@ -254,7 +254,7 @@ class CouncilConsensusEngine:
             f"The Council of Sages has unanimously approved the following task: {task}\n\n"
             f"Here is the reasoning of Claude:\n{reasoning['claude']}\n\n"
             f"Here is the reasoning of Gemini:\n{reasoning['gemini']}\n\n"
-            f"Here is the reasoning of GPT-5.4-nano:\n{reasoning['gpt']}\n\n"
+            f"Here is the reasoning of GPT-4o:\n{reasoning['gpt']}\n\n"
             f"Merge the recommendations and generate the optimal implementation code or text output. "
             f"If it is code, output ONLY raw clean executable code without markdown block wrappers."
         )
