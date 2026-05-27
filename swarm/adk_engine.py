@@ -69,7 +69,7 @@ class ADKSwarmEngine:
         try:
             # 1. وكيل النشر السحابي (GCP Deploy Agent)
             self.deploy_agent = Agent(
-                model="gemini-1.5-flash-latest",
+                model="gemini-2.5-flash",
                 name="gcp_deploy_agent",
                 description="وكيل متخصص لنشر الأكواد والتعديلات البرمجية بأمان سحابياً ومحلياً",
                 instruction="""
@@ -84,7 +84,7 @@ class ADKSwarmEngine:
 
             # 2. وكيل فحص الموارد والأمان (Sentinel Audit Agent - Root Agent)
             self.sentinel_agent = Agent(
-                model="gemini-1.5-flash-latest",
+                model="gemini-2.5-flash",
                 name="sentinel_audit_agent",
                 description="وكيل فحص الموارد ومطابقة سلامة الأكواد ومستودع Git قبل النشر",
                 instruction="""
