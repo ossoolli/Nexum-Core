@@ -20,7 +20,7 @@ from typing import Dict, Any, List, Optional
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, BASE_DIR)
 
-from core.llm_engine import llm_engine
+from core.llm_engine import llm_engine, openai_engine
 from services.gemini_service import gemini_service
 from council.debate_protocol import CouncilDebateProtocol
 from council.knowledge_archive import knowledge_archive
@@ -118,13 +118,13 @@ class CouncilConsensusEngine:
         )
 
     async def _ask_claude(self, prompt: str) -> str:
-        """استدعاء كلود 3.5 سونييت عبر OpenRouter"""
-        res, _ = await asyncio.to_thread(llm_engine.ask, prompt, "anthropic/claude-3.5-sonnet")
+        """استدعاء كلود أوبوس 4.6 عبر OpenRouter"""
+        res, _ = await asyncio.to_thread(llm_engine.ask, prompt, "anthropic/claude-opus-4.6")
         return res
 
     async def _ask_gpt(self, prompt: str) -> str:
-        """استدعاء جي بي تي 4o عبر OpenRouter"""
-        res, _ = await asyncio.to_thread(llm_engine.ask, prompt, "openai/gpt-4o")
+        """استدعاء جي بي تي 5.4 نانو عبر OpenAI مباشرة"""
+        res, _ = await asyncio.to_thread(openai_engine.ask, prompt, "gpt-5.4-nano")
         return res
 
     async def _ask_gemini(self, prompt: str) -> str:
@@ -147,7 +147,7 @@ class CouncilConsensusEngine:
             f"The Council of Sages has unanimously approved the following task: {task}\n\n"
             f"Here is the reasoning of Claude:\n{reasoning['claude']}\n\n"
             f"Here is the reasoning of Gemini:\n{reasoning['gemini']}\n\n"
-            f"Here is the reasoning of GPT-4o:\n{reasoning['gpt']}\n\n"
+            f"Here is the reasoning of GPT-5.4-nano:\n{reasoning['gpt']}\n\n"
             f"Merge the recommendations and generate the optimal implementation code or text output. "
             f"If it is code, output ONLY raw clean executable code without markdown block wrappers."
         )
