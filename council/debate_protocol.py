@@ -54,15 +54,10 @@ class CouncilDebateProtocol:
             f"Respond with APPROVED if you still believe it is 100% safe, or REJECTED if you agree with the objection."
         )
 
-        # استجواب الموافقين بالتوازي
+        # استجواب الموافقين بالتوازي ديناميكياً
         reconsider_tasks = []
         for sup in supporters:
-            if sup == "claude":
-                reconsider_tasks.append(self.engine._ask_claude(reconsider_prompt))
-            elif sup == "gpt":
-                reconsider_tasks.append(self.engine._ask_gpt(reconsider_prompt))
-            elif sup == "gemini":
-                reconsider_tasks.append(self.engine._ask_gemini(reconsider_prompt))
+            reconsider_tasks.append(self.engine._ask_sage_by_id(sup, reconsider_prompt))
 
         sup_results = await asyncio.gather(*reconsider_tasks, return_exceptions=True)
         
@@ -74,24 +69,25 @@ class CouncilDebateProtocol:
             initial_reasoning[sup] = f"Reconsideration Statement:\n{res}"
 
         # جولة النقاش 2: إرسال مبررات الموافقين إلى المعترض لإقناعه بالترميم
-        if updated_votes[supporters[0]] and updated_votes[supporters[1]]:
+        # نتحقق مما إذا كان الموافقون لا يزالون مجمعين على الدعم
+        all_supporters_confirmed = all(updated_votes[sup] for sup in supporters)
+        if all_supporters_confirmed:
             logger.info(f"[Debate] Supporters confirmed. Asking dissenter {dissenting_agent} to reconsider...")
+            
+            supporters_defense = ""
+            for idx, sup in enumerate(supporters):
+                supporters_defense += f"{idx + 1}. {initial_reasoning[sup]}\n"
+                
             convince_prompt = (
                 f"You are a member of the sovereign Council of Sages of NEXUM PRO.\n"
                 f"You previously voted REJECTED for the task: '{task}' due to: '{dissenting_reason}'.\n"
-                f"However, the other two Sages strongly defend the approval for the following reasons:\n"
-                f"1. {initial_reasoning[supporters[0]]}\n"
-                f"2. {initial_reasoning[supporters[1]]}\n\n"
+                f"However, the other Sages strongly defend the approval for the following reasons:\n"
+                f"{supporters_defense}\n"
                 f"Based on their defense, can you approve this task with conditional safeguards? "
                 f"Respond with APPROVED if convinced, or stand firm with REJECTED and state your absolute veto reason."
             )
 
-            if dissenting_agent == "claude":
-                dissent_res = await self.engine._ask_claude(convince_prompt)
-            elif dissenting_agent == "gpt":
-                dissent_res = await self.engine._ask_gpt(convince_prompt)
-            else:
-                dissent_res = await self.engine._ask_gemini(convince_prompt)
+            dissent_res = await self.engine._ask_sage_by_id(dissenting_agent, convince_prompt)
 
             updated_votes[dissenting_agent] = self.engine._extract_vote(dissent_res)
             initial_reasoning[dissenting_agent] = f"Final Debate Response:\n{dissent_res}"

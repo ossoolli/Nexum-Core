@@ -17,6 +17,10 @@ active_models:
     model_name: "gemini-3.5-flash"
     weight: 1.0
     specialty: "multimodal vision, quick execution, search integration"
+  - id: "grok"
+    model_name: "grok-beta"
+    weight: 1.0
+    specialty: "real-time diagnostics, system telemetry, information retrieval"
 
 consensus_rules:
   # The required score to auto-execute critical actions (e.g. file changes, git push)

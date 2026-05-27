@@ -23,6 +23,7 @@ sys.path.insert(0, BASE_DIR)
 from core.llm_engine import llm_engine, openai_engine
 from core.agent_platform_engine import agent_platform
 from services.gemini_service import gemini_service
+from services.grok_service import grok_service
 from council.debate_protocol import CouncilDebateProtocol
 from council.knowledge_archive import knowledge_archive
 
@@ -94,12 +95,69 @@ class CouncilConsensusEngine:
             res, _ = await asyncio.to_thread(gemini_service.ask, fallback_prompt, model="gemini-3.5-flash")
             return f"♻️ [Fallback for {target_sage.upper()}] " + res
         except Exception as e:
-            logger.error(f"[Council Fallback] Alternate resolution failed for {target_sage}: {e}")
             return f"REJECTED: Fallback alternate failed: {e}"
+
+    async def _ask_sage_by_id(self, sage_id: str, prompt: str) -> str:
+        """
+        تستعلم عن حكيم نشط بشكل ديناميكي بناءً على معرّفه الفريد.
+        Queries an active sage dynamically by its ID.
+        """
+        config = self._load_consensus_config()
+        active_models = config.get("active_models", [])
+        sage_config = None
+        for m in active_models:
+            if m.get("id") == sage_id:
+                sage_config = m
+                break
+                
+        if not sage_config:
+            sage_config = {"id": sage_id, "model_name": sage_id}
+            
+        return await self._ask_sage(sage_config, prompt)
+
+    async def _ask_sage(self, sage_config: dict, prompt: str) -> str:
+        """
+        تستعلم عن نموذج عبر Agent Platform كخيار أساسي، مع التحويل للاحتياطي عند حدوث فشل.
+        Queries a sage dynamically via AgentPlatform or its designated direct fallback.
+        """
+        sage_id = sage_config.get("id", "")
+        model_name = sage_config.get("model_name", "")
+        
+        # 1. الاستعلام عبر Agent Platform (الخيار الرئيسي الموحد)
+        if agent_platform.is_available:
+            logger.info(f"[Council] Attempting {sage_id.upper()} ({model_name}) via Agent Platform...")
+            res, _ = await asyncio.to_thread(agent_platform.ask, prompt, model_name)
+            if not self._is_api_error(res):
+                return res
+            logger.warning(f"[Council] Agent Platform failed for {sage_id.upper()} ({model_name}). Trying fallback...")
+
+        # 2. الاستعلام عبر قنوات الصمود والاحتياط الفردية (Direct Fallbacks)
+        try:
+            if sage_id == "claude":
+                res, _ = await asyncio.to_thread(llm_engine.ask, prompt, model_name)
+                return res
+            elif sage_id == "gpt":
+                res, _ = await asyncio.to_thread(openai_engine.ask, prompt, model_name)
+                return res
+            elif sage_id == "gemini":
+                res, _ = await asyncio.to_thread(gemini_service.ask, prompt, model=model_name)
+                return res
+            elif sage_id == "grok":
+                if grok_service.is_available:
+                    res, _ = await asyncio.to_thread(grok_service.ask, prompt, model=model_name)
+                    return res
+                else:
+                    return await self._ask_fallback(prompt, "grok")
+            else:
+                # أي نموذج مخصص إضافي يوجه للاحتياطي السحابي العام
+                return await self._ask_fallback(prompt, sage_id)
+        except Exception as e:
+            logger.error(f"[Council] Fallback connection failed for {sage_id.upper()}: {e}")
+            return f"REJECTED: Fallback failed: {e}"
 
     async def deliberate(self, task: str, code: str = None) -> ConsensusToken:
         """عقد جلسة حكماء لمناقشة وإصدار قرار إجماع نهائي"""
-        logger.info(f"[Council] Starting deliberation session on task: {task[:60]}...")
+        logger.info(f"[Council] Starting dynamic deliberation session on task: {task[:60]}...")
         
         prompt = (
             f"You are a member of the sovereign Council of Sages of NEXUM PRO.\n"
@@ -110,50 +168,71 @@ class CouncilConsensusEngine:
         if code:
             prompt += f"\nCode Context:\n```python\n{code}\n```\n"
 
-        # تشغيل النماذج الثلاثة بالتوازي عبر خيوط معالجة آمنة
+        # شحن الإعدادات وقراءة النماذج النشطة ديناميكياً
+        config = self._load_consensus_config()
+        active_models = config.get("active_models", [])
+        if not active_models:
+            # Fallback to standard core sages
+            active_models = [
+                {"id": "claude", "model_name": "anthropic/claude-sonnet-4"},
+                {"id": "gpt", "model_name": "gpt-4o-mini"},
+                {"id": "gemini", "model_name": "gemini-3.5-flash"}
+            ]
+
+        # تشغيل جميع النماذج النشطة بالتوازي عبر خيوط معالجة آمنة
+        tasks = []
+        for model_info in active_models:
+            tasks.append(self._ask_sage(model_info, prompt))
+
         try:
-            results = await asyncio.gather(
-                self._ask_claude(prompt),
-                self._ask_gemini(prompt),
-                self._ask_gpt(prompt),
-                return_exceptions=True
-            )
+            results = await asyncio.gather(*tasks, return_exceptions=True)
         except Exception as e:
             logger.error(f"[Council] Parallel deliberation failed: {e}")
             return self._create_failed_token(str(e))
 
-        # معالجة النتائج وتصفية الأخطاء
-        claude_res = results[0] if not isinstance(results[0], Exception) else f"REJECTED: Error: {results[0]}"
-        gemini_res = results[1] if not isinstance(results[1], Exception) else f"REJECTED: Error: {results[1]}"
-        gpt_res    = results[2] if not isinstance(results[2], Exception) else f"REJECTED: Error: {results[2]}"
-
-        # تطبيق الصمود التلقائي (Resiliency Fallback) عند كشف أعطال API
-        config = self._load_consensus_config()
-        enable_fallback = config.get("consensus_rules", {}).get("enable_fallback_on_api_error", True)
-
-        if enable_fallback:
-            if self._is_api_error(claude_res):
-                logger.warning("[Council] Claude endpoint failed. Invoking alternate for Claude...")
-                claude_res = await self._ask_fallback(prompt, "claude")
-            
-            if self._is_api_error(gpt_res):
-                logger.warning("[Council] GPT endpoint failed. Invoking alternate for GPT...")
-                gpt_res = await self._ask_fallback(prompt, "gpt")
-
-        votes = {
-            "claude": self._extract_vote(claude_res),
-            "gemini": self._extract_vote(gemini_res),
-            "gpt":    self._extract_vote(gpt_res)
-        }
+        # معالجة أصوات ومبررات الحكماء ديناميكياً
+        votes = {}
+        reasoning = {}
         
-        reasoning = {
-            "claude": str(claude_res),
-            "gemini": str(gemini_res),
-            "gpt":    str(gpt_res)
-        }
+        for idx, model_info in enumerate(active_models):
+            sage_id = model_info["id"]
+            res = results[idx]
+            if isinstance(res, Exception):
+                res_str = f"REJECTED: Call Error: {str(res)}"
+            else:
+                res_str = str(res)
+                
+            votes[sage_id] = self._extract_vote(res_str)
+            reasoning[sage_id] = res_str
 
-        # ─── تحقق الإجماع الكلي (3/3) ───
-        if all(votes.values()):
+        # تطبيق الصمود والاحتياط (Resiliency Fallback) عند فشل API الأعضاء الأساسيين
+        enable_fallback = config.get("consensus_rules", {}).get("enable_fallback_on_api_error", True)
+        if enable_fallback:
+            fallback_tasks = []
+            fallback_indices = []
+            
+            for idx, model_info in enumerate(active_models):
+                sage_id = model_info["id"]
+                if self._is_api_error(reasoning[sage_id]):
+                    logger.warning(f"[Council] Sage {sage_id.upper()} endpoint failed. Invoking alternate...")
+                    fallback_tasks.append(self._ask_fallback(prompt, sage_id))
+                    fallback_indices.append(idx)
+                    
+            if fallback_tasks:
+                fallback_results = await asyncio.gather(*fallback_tasks, return_exceptions=True)
+                for f_idx, idx in enumerate(fallback_indices):
+                    sage_id = active_models[idx]["id"]
+                    res = fallback_results[f_idx]
+                    res_str = str(res) if not isinstance(res, Exception) else f"REJECTED: Fallback alternate failed: {str(res)}"
+                    votes[sage_id] = self._extract_vote(res_str)
+                    reasoning[sage_id] = res_str
+
+        total_sages = len(votes)
+        approve_count = sum(1 for v in votes.values() if v)
+        approval_ratio = approve_count / total_sages if total_sages > 0 else 0.0
+        
+        # ─── تحقق الإجماع الكلي (Unanimous) ───
+        if approve_count == total_sages:
             merged = await self._merge_deliberation(task, reasoning)
             token = ConsensusToken(
                 approved=True,
@@ -163,21 +242,22 @@ class CouncilConsensusEngine:
                 merged_output=merged,
                 timestamp=datetime.now().isoformat()
             )
-            # أرشفة القرار الناجح
             knowledge_archive.archive(task, token)
             return token
 
-        # ─── تحقق توافق الأغلبية (2/3) — إطلاق بروتوكول النقاش ───
-        approve_count = sum(1 for v in votes.values() if v)
-        if approve_count >= 2:
-            logger.info("[Council] Disagreement detected (2 APPROVED, 1 REJECTED). Launching Debate Protocol...")
+        # ─── تحقق توافق الأغلبية (Majority) — إطلاق بروتوكول النقاش ───
+        rules = config.get("consensus_rules", {})
+        threshold = rules.get("general_approval_threshold", 0.66)
+        
+        if approval_ratio >= threshold and approve_count >= 2:
+            logger.info(f"[Council] Disagreement detected ({approve_count}/{total_sages} approved). Launching Debate Protocol...")
             debate_token = await self.debate_protocol.debate(task, reasoning, votes)
             if debate_token.approved:
                 knowledge_archive.archive(task, debate_token)
             return debate_token
 
-        # ─── الرفض التام (أقل من صوتين موافقة) ───
-        logger.warning("[Council] Task rejected by majority of sages.")
+        # ─── الرفض التام (أقل من الحد الأدنى) ───
+        logger.warning(f"[Council] Task rejected by majority of sages ({approve_count}/{total_sages} approved).")
         return ConsensusToken(
             approved=False,
             votes=votes,
@@ -188,64 +268,16 @@ class CouncilConsensusEngine:
         )
 
     async def _ask_claude(self, prompt: str) -> str:
-        """استدعاء كلود عبر Agent Platform (أو OpenRouter كاحتياطي)"""
-        config = self._load_consensus_config()
-        models = config.get("active_models", [])
-        claude_model = "anthropic/claude-sonnet-4"
-        for m in models:
-            if m.get("id") == "claude":
-                claude_model = m.get("model_name", claude_model)
-
-        if agent_platform.is_available:
-            logger.info(f"[Council] Attempting Claude ({claude_model}) via Agent Platform (Primary)...")
-            res, _ = await asyncio.to_thread(agent_platform.ask, prompt, claude_model)
-            if not self._is_api_error(res):
-                return res
-            logger.warning(f"[Council] Agent Platform Claude ({claude_model}) failed. Falling back to OpenRouter. Error: {res}")
-
-        # الاحتياطي: OpenRouter
-        res, _ = await asyncio.to_thread(llm_engine.ask, prompt, claude_model)
-        return res
+        """استدعاء كلود كحكيم نشط بشكل ديناميكي"""
+        return await self._ask_sage_by_id("claude", prompt)
 
     async def _ask_gpt(self, prompt: str) -> str:
-        """استدعاء جي بي تي عبر Agent Platform (أو OpenAI كاحتياطي)"""
-        config = self._load_consensus_config()
-        models = config.get("active_models", [])
-        gpt_model = "gpt-4o-mini"
-        for m in models:
-            if m.get("id") == "gpt":
-                gpt_model = m.get("model_name", gpt_model)
-
-        if agent_platform.is_available:
-            logger.info(f"[Council] Attempting GPT ({gpt_model}) via Agent Platform (Primary)...")
-            res, _ = await asyncio.to_thread(agent_platform.ask, prompt, gpt_model)
-            if not self._is_api_error(res):
-                return res
-            logger.warning(f"[Council] Agent Platform GPT ({gpt_model}) failed. Falling back to OpenAI. Error: {res}")
-
-        # الاحتياطي: OpenAI
-        res, _ = await asyncio.to_thread(openai_engine.ask, prompt, gpt_model)
-        return res
+        """استدعاء جي بي تي كحكيم نشط بشكل ديناميكي"""
+        return await self._ask_sage_by_id("gpt", prompt)
 
     async def _ask_gemini(self, prompt: str) -> str:
-        """استدعاء جيميني عبر Agent Platform (أو GeminiService كاحتياطي)"""
-        config = self._load_consensus_config()
-        models = config.get("active_models", [])
-        gemini_model = "gemini-3.5-flash"
-        for m in models:
-            if m.get("id") == "gemini":
-                gemini_model = m.get("model_name", gemini_model)
-
-        if agent_platform.is_available:
-            logger.info(f"[Council] Attempting Gemini ({gemini_model}) via Agent Platform (Primary)...")
-            res, _ = await asyncio.to_thread(agent_platform.ask, prompt, gemini_model)
-            if not self._is_api_error(res):
-                return res
-            logger.warning(f"[Council] Agent Platform Gemini ({gemini_model}) failed. Falling back to GeminiService. Error: {res}")
-
-        # الاحتياطي: GeminiService
-        res, _ = await asyncio.to_thread(gemini_service.ask, prompt, model=gemini_model)
-        return res
+        """استدعاء جيميني كحكيم نشط بشكل ديناميكي"""
+        return await self._ask_sage_by_id("gemini", prompt)
 
     def _extract_vote(self, response: str) -> bool:
         """استخراج قرار التصويت بناء على بدء الرد"""

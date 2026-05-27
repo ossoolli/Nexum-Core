@@ -54,6 +54,10 @@ MODEL_MAPPING = {
     # يُوجّه كاحتياطي إلى Gemini إن لم يتوفر مفتاح OpenAI
     "gpt-4o": "gemini-3.5-flash",
     "gpt-4o-mini": "gemini-3.5-flash",
+    
+    # Grok via Model Garden / Partner Publishers or Custom Endpoints
+    "grok-beta": "publishers/xai/models/grok-beta",
+    "grok-2": "publishers/xai/models/grok-2",
 }
 
 
