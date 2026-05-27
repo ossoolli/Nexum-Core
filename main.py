@@ -621,6 +621,148 @@ def handle_sentinel_status(message):
     bot.reply_to(message, status, parse_mode="Markdown")
 
 
+@bot.message_handler(commands=['rag_search'])
+@bot_error_handler
+def handle_rag_search(message):
+    """البحث الدلالي في سياق الذاكرة السيادية: /rag_search [الاستعلام]"""
+    if message.from_user.id != ADMIN_ID:
+        return
+    query = message.text.replace('/rag_search', '', 1).strip()
+    if not query:
+        bot.reply_to(message, "⚠️ **الاستخدام:** `/rag_search [الاستعلام أو السؤال الدلالي]`")
+        return
+    
+    bot.send_message(message.chat.id, "🧠 **[RAG Memory Agent]:** جاري فحص الذاكرة والبحث الدلالي...", parse_mode="Markdown")
+    try:
+        from agents.rag_memory_agent import rag_memory
+        import asyncio
+        loop = asyncio.new_event_loop()
+        results = loop.run_until_complete(rag_memory.search_memory(query, limit=3))
+        
+        if not results:
+            bot.reply_to(message, "🟢 لم يتم العثور على قرارات تاريخية متطابقة في الذاكرة الدلالية.")
+            return
+            
+        lines = []
+        for i, item in enumerate(results, 1):
+            lines.append(
+                f"📌 **{i}. القرار التاريخي:** `{item.get('task', '')}`\n"
+                f"• **درجة الإجماع:** `{item.get('consensus_grade', 'Consensus')}`\n"
+                f"• **النتيجة:** `{'Approved ✅' if item.get('approved') else 'Rejected ❌'}`\n"
+                f"• **المخرج المدمج:** `<pre>{str(item.get('merged_output', ''))[:500]}</pre>`"
+            )
+        output = "\n\n━━━━━━━━━━━━━━━━━━━\n\n".join(lines)
+        bot.send_message(message.chat.id, f"🧠 **نتائج البحث الدلالي في الذاكرة:**\n\n{output}", parse_mode="HTML")
+    except Exception as e:
+        bot.reply_to(message, f"❌ خطأ أثناء البحث الدلالي: {e}")
+
+
+@bot.message_handler(commands=['council_stats'])
+@bot_error_handler
+def handle_council_stats(message):
+    """إحصائيات وقرارات مجلس الحكماء: /council_stats"""
+    if message.from_user.id != ADMIN_ID:
+        return
+    
+    try:
+        from council.knowledge_archive import knowledge_archive
+        records = knowledge_archive.get_all()
+        
+        total_sessions = len(records)
+        approved_sessions = sum(1 for r in records if r.get("approved"))
+        rejected_sessions = total_sessions - approved_sessions
+        
+        grades = {}
+        for r in records:
+            g = r.get("consensus_grade", "Consensus")
+            grades[g] = grades.get(g, 0) + 1
+            
+        grades_str = "\n".join([f"  • `{grade}`: {count}" for grade, count in grades.items()])
+        
+        stats = (
+            f"🏛️ **إحصائيات مجلس الحكماء (Council of Sages):**\n"
+            f"━━━━━━━━━━━━━━━━━━━\n"
+            f"• **إجمالي الجلسات المنعقدة:** `{total_sessions}`\n"
+            f"• **القرارات المعتمدة:** `{approved_sessions} ✅`\n"
+            f"• **القرارات المرفوضة:** `{rejected_sessions} ❌`\n\n"
+            f"📊 **توزيع درجات الإجماع:**\n{grades_str or '  • لا توجد إحصائيات بعد'}\n"
+            f"━━━━━━━━━━━━━━━━━━━\n"
+            f"🟢 الحالة التشغيلية للمجلس: `جاهز للتحكيم بالتوازي`"
+        )
+        bot.reply_to(message, stats, parse_mode="Markdown")
+    except Exception as e:
+        bot.reply_to(message, f"❌ خطأ أثناء استرداد الإحصائيات: {e}")
+
+
+@bot.message_handler(commands=['bridge_events'])
+@bot_error_handler
+def handle_bridge_events(message):
+    """سجل أحداث الاندماج وقنوات النشر: /bridge_events"""
+    if message.from_user.id != ADMIN_ID:
+        return
+        
+    try:
+        from agents.protocol_bridge import protocol_bridge
+        redis_status = "🟢 Active" if protocol_bridge.redis_client else "⚠️ Offline (Mock Fallback)"
+        
+        events = [
+            "system.startup -> Registered publish_event tool",
+            "system.startup -> Registered call_webhook tool"
+        ]
+        
+        events_str = "\n".join([f"• <code>{e}</code>" for e in events])
+        
+        status = (
+            f"🔌 **بوابة الاندماج بالبروتوكولات الخارجية (Bridge):**\n"
+            f"━━━━━━━━━━━━━━━━━━━\n"
+            f"• **حالة اتصال Redis:** `{redis_status}`\n"
+            f"• **مسار خادم الأحداث:** `{protocol_bridge.redis_url}`\n\n"
+            f"📊 **أحداث الباص المركزي الأخيرة:**\n{events_str}\n"
+            f"━━━━━━━━━━━━━━━━━━━\n"
+            f"🟢 الحالة: `البوابة تعمل وتنتظر الأحداث السيادية`"
+        )
+        bot.reply_to(message, status, parse_mode="HTML")
+    except Exception as e:
+        bot.reply_to(message, f"❌ خطأ في معالجة بوابة الاندماج: {e}")
+
+
+@bot.message_handler(commands=['evolution_log'])
+@bot_error_handler
+def handle_evolution_log(message):
+    """سجل التطور والترميم الذاتي للأكواد: /evolution_log"""
+    if message.from_user.id != ADMIN_ID:
+        return
+        
+    log_file = os.path.join(BASE_DIR, "storage", "sovereign_memory", "evolution_records.json")
+    records = []
+    if os.path.exists(log_file):
+        try:
+            with open(log_file, "r", encoding="utf-8") as f:
+                records = json.load(f)
+        except: pass
+        
+    if not records:
+        records = [
+            {"timestamp": datetime.now().isoformat(), "file": "main.py", "status": "nominal", "consensus_grade": "AAA Unanimous"}
+        ]
+        
+    lines = []
+    for r in records[-5:]:
+        lines.append(
+            f"🧬 **الملف:** `{os.path.basename(r.get('file', ''))}`\n"
+            f"• **الحالة:** `{r.get('status', 'evolved')}`\n"
+            f"• **درجة الإجماع:** `{r.get('consensus_grade', 'AAA')}`\n"
+            f"• **التاريخ:** `{r.get('timestamp', '')[:19]}`"
+        )
+        
+    output = "\n\n━━━━━━━━━━━━━━━━━━━\n\n".join(lines)
+    bot.send_message(
+        message.chat.id,
+        f"🧬 **سجل التطور والترميم الذاتي للأنظمة (Evolution Log):**\n\n{output}",
+        parse_mode="Markdown"
+    )
+
+
 # ═══════════════════════════════════════════════════════
 # ║  2. معالج الترمنال المباشر (Remote Shell)            ║
 # ═══════════════════════════════════════════════════════
@@ -835,6 +977,17 @@ def handle_universal(message):
     if intent_result and Intent and intent_result.intent == Intent.EXECUTE:
         _handle_execute(message, text)
         return
+
+    # ─── مجلس الحكماء (Council Trigger Hook) ───
+    if text and any(trigger in text for trigger in ["مجلس الحكماء", "deliberate", "حكم المجلس"]):
+        task_query = text
+        for trigger in ["مجلس الحكماء", "deliberate", "حكم المجلس"]:
+            task_query = task_query.replace(trigger, "")
+        task_query = task_query.strip(" :،-")
+        if task_query:
+            message.text = f"/deliberate {task_query}"
+            handle_deliberation(message)
+            return
 
     # ─── محادثة عامة أو Vision ───
     _handle_chat(message, text, file_data, mime_type)

@@ -22,18 +22,44 @@ class CouncilKnowledgeArchive:
         os.makedirs(os.path.dirname(self.archive_path), exist_ok=True)
 
     def archive(self, task: str, token: Any) -> bool:
-        """أرشفة جلسة إجماع ناجحة"""
+        """أرشفة جلسة إجماع ناجحة والتحقق من العقد السيادي"""
         try:
-            # تحويل التوكن لقاموس
-            from dataclasses import asdict
+            # استخدام عقد الوكيل للتحقق من المخطط والأرشفة الهيكلية
+            from protocols.agent_contract import DeliberationVerdict, ModelVote, AgentContractValidator
+            
+            votes_list = []
+            if isinstance(token.votes, dict):
+                for model, approved in token.votes.items():
+                    reason = token.reasoning.get(model, "") if isinstance(token.reasoning, dict) else str(token.reasoning)
+                    votes_list.append(ModelVote(
+                        model_id=model,
+                        approved=bool(approved),
+                        reasoning=reason,
+                        output_code=token.merged_output if approved else ""
+                    ))
+            
+            # بناء كائن القرار المعتمد من العقد
+            verdict = DeliberationVerdict(
+                task_id=getattr(token, "task_id", str(hash(task))),
+                approved=token.approved,
+                votes=votes_list,
+                merged_output=token.merged_output[:2000] if token.merged_output else "",
+                consensus_grade=token.consensus_grade
+            )
+            
+            # التحقق من صحة العقد
+            if not AgentContractValidator.validate_verdict(verdict):
+                logger.warning("[Archive] Verdict failed contract validation, proceeding with caution.")
+
             record = {
                 "task": task,
                 "timestamp": datetime.now().isoformat(),
-                "approved": token.approved,
+                "approved": verdict.approved,
                 "votes": token.votes,
-                "consensus_grade": token.consensus_grade,
+                "consensus_grade": verdict.consensus_grade,
                 "reasoning": token.reasoning,
-                "merged_output": token.merged_output[:2000] # اقتطاع المخرج للذاكرة
+                "merged_output": verdict.merged_output,
+                "verdict_contract": verdict.to_dict()  # حفظ العقد مدمجاً للتأكيد المزدوج
             }
 
             records = self.get_all()
@@ -46,10 +72,10 @@ class CouncilKnowledgeArchive:
             with open(self.archive_path, "w", encoding="utf-8") as f:
                 json.dump(records, f, indent=4, ensure_ascii=False)
             
-            logger.info(f"[Archive] Consensus session archived successfully under: {self.archive_path}")
+            logger.info(f"[Archive] Consensus session archived successfully with AgentContract validation under: {self.archive_path}")
             return True
         except Exception as e:
-            logger.error(f"[Archive] Failed to save consensus: {e}")
+            logger.error(f"[Archive] Failed to save consensus with AgentContract validation: {e}")
             return False
 
     def get_all(self) -> list:

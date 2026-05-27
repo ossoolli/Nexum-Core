@@ -93,6 +93,10 @@ class SovereignUIBuilder:
             InlineKeyboardButton("📊 Agent Metrics", callback_data="ag_metrics")
         )
         m.row(
+            InlineKeyboardButton("🛡️ Sentinel Status", callback_data="sentinel_status"),
+            InlineKeyboardButton("🔌 Bridge Events", callback_data="bridge_events")
+        )
+        m.row(
             InlineKeyboardButton("⏹️ Stop All", callback_data="ag_stop_all"),
             InlineKeyboardButton("🔄 Restart All", callback_data="ag_restart_all")
         )
@@ -168,6 +172,10 @@ class SovereignUIBuilder:
             InlineKeyboardButton("🕸️ Web Scrape", callback_data="ai_scrape")
         )
         m.row(
+            InlineKeyboardButton("🏛️ Council Stats", callback_data="council_stats"),
+            InlineKeyboardButton("🧬 Evolution Log", callback_data="evolution_log")
+        )
+        m.row(
             InlineKeyboardButton("📝 Generate Code", callback_data="ai_codegen"),
             InlineKeyboardButton("🧪 Run Experiment", callback_data="ai_experiment")
         )
@@ -207,14 +215,17 @@ class SovereignUIBuilder:
             InlineKeyboardButton("📊 Usage Stats", callback_data="mem_stats")
         )
         m.row(
-            InlineKeyboardButton("🗑️ Clear Chat Memory", callback_data="mem_clear_chat"),
-            InlineKeyboardButton("🗑️ Clear All Logs", callback_data="mem_clear_logs")
+            InlineKeyboardButton("🧠 RAG Search", callback_data="rag_search"),
+            InlineKeyboardButton("🗑️ Clear Chat Memory", callback_data="mem_clear_chat")
         )
         m.row(
-            InlineKeyboardButton("☁️ Sync to Cloud", callback_data="mem_sync"),
-            InlineKeyboardButton("📥 Export Data", callback_data="mem_export")
+            InlineKeyboardButton("🗑️ Clear All Logs", callback_data="mem_clear_logs"),
+            InlineKeyboardButton("☁️ Sync to Cloud", callback_data="mem_sync")
         )
-        m.add(InlineKeyboardButton("⬅️ Back to Main", callback_data="back_main"))
+        m.row(
+            InlineKeyboardButton("📥 Export Data", callback_data="mem_export"),
+            InlineKeyboardButton("⬅️ Back to Main", callback_data="back_main")
+        )
         return m
 
     # ╔══════════════════════════════════════════╗

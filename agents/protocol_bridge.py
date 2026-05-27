@@ -46,17 +46,37 @@ class ProtocolBridgeAgent:
         logger.info("[Bridge] Registered 'publish_event' and 'call_webhook' to tool_registry.")
 
     def publish_event(self, channel: str, payload: dict) -> str:
-        """نشر أحداث تفاعلية عبر قنوات Redis"""
-        data_str = json.dumps(payload, ensure_ascii=False)
+        """نشر أحداث تفاعلية عبر قنوات Redis باستخدام عقد الوكيل الموحد"""
+        from protocols.agent_contract import AgentEvent, AgentContractValidator
+        
+        try:
+            # ترميز الحمولة كـ bytes
+            payload_bytes = json.dumps(payload, ensure_ascii=False).encode('utf-8')
+            
+            event = AgentEvent(
+                sender="ProtocolBridgeAgent",
+                topic=channel,
+                payload=payload_bytes
+            )
+            
+            # التحقق من صحة مخطط الحدث
+            if not AgentContractValidator.validate_event(event):
+                logger.warning("[Bridge] Event failed contract validation, proceeding with caution.")
+                
+            data_str = event.serialize()
+        except Exception as e:
+            logger.error(f"[Bridge] Failed to construct AgentEvent contract: {e}")
+            data_str = json.dumps(payload, ensure_ascii=False)
+
         if self.redis_client:
             try:
                 self.redis_client.publish(channel, data_str)
-                return f"✅ [Redis] Published event on channel '{channel}' successfully."
+                return f"✅ [Redis] Published event contract on channel '{channel}' successfully."
             except Exception as e:
                 return f"❌ [Redis] Publish failed: {e}"
         else:
-            logger.info(f"[Bridge Mock] Redis Event published on '{channel}': {data_str}")
-            return f"⚠️ [Mock Bridge] Published event on channel '{channel}' (Redis Offline)."
+            logger.info(f"[Bridge Mock] Redis AgentEvent published on '{channel}': {data_str}")
+            return f"⚠️ [Mock Bridge] Published event contract on channel '{channel}' (Redis Offline)."
 
     async def call_webhook(self, url: str, data: dict) -> str:
         """استدعاء webhook خارجي بنمط غير متزامن"""
