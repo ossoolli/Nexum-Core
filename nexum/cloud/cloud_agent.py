@@ -40,7 +40,7 @@ class CloudAgent(BaseAgent):
             # وكيل Gemini مع كل أدوات GCP
             try:
                 self._agent = Agent(
-                    model="gemini-2.5-flash",
+                    model="gemini-3.5-flash",
                     name="nexum_cloud_agent",
                     instruction="""
 أنت NEXUM Cloud Agent — المتحكم السيادي في Google Cloud للمايسترو معتز.

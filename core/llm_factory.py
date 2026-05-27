@@ -16,7 +16,7 @@ class LLMFactory:
     def __init__(self):
         self._gemini_client = None
         self._openai_client = None
-        self.model_id = "gemini-2.5-flash"
+        self.model_id = "gemini-3.5-flash"
         self.sessions = {}
 
         # محاولة تحميل Gemini SDK (اختياري)

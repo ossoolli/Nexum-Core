@@ -329,11 +329,9 @@ class SovereignUIBuilder:
         """قائمة تبديل نموذج الذكاء الاصطناعي"""
         m = InlineKeyboardMarkup(row_width=1)
         m.row(
-            InlineKeyboardButton("🚀 Gemini 3.5 Flash (الأحدث فائق السرعة)", callback_data="setmod_gemini-3.5-flash"),
-            InlineKeyboardButton("⚡ Gemini 2.5 Flash (سريع واقتصادي)", callback_data="setmod_gemini-2.5-flash")
+            InlineKeyboardButton("🚀 Gemini 3.5 Flash (الأحدث فائق السرعة)", callback_data="setmod_gemini-3.5-flash")
         )
         m.row(
-            InlineKeyboardButton("🧠 Gemini 2.5 Pro (ذكي وقوي)", callback_data="setmod_gemini-2.5-pro"),
             InlineKeyboardButton("🧪 Gemini 3.1 Flash Lite (خفيف حديث)", callback_data="setmod_gemini-3.1-flash-lite")
         )
         m.add(InlineKeyboardButton("⬅️ Back to Settings", callback_data="menu_settings"))

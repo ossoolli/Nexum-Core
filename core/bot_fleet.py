@@ -31,6 +31,10 @@ class BotFleet:
         self._running_bots: Dict[str, dict] = {}
         self._registry = self._load_registry()
 
+    @property
+    def registry_path(self) -> str:
+        return self.storage_path
+
     # ═══════════════════════════════════════
     # التخزين
     # ═══════════════════════════════════════

@@ -12,7 +12,7 @@ from services.gemini_service import GeminiService
 svc1 = GeminiService(api_key="test-key-123", use_vertex=False)
 s1 = svc1.get_status()
 assert s1['auth_mode'] == 'API_Key'
-assert s1['model'] == 'gemini-2.5-flash'
+assert s1['model'] == 'gemini-3.5-flash'
 assert s1['connected'] == True
 print('  API Key mode: OK (connected=' + str(s1['connected']) + ')')
 
@@ -40,14 +40,14 @@ print('  OK')
 print()
 
 print('[3] Model switch...')
-svc.switch_model('gemini-2.5-pro')
-assert svc.model == 'gemini-2.5-pro'
-print('  Switched to gemini-2.5-pro: OK')
+svc.switch_model('gemini-3.1-flash-lite')
+assert svc.model == 'gemini-3.1-flash-lite'
+print('  Switched to gemini-3.1-flash-lite: OK')
 print()
 
 print('[4] Models list...')
 models = svc.list_available_models()
-assert len(models) >= 4
+assert len(models) >= 2
 for m in models:
     print('    - ' + m)
 print('  OK')
