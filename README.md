@@ -1,5 +1,5 @@
-# 🔱 NEXUM PRO OS — v11.0.0 (Self-Evolution Swarm Edition)
-### *Sovereign Autonomous Agentic Operating System, Self-Healing Loop & Interactive Control Plane*
+# 🔱 NEXUM PRO OS — v12.0.0 (Sovereign Swarm & Jailed Execution Edition)
+### *Sovereign Autonomous Agentic Operating System, Jailed Execution Gateway & Dynamic Multi-Model Swarm*
 
 ---
 
@@ -35,6 +35,19 @@
 * **📜 البروتوكولات:** محرر YAML متكامل لكتابة وحفظ البروتوكولات، مع لوحة تشغيل تفاعلية تدعم إدخال سياق JSON لمراقبة نتائج التنفيذ خطوة بخطوة.
 * **☁️ السحاب والـ API:** لوحة اختبار فوري لاستدعاء الدوال السحابية ومراقبة تفويض ADC وحالة المشروع، ونشر الوكلاء على Cloud Run.
 
+### 5️⃣ بوابة التنفيذ السيادي المعزولة (🛡️ Sovereign Execution Gateway)
+صمام أمان حديدي لعزل وتطويق بيئات تشغيل الوكلاء (Chroot-Jail Simulation) لمنع التخطي البرمجي:
+* **عزل الملفات (Chroot):** منع محاولات تخطي بيئة العمل (`Path Traversal`) باستخدام `os.path.commonpath`.
+* **تصفية وحظر حقن الأوامر (Command Injection Filters):** تفكيك الأوامر عبر `shlex.split` وحظر كافة رموز التوجيه والتشغيل المزدوج مثل (`&` ، `;` ، `|` ، `` ` `` ، `$()` ، `<` ، `>`)، ومطابقة الأداة مع القائمة البيضاء (`git`, `python`, `python3`, `pip`, `pip3`, `ls`, `echo`, `cat`).
+* **الموافقة البشرية (HITL):** إيقاف الأوامر الحساسة كـ `pip install` للحصول على تفويض يدوي صريح.
+* **سجل العمليات المشفر بـ HMAC:** توقيع كافة السجلات بـ HMAC-SHA256 لمنع كشط أو تزوير سجلات `nexum_audit.log`.
+
+### 6️⃣ مجلس الحكماء الديناميكي بالاقتراع الموازي ودخول Grok (🏛️ Dynamic Council & Grok)
+ترقية شاملة لمنطق التوافق الفكري لتطوير أداء اتخاذ القرار بين النماذج:
+* **أعضاء المجلس ديناميكياً:** قراءة قائمة الحكماء النشطين وتفويض أدوارهم ومواصفاتهم من ملف التكوين `consensus.yaml`.
+* **الاقتراع المتوازي الفوري:** تشغيل تداول النماذج (Claude, GPT, Gemini, Grok) بالتزامن عبر `asyncio.gather` لتسريع التوافق المعرفي.
+* **دخول العضو Grok (xAI):** توافق كامل لـ Grok كعضو اقتراع عبر **Agent Platform Key** (Vertex AI Model Garden) أو عبر خط الربط الاحتياط المباشر لـ xAI API لضمان استمرارية التشغيل التام بنسبة **Zero-Crash**.
+
 ---
 
 ## 🛠️ 3. هيكلية الملفات النشطة والمعقمة (Clean System Layout)
@@ -51,16 +64,21 @@
 │   ├── terminal_controller.py # الحارس الأمني وصمام الحظر للترمنال
 │   ├── keyboards.py           # المحرك البصري السيادي لواجهات التليجرام
 │   ├── router.py              # موجه التفاعل المركزي للأزرار
+│   ├── sovereign_execution_gateway.py # 🛡️ بوابة التنفيذ السيادي والتحقق الأمني
 │   └── memory/
 │       └── sovereign_memory.py# محرك الذاكرة السيادية الفائقة
 ├── handlers/
 │   └── dash_handler.py        # المحرك الخلفي لتفعيل لوحة التحكم والأزرار حياً
 ├── services/
 │   ├── gemini_service.py      # خدمة Gemini المزدوجة وتوليد الصور والأكواد
+│   ├── grok_service.py        # خدمة Grok (xAI) الاحتياطية المباشرة
 │   └── vertex_agent_platform.py# ☁️ تكامل سحابة جوجل وبناء الحاويات للنشر
 ├── webapp/
 │   ├── api_server.py          # ⚡ خادم الـ FastAPI المركزي وبوابات الـ REST
 │   └── index.html             # لوحة التحكم البصرية المطورة (Command Center)
+├── tests/
+│   ├── test_sovereign_execution_gateway.py # اختبارات البوابة السيادية وعزل الملفات
+│   └── test_dynamic_council.py # اختبارات اقتراع مجلس الحكماء وصمود Grok
 ```
 
 ---
@@ -111,5 +129,5 @@ pm2 logs nexum-api
 ---
 
 **Sovereign Cluster Status:** `ONLINE & AA-EVOLUTION nominal`  
-**Core Version:** `v11.0.0-Self-Evolution Swarm Edition`  
+**Core Version:** `v12.0.0-Sovereign Swarm & Jailed Execution Edition`  
 **Security Level:** `AAA Sovereign Grade`
