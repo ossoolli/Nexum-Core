@@ -128,5 +128,14 @@ class TestConsensusSwarm(unittest.TestCase):
         else:
             self.assertIsNone(engine.sentinel_agent)
 
+    def test_go_coordinator_bridge_execution(self):
+        """Verify GoCoordinatorBridge executes cleanly and parses JSON correctly"""
+        from core.go_coordinator_bridge import go_coordinator
+        res = go_coordinator.execute_task("Self-test task via unittest", 0.3)
+        self.assertIsInstance(res, dict)
+        self.assertTrue(res["consensus_reached"])
+        self.assertEqual(res["approved_proposal"]["agent_id"], "Agent-Security-QA")
+        self.assertIn("Self-test task via unittest", res["approved_proposal"]["solution"])
+
 if __name__ == "__main__":
     unittest.main()
