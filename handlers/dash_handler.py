@@ -111,6 +111,9 @@ def handle_dashboard(bot, call):
         elif data == "pr_create":
             bot.send_message(chat_id, "🧬 <b>Create Protocol Instruction:</b>\nSend your protocol definition in YAML format using /create_protocol command.")
             bot.answer_callback_query(call.id, "Standing by...")
+        elif data == "pr_run":
+            bot.send_message(chat_id, "▶️ <b>Run Protocol Instruction:</b>\nTrigger any loaded automation blueprint using the run command:\n<code>/run_protocol [protocol_name]</code>\n\nExample:\n<code>/run_protocol web_research</code>")
+            bot.answer_callback_query(call.id, "Standing by to execute...")
         elif data == "pr_inspect" or data == "pr_graph":
             show_execution_graph_dag(bot, chat_id, message_id)
 

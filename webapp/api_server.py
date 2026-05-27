@@ -115,6 +115,12 @@ app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_methods=["*"], all
 
 @app.on_event("startup")
 async def startup_event():
+    try:
+        from core.system_tools import register_all_system_tools
+        register_all_system_tools()
+    except Exception as e:
+        print(f"⚠️ [Gateway] Failed to register system tools: {e}")
+
     if _RUNTIME_AVAILABLE:
         try:
             from core.runtime.runtime_kernel import runtime_kernel

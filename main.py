@@ -13,6 +13,7 @@ import os
 import sys
 import time
 import threading
+import asyncio
 from datetime import datetime
 
 # ─── 1. الاعتماديات الأساسية ───
@@ -293,6 +294,236 @@ def handle_model_switch(message):
         return
     gemini_service.switch_model(new_model)
     bot.reply_to(message, f"Model switched to: <b>{new_model}</b>", parse_mode="HTML")
+
+
+@bot.message_handler(commands=['spawn_agent'])
+@bot_error_handler
+def handle_spawn_agent(message):
+    """توليد وكيل جديد مخصص: /spawn_agent name role capabilities"""
+    if message.from_user.id != ADMIN_ID:
+        return
+    
+    parts = message.text.replace('/spawn_agent', '', 1).strip().split(' ', 2)
+    if len(parts) < 3:
+        bot.reply_to(
+            message,
+            "⚠️ **الرجاء تحديد معالم الوكيل بالكامل**\n\n"
+            "الاستخدام:\n"
+            "`/spawn_agent [اسم_الوكيل] [الدور] [القدرات_مفصولة_بفاصلة]`\n\n"
+            "مثال:\n"
+            "`/spawn_agent security_bot Auditor file_audit,integrity_scan`",
+            parse_mode="Markdown"
+        )
+        return
+
+    name = parts[0].strip().replace(" ", "_").lower()
+    role = parts[1].strip()
+    caps = [c.strip() for c in parts[2].split(',')]
+
+    bot.send_message(message.chat.id, f"🤖 **[Agent Factory]:** Designing agent `{name}`...", parse_mode="Markdown")
+    
+    try:
+        from agents.agent_smith import agent_smith
+        spec_res = agent_smith.design_agent(name, f"وكيل مخصص للقيام بدور {role}", tools_needed=[], triggers=[])
+        if spec_res.get("status") != "success":
+            bot.reply_to(message, f"❌ فشل التصميم: {spec_res.get('error')}")
+            return
+            
+        bot.send_message(message.chat.id, f"🔨 **[Agent Factory]:** Building source code for `{name}`...", parse_mode="Markdown")
+        filepath = agent_smith.build_agent(name)
+        if "❌" in filepath:
+            bot.reply_to(message, filepath)
+            return
+
+        bot.send_message(message.chat.id, f"📝 **[Agent Factory]:** Registering `{name}` inside the sovereign registry...", parse_mode="Markdown")
+        reg_ok = agent_smith.register_agent(name)
+        
+        if reg_ok:
+            bot.send_message(
+                message.chat.id,
+                f"✅ **تم توليد وتنشيط الوكيل بنجاح!**\n\n"
+                f"• **الاسم:** `{name}`\n"
+                f"• **الدور:** `{role}`\n"
+                f"• **القدرات:** `{', '.join(caps)}`\n"
+                f"• **الملف:** `{os.path.basename(filepath)}`",
+                parse_mode="Markdown"
+            )
+        else:
+            bot.reply_to(message, f"⚠️ تم البناء ولكن فشل التسجيل التلقائي.")
+    except Exception as e:
+        bot.reply_to(message, f"❌ حدث خطأ أثناء توليد الوكيل: {e}")
+
+
+@bot.message_handler(commands=['create_protocol'])
+@bot_error_handler
+def handle_create_protocol(message):
+    """إنشاء بروتوكول أتمتة جديد: /create_protocol اسم_البروتوكول\n[YAML]"""
+    if message.from_user.id != ADMIN_ID:
+        return
+        
+    text = message.text.replace('/create_protocol', '', 1).strip()
+    if not text or '\n' not in text:
+        bot.reply_to(
+            message,
+            "⚠️ **الرجاء إرسال محتوى البروتوكول بصيغة YAML**\n\n"
+            "الاستخدام:\n"
+            "`/create_protocol [اسم_البروتوكول]`\n"
+            "```yaml\n"
+            "name: my_protocol\n"
+            "steps:\n"
+            "  - id: step1\n"
+            "    tool: search_web\n"
+            "    input:\n"
+            "      query: \"test\"\n"
+            "```",
+            parse_mode="Markdown"
+        )
+        return
+        
+    first_line, yaml_content = text.split('\n', 1)
+    protocol_name = first_line.strip().replace(" ", "_").lower()
+    
+    yaml_content = yaml_content.strip()
+    if yaml_content.startswith("```yaml"):
+        yaml_content = yaml_content[7:]
+    elif yaml_content.startswith("```"):
+        yaml_content = yaml_content[3:]
+    if yaml_content.endswith("```"):
+        yaml_content = yaml_content[:-3]
+    yaml_content = yaml_content.strip()
+
+    try:
+        import yaml
+        parsed = yaml.safe_load(yaml_content)
+        if not parsed or "steps" not in parsed:
+            bot.reply_to(message, "❌ خطأ: الـ YAML غير صالح أو يفتقر إلى عُقدة الخطوات `steps`.")
+            return
+            
+        protocols_dir = os.path.join(BASE_DIR, "protocols")
+        os.makedirs(protocols_dir, exist_ok=True)
+        file_path = os.path.join(protocols_dir, f"{protocol_name}.yaml")
+        
+        with open(file_path, "w", encoding="utf-8") as f:
+            f.write(yaml_content)
+            
+        bot.send_message(
+            message.chat.id,
+            f"🧬 **تم تسجيل البروتوكول الجديد بنجاح!**\n\n"
+            f"• **الاسم:** `{protocol_name}`\n"
+            f"• **المسار:** `protocols/{protocol_name}.yaml`\n\n"
+            f"لتشغيل البروتوكول، استخدم الأمر:\n"
+            f"`/run_protocol {protocol_name}`",
+            parse_mode="Markdown"
+        )
+    except Exception as e:
+        bot.reply_to(message, f"❌ فشل تحليل الـ YAML وحفظ الملف: {e}")
+
+
+@bot.message_handler(commands=['run_protocol'])
+@bot_error_handler
+def handle_run_protocol(message):
+    """تشغيل بروتوكول أتمتة مسبق الحفظ: /run_protocol اسم_البروتوكول"""
+    if message.from_user.id != ADMIN_ID:
+        return
+        
+    protocol_name = message.text.replace('/run_protocol', '', 1).strip()
+    if not protocol_name:
+        bot.reply_to(message, "⚠️ الاستخدام: `/run_protocol [اسم_البروتوكول]`", parse_mode="Markdown")
+        return
+        
+    protocols_dir = os.path.join(BASE_DIR, "protocols")
+    file_path = os.path.join(protocols_dir, f"{protocol_name}.yaml")
+    
+    if not os.path.exists(file_path):
+        bot.reply_to(message, f"❌ البروتوكول غير موجود: `{protocol_name}.yaml`", parse_mode="Markdown")
+        return
+
+    bot.send_message(
+        message.chat.id, 
+        f"⚡ **[Protocol Engine]:** Executing blueprint `{protocol_name}`...", 
+        parse_mode="Markdown"
+    )
+    
+    try:
+        from pathlib import Path
+        from nexum.protocols.engine import ProtocolEngine
+        
+        engine = ProtocolEngine(Path(protocols_dir))
+        
+        loop = asyncio.get_event_loop()
+        context = {"goal": "web research mission"}
+        
+        if loop.is_running():
+            future = asyncio.run_coroutine_threadsafe(engine.execute(protocol_name, context), loop)
+            results = future.result(timeout=120)
+        else:
+            results = loop.run_until_complete(engine.execute(protocol_name, context))
+            
+        output = []
+        for step_id, res in results.items():
+            status = "✅" if "error" not in res else "❌"
+            data_str = str(res.get("data", res.get("error", "")))[:200]
+            output.append(f"{status} **Step {step_id}:** {data_str}")
+            
+        bot.send_message(
+            message.chat.id,
+            f"🏆 **اكتمل تنفيذ البروتوكول `{protocol_name}`!**\n\n" + "\n".join(output),
+            parse_mode="Markdown"
+        )
+    except Exception as e:
+        bot.reply_to(message, f"❌ فشل تنفيذ البروتوكول: {e}")
+
+
+@bot.message_handler(commands=['search'])
+@bot_error_handler
+def handle_search(message):
+    """البحث في الويب: /search [الاستعلام]"""
+    if message.from_user.id != ADMIN_ID:
+        return
+    query = message.text.replace('/search', '', 1).strip()
+    if not query:
+        bot.reply_to(message, "⚠️ الاستخدام: `/search [الاستعلام]`")
+        return
+        
+    bot.send_message(message.chat.id, "🔍 **[Search Web]:** Seeking live web resources...", parse_mode="Markdown")
+    try:
+        from core.system_tools import search_web
+        res = search_web(query)
+        if res.get("status") == "success":
+            results = res.get("results", [])
+            lines = []
+            for i, r in enumerate(results, 1):
+                lines.append(f"{i}. [{r['url']}]({r['url']})\n   _{r['snippet']}_")
+            output = "\n\n".join(lines) or "No results found."
+            bot.send_message(message.chat.id, f"🔍 **نتائج البحث عن: {query}**\n\n{output}", parse_mode="Markdown", disable_web_page_preview=True)
+        else:
+            bot.reply_to(message, f"❌ فشل البحث: {res.get('message')}")
+    except Exception as e:
+        bot.reply_to(message, f"❌ حدث خطأ أثناء البحث: {e}")
+
+
+@bot.message_handler(commands=['scrape'])
+@bot_error_handler
+def handle_scrape(message):
+    """قراءة وقشط صفحة ويب: /scrape [الرابط]"""
+    if message.from_user.id != ADMIN_ID:
+        return
+    url = message.text.replace('/scrape', '', 1).strip()
+    if not url:
+        bot.reply_to(message, "⚠️ الاستخدام: `/scrape [الرابط]`")
+        return
+        
+    bot.send_message(message.chat.id, "🕸️ **[Web Scraper]:** Extracting page contents...", parse_mode="Markdown")
+    try:
+        from core.system_tools import fetch_webpage
+        res = fetch_webpage(url)
+        if res.get("status") == "success":
+            content = res.get("content", "")[:3500]
+            bot.send_message(message.chat.id, f"🕸️ **محتويات الصفحة ({url}):**\n\n<pre>{content}</pre>", parse_mode="HTML")
+        else:
+            bot.reply_to(message, f"❌ فشل قشط الصفحة: {res.get('message')}")
+    except Exception as e:
+        bot.reply_to(message, f"❌ حدث خطأ أثناء القشط: {e}")
 
 
 # ═══════════════════════════════════════════════════════
@@ -625,6 +856,13 @@ def _proactive_learning_loop():
 if __name__ == "__main__":
     print(f"[NEXUM PRO v7.2.5] Sovereign OS Online (Admin: {ADMIN_ID})")
     print(f"[NEXUM PRO] Modules: Memory + Context + Trust + Learning + Watchdog + Swarm")
+
+    # ─── تسجيل أدوات النظام ───
+    try:
+        from core.system_tools import register_all_system_tools
+        register_all_system_tools()
+    except Exception as e:
+        print(f"[NEXUM PRO] Tools registration error: {e}")
 
     # ─── تشغيل المسح الأولي للبنية التحتية ───
     def _initial_scan():

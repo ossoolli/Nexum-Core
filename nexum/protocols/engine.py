@@ -40,15 +40,15 @@ class ProtocolEngine:
             # 3. حل المتغيرات
             inputs = self._resolve_inputs(step["input"], context, results)
 
-            # 4. التنفيذ (Placeholder للربط مع الأدوات لاحقاً)
+            # 4. التنفيذ الفعلي عبر tool_registry
             try:
-                # هنا يتم استدعاء tool_registry.execute
+                from core.tool_registry import tool_registry
                 logger.info(f"Step {step['id']}: Executing tool {step['tool']}")
-                # result = await tool_registry.execute(...)
-                results[step['id']] = {"status": "success", "data": f"Result of {step['id']}"}
+                res = tool_registry.execute_tool(step['tool'], inputs)
+                results[step['id']] = res if isinstance(res, dict) else {"status": "success", "data": res}
             except Exception as e:
                 logger.error(f"Step {step['id']} failed: {e}")
-                results[step['id']] = {"error": str(e)}
+                results[step['id']] = {"status": "error", "error": str(e)}
 
         return results
 

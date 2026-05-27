@@ -15,7 +15,7 @@ class SovereignUIBuilder:
     """
 
     def __init__(self):
-        self.webapp_url = os.getenv("WEBAPP_URL", "https://ossoolli.github.io/Nexum-Core/")
+        self.webapp_url = os.getenv("WEBAPP_URL", "https://ossoolli.github.io/Nexum-Core/webapp/")
 
     # ╔══════════════════════════════════════════╗
     # ║         الشاشة الرئيسية (Home)          ║
@@ -128,7 +128,10 @@ class SovereignUIBuilder:
             InlineKeyboardButton("🔬 Protocol Inspector", callback_data="pr_inspect"),
             InlineKeyboardButton("📊 Execution Graph", callback_data="pr_graph")
         )
-        m.add(InlineKeyboardButton("⬅️ Back to Main", callback_data="back_main"))
+        m.row(
+            InlineKeyboardButton("▶️ Run Protocol", callback_data="pr_run"),
+            InlineKeyboardButton("⬅️ Back to Main", callback_data="back_main")
+        )
         return m
 
     # ╔══════════════════════════════════════════╗
@@ -168,7 +171,10 @@ class SovereignUIBuilder:
             InlineKeyboardButton("📝 Generate Code", callback_data="ai_codegen"),
             InlineKeyboardButton("🧪 Run Experiment", callback_data="ai_experiment")
         )
-        m.add(InlineKeyboardButton("⬅️ Back to Main", callback_data="back_main"))
+        m.row(
+            InlineKeyboardButton("🏛️ Council of Sages", callback_data="invoke_swarm"),
+            InlineKeyboardButton("⬅️ Back to Main", callback_data="back_main")
+        )
         return m
 
     # ╔══════════════════════════════════════════╗
