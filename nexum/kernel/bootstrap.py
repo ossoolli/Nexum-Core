@@ -32,8 +32,8 @@ def bootstrap():
         logger.error("❌ TELEGRAM_TOKEN is missing or default. System will not start.")
         return False
 
-    if not config.google_api_key:
-        logger.warning("⚠️ GOOGLE_API_KEY is missing. Intelligence features will be disabled.")
+    if not config.google_api_key and not config.agent_platform_api_key:
+        logger.warning("⚠️ GOOGLE_API_KEY / AGENT_PLATFORM_API_KEY is missing. Intelligence features will be disabled.")
 
     # 3. طباعة تقرير البداية
     logger.info(f"✅ Kernel Initialized. Mode: Sovereign.")

@@ -28,6 +28,7 @@ class NexumConfig(BaseSettings):
     telegram_token: str = Field(alias="TELEGRAM_TOKEN")
     admin_id: int = Field(alias="ADMIN_ID")
     google_api_key: str = Field(default="", alias="GOOGLE_API_KEY")
+    agent_platform_api_key: str = Field(default="", alias="AGENT_PLATFORM_API_KEY")
 
     # Tokens & Services
     github_token: str = Field(default="", alias="GITHUB_TOKEN")

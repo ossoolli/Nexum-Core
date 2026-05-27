@@ -21,6 +21,7 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, BASE_DIR)
 
 from core.llm_engine import llm_engine, openai_engine
+from core.agent_platform_engine import agent_platform
 from services.gemini_service import gemini_service
 from council.debate_protocol import CouncilDebateProtocol
 from council.knowledge_archive import knowledge_archive
@@ -180,18 +181,41 @@ class CouncilConsensusEngine:
         )
 
     async def _ask_claude(self, prompt: str) -> str:
-        """استدعاء كلود أوبوس 4.6 عبر OpenRouter"""
+        """استدعاء كلود أوبوس 4.6 عبر Agent Platform (أو OpenRouter كاحتياطي)"""
+        if agent_platform.is_available:
+            logger.info("[Council] Attempting Claude via Agent Platform (Primary)...")
+            res, _ = await asyncio.to_thread(agent_platform.ask, prompt, "anthropic/claude-opus-4.6")
+            if not self._is_api_error(res):
+                return res
+            logger.warning(f"[Council] Agent Platform Claude failed. Falling back to OpenRouter. Error: {res}")
+
+        # الاحتياطي: OpenRouter
         res, _ = await asyncio.to_thread(llm_engine.ask, prompt, "anthropic/claude-opus-4.6")
         return res
 
     async def _ask_gpt(self, prompt: str) -> str:
-        """استدعاء جي بي تي 5.4 نانو عبر OpenAI مباشرة"""
+        """استدعاء جي بي تي 5.4 نانو عبر Agent Platform (أو OpenAI كاحتياطي)"""
+        if agent_platform.is_available:
+            logger.info("[Council] Attempting GPT via Agent Platform (Primary)...")
+            res, _ = await asyncio.to_thread(agent_platform.ask, prompt, "gpt-5.4-nano")
+            if not self._is_api_error(res):
+                return res
+            logger.warning(f"[Council] Agent Platform GPT failed. Falling back to OpenAI. Error: {res}")
+
+        # الاحتياطي: OpenAI
         res, _ = await asyncio.to_thread(openai_engine.ask, prompt, "gpt-5.4-nano")
         return res
 
     async def _ask_gemini(self, prompt: str) -> str:
-        """استدعاء جيميني 3.5 فلاش محلياً/سحابياً"""
-        # دمج سياق جيميني عبر ask العادية
+        """استدعاء جيميني 3.5 فلاش عبر Agent Platform (أو GeminiService كاحتياطي)"""
+        if agent_platform.is_available:
+            logger.info("[Council] Attempting Gemini via Agent Platform (Primary)...")
+            res, _ = await asyncio.to_thread(agent_platform.ask, prompt, "gemini-3.5-flash")
+            if not self._is_api_error(res):
+                return res
+            logger.warning(f"[Council] Agent Platform Gemini failed. Falling back to GeminiService. Error: {res}")
+
+        # الاحتياطي: GeminiService
         res, _ = await asyncio.to_thread(gemini_service.ask, prompt, model="gemini-3.5-flash")
         return res
 

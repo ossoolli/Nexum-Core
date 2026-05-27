@@ -22,7 +22,7 @@ class LLMFactory:
         # محاولة تحميل Gemini SDK (اختياري)
         try:
             from google import genai
-            api_key = os.getenv("GOOGLE_API_KEY")
+            api_key = os.getenv("AGENT_PLATFORM_API_KEY") or os.getenv("GOOGLE_API_KEY")
             if api_key:
                 self._gemini_client = genai.Client(api_key=api_key)
         except ImportError:
