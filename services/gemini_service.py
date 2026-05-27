@@ -71,11 +71,11 @@ class GeminiService:
         # النماذج
         self.model = model or (
             _config.gemini_model if _config and hasattr(_config, 'gemini_model') else None
-        ) or os.getenv("GEMINI_MODEL", "gemini-2.5-flash")
+        ) or os.getenv("GEMINI_MODEL", "gemini-3.5-flash")
 
         self.image_model = image_model or (
             _config.gemini_image_model if _config and hasattr(_config, 'gemini_image_model') else None
-        ) or os.getenv("GEMINI_IMAGE_MODEL", "gemini-2.5-flash")
+        ) or os.getenv("GEMINI_IMAGE_MODEL", "gemini-3.5-flash")
 
         # ─── إنشاء العميل ───
         self.client = self._create_client()
@@ -372,11 +372,11 @@ class GeminiService:
     def list_available_models(self) -> list:
         """النماذج المتاحة على Agent Platform."""
         return [
+            "gemini-3.5-flash",
             "gemini-2.5-flash",
             "gemini-2.5-pro",
             "gemini-2.0-flash",
             "gemini-2.0-flash-lite",
-            "gemini-3-pro-image-preview",
         ]
 
 

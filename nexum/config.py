@@ -47,8 +47,8 @@ class NexumConfig(BaseSettings):
     google_cloud_project: str = Field(default="", alias="GOOGLE_CLOUD_PROJECT")
     google_cloud_location: str = Field(default="global", alias="GOOGLE_CLOUD_LOCATION")
     google_genai_use_vertexai: bool = Field(default=False, alias="GOOGLE_GENAI_USE_VERTEXAI")
-    gemini_model: str = Field(default="gemini-2.5-flash", alias="GEMINI_MODEL")
-    gemini_image_model: str = Field(default="gemini-2.5-flash", alias="GEMINI_IMAGE_MODEL")
+    gemini_model: str = Field(default="gemini-3.5-flash", alias="GEMINI_MODEL")
+    gemini_image_model: str = Field(default="gemini-3.5-flash", alias="GEMINI_IMAGE_MODEL")
 
     # Internal paths & configs
     storage_dir: Path = Field(default=BASE_DIR / "storage")
