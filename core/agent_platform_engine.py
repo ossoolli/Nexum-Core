@@ -4,13 +4,16 @@
 🔱 AgentPlatformEngine — المحرك السيادي المركزي لمجلس الحكماء
 ==============================================================
 يستخدم مفتاح Agent Platform API Key من Google لاستدعاء جميع
-الموديلات (Gemini + Claude + GPT) عبر Model Garden مركزياً.
+الموديلات (Gemini + Claude + GPT) عبر Vertex AI Model Garden مركزياً.
 
-- المزود الأساسي (Primary): Agent Platform API Key عبر google.genai.Client
-- المزود الثانوي (Fallback): OpenRouter / OpenAI المفاتيح المباشرة
+⚠️ هذا المفتاح يعمل حصرياً بوضع vertexai=True عبر Vertex AI endpoints
+   وليس عبر generativelanguage.googleapis.com العادي.
+
+- المزود الأساسي (Primary): Agent Platform API Key عبر Vertex AI
+- المزود الثانوي (Fallback): OpenRouter / OpenAI / GeminiService المفاتيح المباشرة
 
 الأفضلية:
-  Agent Platform API → OpenRouter/OpenAI → Gemini Fallback Alternate
+  Agent Platform API (Vertex AI) → OpenRouter/OpenAI → Gemini API Key
 """
 
 import os
@@ -19,34 +22,42 @@ from typing import Tuple, Optional
 
 logger = logging.getLogger("nexum.agent_platform")
 
-# خريطة مطابقة الموديلات لمجلس الحكماء مع Model Garden (Vertex AI)
+# خريطة مطابقة الموديلات لمجلس الحكماء مع Vertex AI Model Garden
+# ⚠️ يجب استخدام أسماء الموديلات المتاحة فعلياً على المشروع
 MODEL_MAPPING = {
-    "anthropic/claude-opus-4.6": "publishers/anthropic/models/claude-3-opus",
-    "claude-opus-4": "publishers/anthropic/models/claude-3-opus",
-    "gpt-5.4-nano": "gemini-2.5-flash",  # كبديل ذكي سريع داخل Model Garden
-    "gemini-3.5-flash": "gemini-3.5-flash",
+    # Google Models — gemini-2.5-flash مؤكد العمل على هذا المشروع
+    "gemini-3.5-flash": "gemini-2.5-flash",
+    "gemini-2.5-flash": "gemini-2.5-flash",
+    "gemini-2.5-pro": "gemini-2.5-pro",
+    # Third-party via Model Garden (Vertex AI publishers)
+    "anthropic/claude-opus-4.6": "publishers/anthropic/models/claude-opus-4",
+    "claude-opus-4": "publishers/anthropic/models/claude-opus-4",
+    "claude-sonnet-4": "publishers/anthropic/models/claude-sonnet-4",
+    # GPT ليس متاحاً في Model Garden — سيُعالج بالاحتياطي
+    "gpt-5.4-nano": "gemini-2.5-flash",
 }
+
 
 class AgentPlatformEngine:
     """
     يوفر واجهة موحدة `ask(prompt, model)` لاستدعاء أي موديل
-    عبر مفتاح Agent Platform API Key من Google Model Garden.
+    عبر مفتاح Agent Platform API Key عبر Vertex AI Model Garden.
+
+    ⚠️ يعمل حصرياً بوضع vertexai=True
     """
 
     def __init__(self):
         # تحميل الإعدادات
         self.api_key = ""
-        self.use_vertex = False
         self.project = ""
-        self.location = "global"
-        
+        self.location = "us-central1"
+
         try:
             from nexum.config import config
             if config:
                 self.api_key = getattr(config, "agent_platform_api_key", "")
-                self.use_vertex = getattr(config, "google_genai_use_vertexai", False)
                 self.project = getattr(config, "google_cloud_project", "")
-                self.location = getattr(config, "google_cloud_location", "global")
+                self.location = getattr(config, "google_cloud_location", "us-central1")
         except ImportError:
             pass
 
@@ -55,36 +66,32 @@ class AgentPlatformEngine:
             self.api_key = os.getenv("AGENT_PLATFORM_API_KEY", "").strip()
         if not self.project:
             self.project = os.getenv("GOOGLE_CLOUD_PROJECT", "")
-        if not self.location:
-            self.location = os.getenv("GOOGLE_CLOUD_LOCATION", "global")
+        if not self.location or self.location == "global":
+            self.location = os.getenv("GOOGLE_CLOUD_LOCATION", "us-central1")
 
         self.client = None
         self._available = False
 
-        if not self.api_key and not self.use_vertex:
+        if not self.api_key:
             logger.warning(
-                "[AgentPlatform] No AGENT_PLATFORM_API_KEY or Vertex AI config found. "
+                "[AgentPlatform] No AGENT_PLATFORM_API_KEY found. "
                 "Engine will be disabled."
             )
             return
 
         try:
             from google import genai
-            from google.genai.types import HttpOptions
 
-            if self.use_vertex:
-                # وضع Vertex AI مع ADC
-                os.environ.setdefault("GOOGLE_CLOUD_PROJECT", self.project)
-                os.environ.setdefault("GOOGLE_CLOUD_LOCATION", self.location)
-                os.environ.setdefault("GOOGLE_GENAI_USE_VERTEXAI", "True")
-                self.client = genai.Client(http_options=HttpOptions(api_version="v1"))
-                self._available = True
-                logger.info("[AgentPlatform] Engine initialized with Vertex AI/ADC.")
-            else:
-                # وضع API Key لـ Agent Platform
-                self.client = genai.Client(api_key=self.api_key)
-                self._available = True
-                logger.info("[AgentPlatform] Engine initialized with Agent Platform API Key.")
+            # ⚠️ المفتاح يعمل حصرياً بوضع Vertex AI
+            self.client = genai.Client(
+                vertexai=True,
+                api_key=self.api_key,
+            )
+            self._available = True
+            logger.info(
+                f"[AgentPlatform] Engine initialized with Vertex AI mode. "
+                f"Location: {self.location}"
+            )
         except ImportError:
             logger.error(
                 "[AgentPlatform] google-genai package not installed. "
@@ -98,23 +105,23 @@ class AgentPlatformEngine:
         """تحقق من جاهزية المحرك"""
         return self._available and self.client is not None
 
-    def ask(self, prompt: str, model: str = "gemini-3.5-flash") -> Tuple[str, None]:
+    def ask(self, prompt: str, model: str = "gemini-2.5-flash") -> Tuple[str, None]:
         """
-        استدعاء موديل عبر Agent Platform API.
+        استدعاء موديل عبر Vertex AI Agent Platform.
 
         Args:
             prompt: النص المطلوب إرساله
-            model: اسم الموديل (e.g. gemini-3.5-flash, claude-opus-4, gpt-5.4-nano)
+            model: اسم الموديل (e.g. gemini-2.5-flash, claude-opus-4)
 
         Returns:
             Tuple[str, None]: (النص المولد, None)
         """
         if not self.is_available:
-            return f"❌ [AgentPlatform] Engine not available (missing API key or client).", None
+            return "❌ [AgentPlatform] Engine not available (missing API key or client).", None
 
-        # مطابقة الموديل المطلوب مع معرّف Model Garden
+        # مطابقة الموديل المطلوب مع معرّف Vertex AI
         target_model = MODEL_MAPPING.get(model, model)
-        logger.info(f"[AgentPlatform] Routing model '{model}' -> '{target_model}' in Model Garden...")
+        logger.info(f"[AgentPlatform] Routing '{model}' -> '{target_model}' via Vertex AI...")
 
         try:
             response = self.client.models.generate_content(
@@ -129,7 +136,9 @@ class AgentPlatformEngine:
 
         except Exception as e:
             error_msg = str(e)
-            logger.error(f"[AgentPlatform] Model '{model}' (mapped to '{target_model}') call failed: {error_msg}")
+            logger.error(
+                f"[AgentPlatform] Model '{model}' (-> '{target_model}') failed: {error_msg}"
+            )
             return f"❌ خطأ في Agent Platform ({model}): {error_msg}", None
 
     def get_status(self) -> dict:
@@ -138,7 +147,8 @@ class AgentPlatformEngine:
             "engine": "AgentPlatformEngine",
             "available": self.is_available,
             "api_key_set": bool(self.api_key),
-            "use_vertex": self.use_vertex,
+            "mode": "Vertex AI",
+            "location": self.location,
             "client_ready": self.client is not None,
         }
 

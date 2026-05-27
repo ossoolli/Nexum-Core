@@ -44,22 +44,11 @@ class GeminiService:
         except ImportError:
             pass
 
-        # مفتاح API - نفضل دائماً مفتاح Agent Platform للاستفادة القصوى من الرصيد المجاني
-        agent_platform_key = ""
-        if _config:
-            agent_platform_key = getattr(_config, "agent_platform_api_key", "")
-        if not agent_platform_key:
-            agent_platform_key = os.getenv("AGENT_PLATFORM_API_KEY", "")
-
         raw_key = api_key
-        # إذا تم تمرير مفتاح عادي أو كان فارغاً ولدينا مفتاح المنصة، نستخدم مفتاح المنصة
-        if agent_platform_key and (not raw_key or raw_key == os.getenv("GOOGLE_API_KEY", "")):
-            raw_key = agent_platform_key
-        else:
-            if not raw_key and _config:
-                raw_key = _config.google_api_key
-            if not raw_key:
-                raw_key = os.getenv("GOOGLE_API_KEY", "")
+        if not raw_key and _config:
+            raw_key = getattr(_config, "google_api_key", "")
+        if not raw_key:
+            raw_key = os.getenv("GOOGLE_API_KEY", "")
         self.api_key = raw_key.strip() if raw_key else ""
 
         # وضع Agent Platform (Vertex AI / ADC)
