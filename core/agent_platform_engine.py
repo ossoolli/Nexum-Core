@@ -25,16 +25,18 @@ logger = logging.getLogger("nexum.agent_platform")
 # خريطة مطابقة الموديلات لمجلس الحكماء مع Vertex AI Model Garden
 # ⚠️ يجب استخدام أسماء الموديلات المتاحة فعلياً على المشروع
 MODEL_MAPPING = {
-    # Google Models — gemini-2.5-flash مؤكد العمل على هذا المشروع
-    "gemini-3.5-flash": "gemini-2.5-flash",
+    # Google Models — الموديلات المستقرة الحديثة
+    "gemini-3.5-flash": "gemini-3.5-flash",
+    "gemini-3.1-flash-lite": "gemini-3.1-flash-lite",
     "gemini-2.5-flash": "gemini-2.5-flash",
     "gemini-2.5-pro": "gemini-2.5-pro",
+    "gemini-2.5-flash-lite": "gemini-2.5-flash-lite",
     # Third-party via Model Garden (Vertex AI publishers)
     "anthropic/claude-opus-4.6": "publishers/anthropic/models/claude-opus-4",
     "claude-opus-4": "publishers/anthropic/models/claude-opus-4",
     "claude-sonnet-4": "publishers/anthropic/models/claude-sonnet-4",
-    # GPT ليس متاحاً في Model Garden — سيُعالج بالاحتياطي
-    "gpt-5.4-nano": "gemini-2.5-flash",
+    # GPT ليس متاحاً في Model Garden — سيُعالج بالاحتياطي (نستخدم النموذج الحديث كبديل)
+    "gpt-5.4-nano": "gemini-3.5-flash",
 }
 
 
