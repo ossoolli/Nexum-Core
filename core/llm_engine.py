@@ -7,7 +7,7 @@ class OpenRouterEngine:
         self.api_key = os.getenv("OPENROUTER_API_KEY")
         self.url = "https://openrouter.ai/api/v1/chat/completions"
 
-    def ask(self, prompt, model="anthropic/claude-3.5-sonnet"):
+    def ask(self, prompt, model="anthropic/claude-sonnet-4.6"):
         """يرسل الطلب لـ OpenRouter ويجلب الرد الذكي"""
         headers = {
             "Authorization": f"Bearer {self.api_key}",

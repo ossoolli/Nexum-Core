@@ -181,42 +181,63 @@ class CouncilConsensusEngine:
         )
 
     async def _ask_claude(self, prompt: str) -> str:
-        """استدعاء كلود أوبوس 4.6 عبر Agent Platform (أو OpenRouter كاحتياطي)"""
+        """استدعاء كلود عبر Agent Platform (أو OpenRouter كاحتياطي)"""
+        config = self._load_consensus_config()
+        models = config.get("active_models", [])
+        claude_model = "anthropic/claude-opus-4.7"
+        for m in models:
+            if m.get("id") == "claude":
+                claude_model = m.get("model_name", claude_model)
+
         if agent_platform.is_available:
-            logger.info("[Council] Attempting Claude via Agent Platform (Primary)...")
-            res, _ = await asyncio.to_thread(agent_platform.ask, prompt, "anthropic/claude-opus-4.6")
+            logger.info(f"[Council] Attempting Claude ({claude_model}) via Agent Platform (Primary)...")
+            res, _ = await asyncio.to_thread(agent_platform.ask, prompt, claude_model)
             if not self._is_api_error(res):
                 return res
-            logger.warning(f"[Council] Agent Platform Claude failed. Falling back to OpenRouter. Error: {res}")
+            logger.warning(f"[Council] Agent Platform Claude ({claude_model}) failed. Falling back to OpenRouter. Error: {res}")
 
         # الاحتياطي: OpenRouter
-        res, _ = await asyncio.to_thread(llm_engine.ask, prompt, "anthropic/claude-opus-4.6")
+        res, _ = await asyncio.to_thread(llm_engine.ask, prompt, claude_model)
         return res
 
     async def _ask_gpt(self, prompt: str) -> str:
-        """استدعاء جي بي تي 5.4 نانو عبر Agent Platform (أو OpenAI كاحتياطي)"""
+        """استدعاء جي بي تي عبر Agent Platform (أو OpenAI كاحتياطي)"""
+        config = self._load_consensus_config()
+        models = config.get("active_models", [])
+        gpt_model = "gpt-5.4-nano"
+        for m in models:
+            if m.get("id") == "gpt":
+                gpt_model = m.get("model_name", gpt_model)
+
         if agent_platform.is_available:
-            logger.info("[Council] Attempting GPT via Agent Platform (Primary)...")
-            res, _ = await asyncio.to_thread(agent_platform.ask, prompt, "gpt-5.4-nano")
+            logger.info(f"[Council] Attempting GPT ({gpt_model}) via Agent Platform (Primary)...")
+            res, _ = await asyncio.to_thread(agent_platform.ask, prompt, gpt_model)
             if not self._is_api_error(res):
                 return res
-            logger.warning(f"[Council] Agent Platform GPT failed. Falling back to OpenAI. Error: {res}")
+            logger.warning(f"[Council] Agent Platform GPT ({gpt_model}) failed. Falling back to OpenAI. Error: {res}")
 
         # الاحتياطي: OpenAI
-        res, _ = await asyncio.to_thread(openai_engine.ask, prompt, "gpt-5.4-nano")
+        res, _ = await asyncio.to_thread(openai_engine.ask, prompt, gpt_model)
         return res
 
     async def _ask_gemini(self, prompt: str) -> str:
-        """استدعاء جيميني 3.5 فلاش عبر Agent Platform (أو GeminiService كاحتياطي)"""
+        """استدعاء جيميني عبر Agent Platform (أو GeminiService كاحتياطي)"""
+        config = self._load_consensus_config()
+        models = config.get("active_models", [])
+        gemini_model = "gemini-3.5-flash"
+        for m in models:
+            if m.get("id") == "gemini":
+                gemini_model = m.get("model_name", gemini_model)
+
         if agent_platform.is_available:
-            logger.info("[Council] Attempting Gemini via Agent Platform (Primary)...")
-            res, _ = await asyncio.to_thread(agent_platform.ask, prompt, "gemini-3.5-flash")
+            logger.info(f"[Council] Attempting Gemini ({gemini_model}) via Agent Platform (Primary)...")
+            res, _ = await asyncio.to_thread(agent_platform.ask, prompt, gemini_model)
             if not self._is_api_error(res):
                 return res
-            logger.warning(f"[Council] Agent Platform Gemini failed. Falling back to GeminiService. Error: {res}")
+            logger.warning(f"[Council] Agent Platform Gemini ({gemini_model}) failed. Falling back to GeminiService. Error: {res}")
 
         # الاحتياطي: GeminiService
-        res, _ = await asyncio.to_thread(gemini_service.ask, prompt, model="gemini-3.5-flash")
+        res, _ = await asyncio.to_thread(gemini_service.ask, prompt, model=gemini_model)
         return res
 
     def _extract_vote(self, response: str) -> bool:
