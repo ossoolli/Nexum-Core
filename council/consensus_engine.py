@@ -40,6 +40,55 @@ class CouncilConsensusEngine:
     def __init__(self):
         self.debate_protocol = CouncilDebateProtocol(self)
 
+    def _load_consensus_config(self) -> dict:
+        """شحن وقراءة ملف إعدادات بروتوكول التوافق والاعتراضات ديناميكياً"""
+        try:
+            import yaml
+            path = os.path.join(BASE_DIR, "protocols", "consensus.yaml")
+            with open(path, "r", encoding="utf-8") as f:
+                return yaml.safe_load(f)
+        except Exception as e:
+            logger.error(f"[Council] Failed to load consensus.yaml: {e}")
+            return {}
+
+    def _is_api_error(self, res: Any) -> bool:
+        """تحديد ما إذا كان الرد يمثل خطأ استدعاء أو عطلاً في الرصيد/الشبكة"""
+        if isinstance(res, Exception):
+            return True
+        res_str = str(res)
+        error_indicators = [
+            "خطأ في الاتصال",
+            "Payment Required",
+            "402",
+            "Rate Limit",
+            "429",
+            "Unauthorized",
+            "401",
+            "Internal Server Error",
+            "500",
+            "Bad Gateway",
+            "502"
+        ]
+        return any(ind in res_str for ind in error_indicators)
+
+    async def _ask_fallback(self, prompt: str, target_sage: str) -> str:
+        """استدعاء وكيل احتياطي سيادي (Gemini) للتصويت بالنيابة عن الموديل المتعطل برمجياً"""
+        logger.info(f"[Council Fallback] Invoking Gemini alternate to deliberate as Sage {target_sage.upper()}...")
+        fallback_prompt = (
+            f"⚠️ [SYSTEM FALLBACK SYSTEM ACTIVE]\n"
+            f"You are acting as the Sovereign Alternate for Sage {target_sage.upper()} in the NEXUM PRO Council of Sages.\n"
+            f"Sage {target_sage.upper()}'s API endpoint is currently offline (Billing or Connection Issue).\n"
+            f"You must evaluate the proposed task from {target_sage.upper()}'s specific perspective (e.g. strict security and logic check for Claude, or strategic/analytical layout for GPT).\n"
+            f"You must explicitly start your response with 'APPROVED' or 'REJECTED' followed by your technical reasoning.\n\n"
+            f"Here is the original deliberation prompt:\n{prompt}"
+        )
+        try:
+            res, _ = await asyncio.to_thread(gemini_service.ask, fallback_prompt, model="gemini-3.5-flash")
+            return f"♻️ [Fallback for {target_sage.upper()}] " + res
+        except Exception as e:
+            logger.error(f"[Council Fallback] Alternate resolution failed for {target_sage}: {e}")
+            return f"REJECTED: Fallback alternate failed: {e}"
+
     async def deliberate(self, task: str, code: str = None) -> ConsensusToken:
         """عقد جلسة حكماء لمناقشة وإصدار قرار إجماع نهائي"""
         logger.info(f"[Council] Starting deliberation session on task: {task[:60]}...")
@@ -69,6 +118,19 @@ class CouncilConsensusEngine:
         claude_res = results[0] if not isinstance(results[0], Exception) else f"REJECTED: Error: {results[0]}"
         gemini_res = results[1] if not isinstance(results[1], Exception) else f"REJECTED: Error: {results[1]}"
         gpt_res    = results[2] if not isinstance(results[2], Exception) else f"REJECTED: Error: {results[2]}"
+
+        # تطبيق الصمود التلقائي (Resiliency Fallback) عند كشف أعطال API
+        config = self._load_consensus_config()
+        enable_fallback = config.get("consensus_rules", {}).get("enable_fallback_on_api_error", True)
+
+        if enable_fallback:
+            if self._is_api_error(claude_res):
+                logger.warning("[Council] Claude endpoint failed. Invoking alternate for Claude...")
+                claude_res = await self._ask_fallback(prompt, "claude")
+            
+            if self._is_api_error(gpt_res):
+                logger.warning("[Council] GPT endpoint failed. Invoking alternate for GPT...")
+                gpt_res = await self._ask_fallback(prompt, "gpt")
 
         votes = {
             "claude": self._extract_vote(claude_res),
@@ -136,7 +198,7 @@ class CouncilConsensusEngine:
     def _extract_vote(self, response: str) -> bool:
         """استخراج قرار التصويت بناء على بدء الرد"""
         clean = str(response).strip().upper()
-        if "APPROVED" in clean[:150]:
+        if "APPROVED" in clean[:300]:
             return True
         return False
 
