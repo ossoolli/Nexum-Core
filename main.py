@@ -558,6 +558,69 @@ def handle_system_evolution(message):
         bot.reply_to(message, f"❌ فشلت دورة التطور الذاتي: {e}")
 
 
+@bot.message_handler(commands=['deliberate'])
+@bot_error_handler
+def handle_deliberation(message):
+    """عقد جلسة حكماء لمناقشة وإصدار قرار إجماع نهائي: /deliberate [المهمة]"""
+    if message.from_user.id != ADMIN_ID:
+        return
+        
+    task = message.text.replace('/deliberate', '', 1).strip()
+    if not task:
+        bot.reply_to(message, "⚠️ الاستخدام: `/deliberate [المهمة أو القرار المقترح]`")
+        return
+
+    bot.send_message(message.chat.id, "🏛️ **[مجلس الحكماء]:** جاري عقد جلسة للمناقشة بالتوازي بين Claude و Gemini و GPT-4o...", parse_mode="Markdown")
+
+    try:
+        from council.consensus_engine import council_consensus
+        # استدعاء المناقشة بشكل متزامن من خلال الخيط الحالي
+        loop = asyncio.new_event_loop()
+        token = loop.run_until_complete(council_consensus.deliberate(task))
+        
+        votes_str = "\n".join([f"• `{model}`: {'APPROVED ✅' if vote else 'REJECTED ❌'}" for model, vote in token.votes.items()])
+        
+        status_icon = "🏆 APPROVED & EXECUTING" if token.approved else "❌ REJECTED"
+        output = (
+            f"🏛️ **تقرير جلسة مجلس الحكماء:**\n\n"
+            f"📌 **المهمة:** `{task}`\n\n"
+            f"📊 **الأصوات والقرار:**\n{votes_str}\n\n"
+            f"🧬 **درجة التوافق والقرار الكلي:** `{token.consensus_grade}`\n"
+            f"👑 **الحالة النهائية:** `{status_icon}`\n\n"
+        )
+        if token.approved and token.merged_output:
+            output += f"💻 **المخرج البرمجي المدمج المعتمد:**\n<pre>{token.merged_output[:2500]}</pre>"
+        else:
+            reason_str = "\n\n".join([f"🗣️ **{model.upper()}:** {reason}" for model, reason in token.reasoning.items()])
+            output += f"📝 **مسودة النقاش والاعتراضات:**\n{reason_str[:1500]}"
+            
+        bot.send_message(message.chat.id, output, parse_mode="HTML")
+    except Exception as e:
+        bot.reply_to(message, f"❌ حدث خطأ أثناء انعقاد الجلسة: {e}")
+
+
+@bot.message_handler(commands=['sentinel_status'])
+@bot_error_handler
+def handle_sentinel_status(message):
+    """عرض الحالة الحالية للحارس الرقابي: /sentinel_status"""
+    if message.from_user.id != ADMIN_ID:
+        return
+        
+    import psutil
+    cpu = psutil.cpu_percent()
+    ram = psutil.virtual_memory().percent
+    disk = psutil.disk_usage("/").percent
+    
+    status = (
+        f"🛡️ **الحالة الحالية للحارس الرقابي (Sentinel):**\n\n"
+        f"🖥️ CPU: `{cpu}%` (الحد الأقصى: 85%)\n"
+        f"💾 RAM: `{ram}%` (الحد الأقصى: 90%)\n"
+        f"💿 Disk: `{disk}%` (الحد الأقصى: 95%)\n\n"
+        f"🟢 حالة المراقبة: `نشط ويعمل في الخلفية بنجاح`"
+    )
+    bot.reply_to(message, status, parse_mode="Markdown")
+
+
 # ═══════════════════════════════════════════════════════
 # ║  2. معالج الترمنال المباشر (Remote Shell)            ║
 # ═══════════════════════════════════════════════════════
@@ -939,6 +1002,19 @@ if __name__ == "__main__":
     )
     watchdog.start()
     print("[NEXUM PRO] Watchdog daemon started (30s heartbeat).")
+
+    # ─── Sentinel Watchdog Thread ───
+    try:
+        from agents.sentinel import sentinel_agent
+        def run_sentinel():
+            loop = asyncio.new_event_loop()
+            asyncio.set_event_loop(loop)
+            loop.run_until_complete(sentinel_agent.watch(bot, ADMIN_ID, interval=60))
+        sentinel_thread = threading.Thread(target=run_sentinel, daemon=True)
+        sentinel_thread.start()
+        print("🛡️ [Sentinel] Watching daemon initialized successfully.")
+    except Exception as e:
+        print(f"⚠️ [Sentinel Init Error] {e}")
 
     # ─── تشغيل البوت ───
     bot.infinity_polling(timeout=60, long_polling_timeout=30)

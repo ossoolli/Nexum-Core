@@ -1,0 +1,27 @@
+# protocols/consensus.yaml
+# 🔱 NEXUM PRO OS — Consensus Configuration & Rules v1.0.0
+# =========================================================
+
+name: "Council of Sages Multi-Model Consensus"
+version: "1.0"
+active_models:
+  - id: "claude"
+    model_name: "anthropic/claude-3.5-sonnet"
+    weight: 1.0
+    specialty: "logic, code audit, security check"
+  - id: "gpt"
+    model_name: "openai/gpt-4o"
+    weight: 1.0
+    specialty: "creativity, strategy, API design"
+  - id: "gemini"
+    model_name: "gemini-3.5-flash"
+    weight: 1.0
+    specialty: "multimodal vision, quick execution, search integration"
+
+consensus_rules:
+  # The required score to auto-execute critical actions (e.g. file changes, git push)
+  critical_approval_threshold: 1.0   # Must be 3/3 unanimous
+  # The required score to execute general advisory tasks
+  general_approval_threshold: 0.66   # Can be 2/3 consensus
+  max_debate_rounds: 3
+  enable_fallback_on_api_error: true

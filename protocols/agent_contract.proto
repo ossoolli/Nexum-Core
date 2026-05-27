@@ -1,0 +1,36 @@
+// protocols/agent_contract.proto
+syntax = "proto3";
+
+package nexum.protocols;
+
+// Contract for message sharing and event delivery between sovereign agents
+message AgentEvent {
+  string event_id = 1;
+  string sender = 2;
+  string timestamp = 3;
+  string topic = 4;
+  bytes payload = 5; // JSON serialized specific parameters
+}
+
+// Contract for Council Deliberation Requests and Votes
+message DeliberationRequest {
+  string task_id = 1;
+  string prompt = 2;
+  string context_code = 3;
+  string requested_by = 4;
+}
+
+message ModelVote {
+  string model_id = 1;
+  bool approved = 2;
+  string reasoning = 3;
+  string output_code = 4;
+}
+
+message DeliberationVerdict {
+  string task_id = 1;
+  bool approved = 2;
+  repeated ModelVote votes = 3;
+  string merged_output = 4;
+  string consensus_grade = 5; // e.g. "AAA Unanimous", "A Consensus"
+}
