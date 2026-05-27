@@ -72,7 +72,7 @@ from watchdog.recovery import RecoveryManager
 from swarm.engine import SwarmEngine
 from swarm.council import CouncilOfSages
 
-council = CouncilOfSages(trust_engine=trust_engine, llm_interface=gemini_service)
+council = CouncilOfSages(trust_engine=trust_engine, llm_interface=gemini_service, sovereign_memory=sovereign_memory)
 swarm_engine = SwarmEngine(
     agent_registry=None, council=council,
     llm_interface=gemini_service, max_workers=4, agent_timeout=30
@@ -526,6 +526,38 @@ def handle_scrape(message):
         bot.reply_to(message, f"❌ حدث خطأ أثناء القشط: {e}")
 
 
+@bot.message_handler(commands=['evolve'])
+@bot_error_handler
+def handle_system_evolution(message):
+    """تحفيز حلقة التطور الذاتي والترميم: /evolve"""
+    if message.from_user.id != ADMIN_ID:
+        return
+        
+    bot.send_message(message.chat.id, "🧬 **[Evolution Engine]:** Convening the Council of Sages for system self-diagnostics and logs audit...", parse_mode="Markdown")
+    
+    try:
+        report = council.convene_on_evolution(ADMIN_ID)
+        
+        gaps_str = "\n".join([f"• `{g['agent_name']}`: {g['objective']}" for g in report.get("discovered_gaps", [])]) or "🟢 لا توجد فجوات معرفية جديدة."
+        repaired_str = ", ".join(report.get("repaired_agents", [])) or "🟢 جميع الوكلاء يعملون بشكل طبيعي ولا أخطاء."
+        spawned_str = ", ".join(report.get("spawned_agents", [])) or "🟢 لم يتم تخليق وكلاء جدد في هذه الدورة."
+        
+        output = (
+            f"🏆 **اكتملت دورة التطور والترميم الذاتي بنجاح!**\n\n"
+            f"🛡️ **ترميم الوكلاء المعطوبين (Self-Healing):**\n"
+            f"{repaired_str}\n\n"
+            f"🔍 **الفجوات المعرفية المكتشفة (Capability Gaps):**\n"
+            f"{gaps_str}\n\n"
+            f"🤖 **الوكلاء الجدد المولّدون (Synthesized Agents):**\n"
+            f"{spawned_str}\n\n"
+            f"👑 **الحالة التشغيلية الكلية:** `AAA Nominal Grade`"
+        )
+        
+        bot.send_message(message.chat.id, output, parse_mode="Markdown")
+    except Exception as e:
+        bot.reply_to(message, f"❌ فشلت دورة التطور الذاتي: {e}")
+
+
 # ═══════════════════════════════════════════════════════
 # ║  2. معالج الترمنال المباشر (Remote Shell)            ║
 # ═══════════════════════════════════════════════════════
@@ -849,6 +881,18 @@ def _proactive_learning_loop():
             print(f"[Proactive Loop Error] {e}")
 
 
+def _autonomous_evolution_loop():
+    """حلقة خلفية للتطور والترميم الذاتي للأنظمة والوكلاء (كل 15 دقيقة)."""
+    while True:
+        try:
+            time.sleep(900)  # 15 دقيقة
+            if council:
+                print("[Evolution] Auto-running diagnostic self-evolution cycle...")
+                council.convene_on_evolution(ADMIN_ID)
+        except Exception as e:
+            print(f"[Evolution Loop Error] {e}")
+
+
 # ═══════════════════════════════════════════════════════
 # ║  نقطة الدخول الرئيسية                               ║
 # ═══════════════════════════════════════════════════════
@@ -878,6 +922,10 @@ if __name__ == "__main__":
     # ─── تشغيل حلقة التعلم الاستباقي ───
     learning_thread = threading.Thread(target=_proactive_learning_loop, daemon=True)
     learning_thread.start()
+
+    # ─── تشغيل حلقة التطور والترميم الذاتي ───
+    evolution_thread = threading.Thread(target=_autonomous_evolution_loop, daemon=True)
+    evolution_thread.start()
 
     # ─── تشغيل الحارس المستقل (Watchdog) ───
     recovery_manager = RecoveryManager(

@@ -152,6 +152,9 @@
     <button onclick="showTab('agents')" class="tab-btn" id="tab-agents">🤖 الوكلاء</button>
     <button onclick="showTab('bots')" class="tab-btn" id="tab-bots">🤖 البوتات</button>
     <button onclick="showTab('channels')" class="tab-btn" id="tab-channels">📢 القنوات</button>
+    <button onclick="showTab('protocols')" class="tab-btn" id="tab-protocols">📜 البروتوكولات</button>
+    <button onclick="showTab('gcp')" class="tab-btn" id="tab-gcp">☁️ السحاب والـ API</button>
+    <button onclick="showTab('evolution')" class="tab-btn" id="tab-evolution">🧬 التطور الذاتي</button>
 </div>
 
 <div class="content">
@@ -281,6 +284,125 @@
     </div>
 </div>
 
+<!-- ════════════════════════ Tab 6: التطور الذاتي ════════════════════════ -->
+<div class="tab-content" id="panel-evolution">
+    <div class="two-col">
+        <div class="form-card">
+            <div class="section-title"><span>🧬</span> فحص وترميم وتطوير الأنظمة</div>
+            <p style="color:var(--text2);font-size:12px;margin-bottom:14px;line-height:1.6">
+                محرك التطور السيادي يقوم بمسح أخطاء السجلات (Self-Healing) لكشف وإصلاح الوكلاء المعطوبين ذاتياً، بالإضافة لمسح فجوات المحادثات لتصميم وتنشيط وكلاء جدد.
+            </p>
+            <button class="btn-primary" onclick="triggerEvolution()" style="width:100%">⚡ تشغيل دورة التطور الآن</button>
+        </div>
+        <div>
+            <div class="section-title"><span>📊</span> تقرير التطور الأخير</div>
+            <div class="stat-card" style="margin-bottom:12px">
+                <div class="label">الوكلاء المصلحون ذاتياً</div>
+                <div class="value" id="evo-repaired">0</div>
+                <div class="sub" id="evo-repaired-names">🟢 لا توجد أخطاء</div>
+            </div>
+            <div class="stat-card" style="margin-bottom:12px">
+                <div class="label">الوكلاء المولدون الجدد</div>
+                <div class="value" id="evo-spawned">0</div>
+                <div class="sub" id="evo-spawned-names">🟢 لم يتم التوليد</div>
+            </div>
+            <div class="stat-card">
+                <div class="label">فجوات القدرات المكتشفة</div>
+                <div class="value" id="evo-gaps">0</div>
+                <div class="sub" id="evo-gaps-names">🟢 لا توجد فجوات</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ════════════════════════ Tab 7: البروتوكولات ════════════════════════ -->
+<div class="tab-content" id="panel-protocols">
+    <div class="two-col">
+        <div class="form-card">
+            <div class="section-title"><span>📜</span> بناء وتصميم بروتوكول جديد (YAML)</div>
+            <div class="form-group"><label>اسم البروتوكول</label><input id="pr-name" placeholder="my_workflow"></div>
+            <div class="form-group"><label>محتوى البروتوكول (YAML)</label>
+                <textarea id="pr-yaml" style="height:250px; font-family: 'Courier New', monospace;" placeholder="name: custom_workflow
+version: '1.0'
+description: 'بحث ويب وتلخيص'
+steps:
+  - id: search
+    tool: web_search
+    input:
+      query: '{{goal}}'"></textarea>
+            </div>
+            <button class="btn-primary" onclick="createProtocol()">💾 حفظ البروتوكول</button>
+        </div>
+        <div>
+            <div class="section-title"><span>📋</span> بروتوكولات التشغيل المتاحة</div>
+            <div id="protocols-list"><div class="empty-state"><div class="icon">📜</div>لا توجد بروتوكولات</div></div>
+            
+            <div class="form-card" style="margin-top:20px" id="run-context-card">
+                <div class="section-title"><span>⚡</span> تشغيل بروتوكول مع سياق</div>
+                <div class="form-group"><label>سياق التشغيل (JSON)</label>
+                    <textarea id="pr-context" style="height:80px; font-family: 'Courier New', monospace;" placeholder='{"goal": "أحدث أخبار الذكاء الاصطناعي"}'></textarea>
+                </div>
+                <div id="protocol-run-results" style="display:none; background: var(--surface); border:1px solid var(--border); border-radius:8px; padding:12px; font-size:12px; font-family:monospace; margin-bottom:12px; max-height:150px; overflow-y:auto; white-space:pre-wrap;"></div>
+                <button class="btn-primary" id="btn-run-protocol" onclick="runSelectedProtocol()" style="width:100%" disabled>⚡ اختر بروتوكولاً للتشغيل</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ════════════════════════ Tab 8: السحاب والـ API ════════════════════════ -->
+<div class="tab-content" id="panel-gcp">
+    <div class="two-col">
+        <div>
+            <div class="form-card" style="margin-bottom:16px">
+                <div class="section-title"><span>☁️</span> حالة Google Cloud Vertex Platform</div>
+                <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px; margin-bottom:14px;">
+                    <div style="background:var(--surface); border:1px solid var(--border); padding:10px; border-radius:8px;">
+                        <div style="font-size:11px; color:var(--text2)">وضع الاتصال</div>
+                        <div id="v-status" style="font-size:14px; font-weight:bold; color:var(--success)">نشط</div>
+                    </div>
+                    <div style="background:var(--surface); border:1px solid var(--border); padding:10px; border-radius:8px;">
+                        <div style="font-size:11px; color:var(--text2)">نوع الترخيص</div>
+                        <div id="v-auth" style="font-size:12px; font-weight:bold; color:var(--accent)">ADC</div>
+                    </div>
+                </div>
+                <div class="form-group"><label>GCP Project ID</label><input id="v-project" readonly value="..."></div>
+                <div class="form-group"><label>Region / Location</label><input id="v-location" readonly value="..."></div>
+            </div>
+            
+            <div class="form-card">
+                <div class="section-title"><span>🚀</span> نشر وكيل مستقل إلى Cloud Run</div>
+                <p style="color:var(--text2); font-size:12px; margin-bottom:14px; line-height:1.6">
+                    بناء كود الوكيل المختار في حاوية Docker معتمدة ونشرها مباشرة إلى بيئة Google Cloud Run السيادية.
+                </p>
+                <div class="form-group"><label>اختر الوكيل للتعبئة والنشر</label>
+                    <select id="v-deploy-agent"><option value="">-- لا يوجد وكلاء --</option></select>
+                </div>
+                <div id="v-deploy-output" style="display:none; background: var(--surface); border:1px solid var(--border); border-radius:8px; padding:12px; font-size:11px; font-family:monospace; margin-bottom:12px; max-height:120px; overflow-y:auto; white-space:pre-wrap;"></div>
+                <button class="btn-primary" onclick="deployAgentToCloud()" style="width:100%">🚢 بناء الحاوية ونشر الوكيل</button>
+            </div>
+        </div>
+        
+        <div class="form-card" style="display:flex; flex-direction:column; justify-content:space-between;">
+            <div>
+                <div class="section-title"><span>🔮</span> اختبار استدعاء الدوال السحابية (Vertex AI)</div>
+                <p style="color:var(--text2); font-size:12px; margin-bottom:14px; line-height:1.6">
+                    اختبار قدرة Gemini Vertex AI على الربط التلقائي واستدعاء الأدوات المحلية سحابياً (Function Calling) مثل البحث في الويب وقراءة الصفحات والترمنال.
+                </p>
+                <div class="form-group"><label>موجه الاختبار</label>
+                    <textarea id="v-prompt" style="height:100px;" placeholder="ابحث في الويب عن أحدث سعر لعملة البتكوين اليوم"></textarea>
+                </div>
+                <div class="form-group"><label>تعليمات النظام (الاختيارية)</label>
+                    <input id="v-sys" placeholder="You are a financial advisor...">
+                </div>
+            </div>
+            <div>
+                <div id="v-execution-result" style="display:none; background: var(--surface); border:1px solid var(--border); border-radius:8px; padding:12px; font-size:12px; font-family:monospace; margin-bottom:12px; max-height:220px; overflow-y:auto; white-space:pre-wrap;"></div>
+                <button class="btn-primary" onclick="executeVertexPrompt()" style="width:100%">⚡ تشغيل مع ربط الأدوات</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 </div><!-- end content -->
 
 <script>
@@ -298,6 +420,9 @@ function showTab(name) {
     if(name === 'bots') loadBots();
     if(name === 'channels') loadChannels();
     if(name === 'status') loadStatus();
+    if(name === 'evolution') loadEvolutionStatus();
+    if(name === 'protocols') loadProtocols();
+    if(name === 'gcp') loadVertexStatus();
 }
 
 // ═══ API Helpers ═══
@@ -438,6 +563,170 @@ async function schedulePost() {
     if(!content||!ids.length) return alert('اكتب المحتوى واختر القنوات');
     const res = await api('/api/channels/schedule', 'POST', { content, channel_ids:ids, scheduled_time: time || 'now' });
     log(res.job_id ? '✅ المنشور مجدوَل: ' + res.job_id : '❌ فشل');
+}
+
+// ═══ Evolution Tab ═══
+async function loadEvolutionStatus() {
+    const res = await api('/api/evolution/status');
+    if(res) {
+        document.getElementById('evo-repaired').textContent = res.scanned_errors || 0;
+        document.getElementById('evo-repaired-names').textContent = res.repaired_agents && res.repaired_agents.length ? '🛠️ ' + res.repaired_agents.join(', ') : '🟢 لا توجد أخطاء في الوكلاء';
+        
+        document.getElementById('evo-spawned').textContent = res.spawned_agents ? res.spawned_agents.length : 0;
+        document.getElementById('evo-spawned-names').textContent = res.spawned_agents && res.spawned_agents.length ? '🚀 ' + res.spawned_agents.join(', ') : '🟢 لم يتم تخليق وكلاء جدد';
+        
+        document.getElementById('evo-gaps').textContent = res.discovered_gaps ? res.discovered_gaps.length : 0;
+        document.getElementById('evo-gaps-names').textContent = res.discovered_gaps && res.discovered_gaps.length ? '🔍 ' + res.discovered_gaps.map(g=>g.agent_name).join(', ') : '🟢 لا توجد فجوات قدرات';
+    }
+}
+
+async function triggerEvolution() {
+    log('🧬 جاري تحفيز مجلس الحكماء وتفويض دورة التطور والترميم الذاتي...');
+    const res = await api('/api/evolution/trigger', 'POST');
+    if(res.status === 'success') {
+        log('🧬 تم الانتهاء بنجاح! تم فحص السجلات الفنية وسد فجوات القدرات.');
+        loadEvolutionStatus();
+    } else {
+        log('❌ فشلت دورة التطور: ' + (res.error || 'خطأ غير معروف'));
+    }
+}
+
+// ═══ Protocols Tab ═══
+let selectedProtocolName = '';
+
+async function loadProtocols() {
+    const data = await api('/api/protocols/list');
+    const el = document.getElementById('protocols-list');
+    if(!data || !data.length) {
+        el.innerHTML = '<div class="empty-state"><div class="icon">📜</div>لا توجد بروتوكولات</div>';
+        return;
+    }
+    el.innerHTML = data.map(p => `
+        <div class="list-card" id="proto-${p.name}">
+            <div class="info">
+                <div class="name">${p.name} <span class="badge badge-built">${p.steps_count} خطوات</span></div>
+                <div class="desc">${p.description}</div>
+            </div>
+            <div class="actions">
+                <button class="btn-sm btn-success" onclick="selectProtocol('${p.name}')">🎯 اختيار</button>
+            </div>
+        </div>
+    `).join('');
+}
+
+async function createProtocol() {
+    const name = document.getElementById('pr-name').value;
+    const content = document.getElementById('pr-yaml').value;
+    if(!name || !content) return alert('أدخل الاسم ومحتوى الـ YAML');
+    log('جاري حفظ بروتوكول جديد: ' + name + '...');
+    const res = await api('/api/protocols/create', 'POST', { name, content });
+    if(res.status === 'success') {
+        log('✅ تم حفظ البروتوكول ' + name);
+        loadProtocols();
+    } else {
+        log('❌ ' + (res.error || 'فشل الحفظ'));
+    }
+}
+
+function selectProtocol(name) {
+    selectedProtocolName = name;
+    document.querySelectorAll('[id^="proto-"]').forEach(el => el.style.borderColor = 'var(--border)');
+    const selEl = document.getElementById('proto-' + name);
+    if(selEl) selEl.style.borderColor = 'var(--accent)';
+    
+    const btn = document.getElementById('btn-run-protocol');
+    btn.disabled = false;
+    btn.textContent = '⚡ تشغيل البروتوكول (' + name + ') الآن';
+}
+
+async function runSelectedProtocol() {
+    if(!selectedProtocolName) return alert('اختر بروتوكولاً للتشغيل');
+    const ctxText = document.getElementById('pr-context').value || '{}';
+    let context = {};
+    try {
+        context = JSON.parse(ctxText);
+    } catch(e) {
+        return alert('تنسيق الـ JSON غير صالح في السياق');
+    }
+    
+    log('⚡ جاري بدء تشغيل بروتوكول ' + selectedProtocolName + '...');
+    const resBox = document.getElementById('protocol-run-results');
+    resBox.style.display = 'block';
+    resBox.textContent = '⚙️ جاري التشغيل الفعلي للخطوات عبر الـ Tool Registry... الرجاء الانتظار...';
+    
+    const res = await api('/api/protocols/run', 'POST', { name: selectedProtocolName, context });
+    if(res.status === 'success') {
+        log('✅ اكتمل تشغيل بروتوكول ' + selectedProtocolName);
+        resBox.textContent = JSON.stringify(res.results, null, 2);
+    } else {
+        log('❌ فشل تشغيل البروتوكول: ' + (res.error || 'خطأ'));
+        resBox.textContent = 'Error:\n' + (res.error || 'Unknown error occurred');
+    }
+}
+
+// ═══ GCP Vertex AI Tab ═══
+async function loadVertexStatus() {
+    const res = await api('/api/vertex/status');
+    if(res) {
+        document.getElementById('v-status').textContent = res.active ? 'نشط (Active)' : 'غير نشط (Local Fallback)';
+        document.getElementById('v-status').style.color = res.active ? 'var(--success)' : 'var(--warn)';
+        document.getElementById('v-auth').textContent = res.auth_mode || 'API Key';
+        document.getElementById('v-project').value = res.project_id || 'Not Set';
+        document.getElementById('v-location').value = res.location || 'Not Set';
+    }
+    
+    // Also load agents into the select list for deployment
+    const agents = await api('/api/agents/list');
+    const sel = document.getElementById('v-deploy-agent');
+    if(agents && agents.length) {
+        sel.innerHTML = agents.map(a => `<option value="${a.name}">${a.name} (${a.status})</option>`).join('');
+    } else {
+        sel.innerHTML = '<option value="">-- لا يوجد وكلاء --</option>';
+    }
+}
+
+async function executeVertexPrompt() {
+    const prompt = document.getElementById('v-prompt').value;
+    const sys = document.getElementById('v-sys').value;
+    if(!prompt) return alert('أدخل موجه الاختبار');
+    
+    log('🔮 جاري استدعاء نموذج Vertex AI مع ربط الأدوات سحابياً...');
+    const resBox = document.getElementById('v-execution-result');
+    resBox.style.display = 'block';
+    resBox.textContent = '⚙️ جاري الاتصال بـ Google Cloud Vertex AI وتفعيل آلية الـ Function Calling...';
+    
+    const res = await api('/api/vertex/execute', 'POST', { prompt, system_instruction: sys || null });
+    if(res.status === 'success') {
+        log('✅ اكتمل الاستدعاء السحابي بنجاح');
+        let out = 'Mode: ' + res.mode + '\n';
+        if(res.function_calls && res.function_calls.length) {
+            out += 'Bound Function Calls Triggered:\n' + res.function_calls.map(fc => ' 📞 ' + fc).join('\n') + '\n\n';
+        }
+        out += 'Output:\n' + res.output;
+        resBox.textContent = out;
+    } else {
+        log('❌ فشل الاستدعاء السحابي: ' + (res.error || 'خطأ'));
+        resBox.textContent = 'Error:\n' + (res.error || 'Unknown error occurred') + '\n\nFallback Output:\n' + res.output;
+    }
+}
+
+async function deployAgentToCloud() {
+    const agent = document.getElementById('v-deploy-agent').value;
+    if(!agent) return alert('اختر وكيلاً للنشر');
+    
+    log('🚢 جاري تشغيل خط أنابيب بناء الحاويات ونشر الوكيل ' + agent + ' إلى Google Cloud Run...');
+    const resBox = document.getElementById('v-deploy-output');
+    resBox.style.display = 'block';
+    resBox.textContent = '🐳 1. جاري إنشاء Dockerfile مؤقت للوكيل...\n⚙️ 2. جاري تحضير الحاوية السحابية...';
+    
+    const res = await api('/api/vertex/deploy', 'POST', { agent_name: agent });
+    if(res.status === 'success') {
+        log('✅ تم نشر الوكيل ' + agent + ' بنجاح إلى Cloud Run!');
+        resBox.textContent = 'Docker Image: ' + res.image_uri + '\n\nCommand:\n' + res.deploy_command + '\n\nMock Endpoint:\n' + res.url;
+    } else {
+        log('❌ فشل نشر الوكيل: ' + (res.error || 'خطأ'));
+        resBox.textContent = 'Error Deploying Agent:\n' + (res.error || 'Unknown error occurred');
+    }
 }
 
 // ═══ Auto-load ═══

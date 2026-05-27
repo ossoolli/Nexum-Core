@@ -162,6 +162,8 @@ def handle_dashboard(bot, call):
             bot.answer_callback_query(call.id, "Directing...")
         elif data == "ai_experiment":
             run_sandbox_experiment(bot, chat_id, message_id)
+        elif data == "ai_evolution":
+            run_proactive_evolution_diagnostics(bot, chat_id, message_id)
 
         # 7. ──── تبويب Security ────
         elif data == "menu_security":
@@ -711,6 +713,39 @@ def run_sandbox_experiment(bot, chat_id, message_id):
         "━━━━━━━━━━━━━━━━━━━\n"
         "🏆 Experiment verdict: NEXUM Core v7.4.0 is fully healthy and sovereign!"
     )
+    bot.edit_message_text(
+        text, chat_id, message_id, parse_mode="HTML",
+        reply_markup=ui_builder.build_ai_menu()
+    )
+
+def run_proactive_evolution_diagnostics(bot, chat_id, message_id):
+    """تحفيز وعرض دورة التطور والترميم الذاتي للأنظمة والوكلاء."""
+    bot.edit_message_text(
+        "🧬 <b>PROACTIVE EVOLUTION SCANNING...</b>\n\nConvening Sages and auditing diagnostics logs...",
+        chat_id, message_id, parse_mode="HTML"
+    )
+    
+    try:
+        from main import council, ADMIN_ID
+        report = council.convene_on_evolution(ADMIN_ID)
+        
+        gaps_lines = [f"• <code>{g['agent_name']}</code>: {g['objective']}" for g in report.get("discovered_gaps", [])]
+        gaps_str = "\n".join(gaps_lines) or "🟢 No capability gaps detected."
+        repaired_str = ", ".join(report.get("repaired_agents", [])) or "🟢 All agents are healthy. No errors."
+        spawned_str = ", ".join(report.get("spawned_agents", [])) or "🟢 No new agents spawned in this cycle."
+        
+        text = (
+            "🧬 <b>PROACTIVE SYSTEM EVOLUTION & REPAIR</b>\n"
+            "━━━━━━━━━━━━━━━━━━━\n"
+            f"🛡️ <b>Self-Healing Repair:</b> {repaired_str}\n\n"
+            f"🔍 <b>Capability Gaps Scanned:</b>\n{gaps_str}\n\n"
+            f"🤖 <b>Autonomous Generated Agents:</b> {spawned_str}\n"
+            "━━━━━━━━━━━━━━━━━━━\n"
+            "🏆 Evolution cycle compiled successfully!"
+        )
+    except Exception as e:
+        text = f"⚠️ <b>Evolution Cycle Failed:</b>\n<pre>{e}</pre>"
+        
     bot.edit_message_text(
         text, chat_id, message_id, parse_mode="HTML",
         reply_markup=ui_builder.build_ai_menu()

@@ -339,6 +339,151 @@ async def websocket_endpoint(websocket: WebSocket):
 
 
 # ═══════════════════════════════════════
+# Sovereign Evolution & GCP Platform & Protocols
+# ═══════════════════════════════════════
+
+class VertexExecuteRequest(BaseModel):
+    prompt: str
+    system_instruction: Optional[str] = None
+
+class VertexDeployRequest(BaseModel):
+    agent_name: str
+
+class ProtocolCreateRequest(BaseModel):
+    name: str
+    content: str
+
+class ProtocolRunRequest(BaseModel):
+    name: str
+    context: dict = {}
+
+# 1. Self-Evolution Endpoints
+@app.get("/api/evolution/status")
+async def get_evolution_status():
+    history_path = os.path.join(BASE_DIR, "storage", "sovereign_memory", "evolution_history.json")
+    if os.path.exists(history_path):
+        try:
+            with open(history_path, "r", encoding="utf-8") as f:
+                history = json.load(f)
+                if history:
+                    return history[-1]
+        except Exception as e:
+            print(f"⚠️ [Gateway] Error loading evolution history: {e}")
+    
+    return {
+        "timestamp": datetime.now().isoformat(),
+        "scanned_errors": 0,
+        "repaired_agents": [],
+        "discovered_gaps": [],
+        "spawned_agents": [],
+        "status": "nominal"
+    }
+
+@app.post("/api/evolution/trigger")
+async def trigger_evolution():
+    try:
+        from core.learning.evolution_engine import SovereignEvolutionEngine
+        from core.memory.sovereign_memory import SovereignMemory
+        from config_loader import get_config
+        cfg = get_config()
+        admin_id = cfg.admin_id
+        
+        sovereign_memory = SovereignMemory(os.path.join(BASE_DIR, 'storage', 'sovereign_memory'))
+        evolution_engine = SovereignEvolutionEngine(sovereign_memory)
+        
+        report = await asyncio.get_event_loop().run_in_executor(
+            None, evolution_engine.run_diagnostics_and_evolve, admin_id
+        )
+        return {"status": "success", "report": report}
+    except Exception as e:
+        return {"status": "error", "error": str(e)}
+
+# 2. Google Cloud Vertex AI Agent Platform Endpoints
+@app.get("/api/vertex/status")
+async def get_vertex_status():
+    try:
+        from services.vertex_agent_platform import vertex_agent_platform
+        return vertex_agent_platform.get_status()
+    except Exception as e:
+        return {"status": "error", "error": str(e)}
+
+@app.post("/api/vertex/execute")
+async def execute_vertex_prompt(request: VertexExecuteRequest):
+    try:
+        from services.vertex_agent_platform import vertex_agent_platform
+        res = vertex_agent_platform.execute_with_cloud_tools(request.prompt, request.system_instruction)
+        return res
+    except Exception as e:
+        return {"status": "error", "error": str(e)}
+
+@app.post("/api/vertex/deploy")
+async def deploy_agent_vertex(request: VertexDeployRequest):
+    try:
+        from services.vertex_agent_platform import vertex_agent_platform
+        res = vertex_agent_platform.deploy_agent_to_cloud_run(request.agent_name)
+        return res
+    except Exception as e:
+        return {"status": "error", "error": str(e)}
+
+# 3. Protocols Engine Endpoints
+@app.get("/api/protocols/list")
+async def list_protocols():
+    try:
+        protocols_dir = os.path.join(BASE_DIR, "protocols")
+        if not os.path.exists(protocols_dir):
+            return []
+        import yaml
+        files = []
+        for f in os.listdir(protocols_dir):
+            if f.endswith(".yaml") or f.endswith(".yml"):
+                p_path = os.path.join(protocols_dir, f)
+                try:
+                    with open(p_path, "r", encoding="utf-8") as file:
+                        data = yaml.safe_load(file)
+                        files.append({
+                            "name": f.replace(".yaml", "").replace(".yml", ""),
+                            "description": data.get("description", "No description"),
+                            "steps_count": len(data.get("steps", []))
+                        })
+                except Exception:
+                    pass
+        return files
+    except Exception as e:
+        return {"status": "error", "error": str(e)}
+
+@app.post("/api/protocols/create")
+async def create_protocol(request: ProtocolCreateRequest):
+    try:
+        protocols_dir = os.path.join(BASE_DIR, "protocols")
+        os.makedirs(protocols_dir, exist_ok=True)
+        file_path = os.path.join(protocols_dir, f"{request.name}.yaml")
+        
+        # Validate YAML format
+        import yaml
+        yaml.safe_load(request.content)
+        
+        with open(file_path, "w", encoding="utf-8") as f:
+            f.write(request.content)
+        return {"status": "success", "message": f"Protocol {request.name} created successfully"}
+    except Exception as e:
+        return {"status": "error", "error": str(e)}
+
+@app.post("/api/protocols/run")
+async def run_protocol(request: ProtocolRunRequest):
+    try:
+        from nexum.protocols.engine import ProtocolEngine
+        from pathlib import Path
+        protocols_dir = Path(BASE_DIR) / "protocols"
+        engine = ProtocolEngine(protocols_dir)
+        
+        # Run it asynchronously
+        results = await engine.execute(request.name, request.context)
+        return {"status": "success", "results": results}
+    except Exception as e:
+        return {"status": "error", "error": str(e)}
+
+
+# ═══════════════════════════════════════
 # HTML Dashboard
 # ═══════════════════════════════════════
 

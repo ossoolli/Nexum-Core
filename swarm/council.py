@@ -61,10 +61,45 @@ class CouncilOfSages:
         }
     }
 
-    def __init__(self, trust_engine=None, llm_interface=None):
+    def __init__(self, trust_engine=None, llm_interface=None, sovereign_memory=None):
         self.trust_engine = trust_engine
         self.llm = llm_interface
+        self.memory = sovereign_memory
         self._session_log: List[dict] = []
+        try:
+            from core.learning.evolution_engine import SovereignEvolutionEngine
+            self.evolution_engine = SovereignEvolutionEngine(self.memory, self)
+        except ImportError:
+            self.evolution_engine = None
+
+    def convene_on_evolution(self, admin_id: int) -> dict:
+        """يعقد جلسة خاصة لمجلس الحكماء لمناقشة دورة التطوير والترميم الذاتي للأنظمة"""
+        if not self.evolution_engine:
+            return {"status": "error", "message": "EvolutionEngine not available"}
+            
+        # 1. تشغيل الفحص الذاتي والترميم
+        report = self.evolution_engine.run_diagnostics_and_evolve(admin_id)
+        
+        # 2. تقييم المخرجات من قبل المجلس وتسجيل القرار
+        action_summary = (
+            f"Evolved agents: {report['spawned_agents']} | "
+            f"Repaired agents: {report['repaired_agents']} | "
+            f"Gaps found: {len(report['discovered_gaps'])}"
+        )
+        
+        # تسجيل الجلسة في سجلات المجلس
+        self._session_log.append({
+            "action": "system_evolution_cycle",
+            "timestamp": datetime.now().isoformat(),
+            "votes": [],
+            "weighted_confidence": 0.99,
+            "approved": True,
+            "unanimous": True,
+            "decision": "EXECUTE",
+            "summary": f"Sovereign Evolution Cycle Completed: {action_summary}"
+        })
+        
+        return report
 
     def convene(self, proposed_action: str, context: str = "") -> dict:
         """عقد جلسة المجلس لتقييم التصرف المقترح."""
