@@ -1,0 +1,45 @@
+{
+  "boards": {
+    "1676f3c6-7eb5-4cef-8dee-e5bc716203f4": {
+      "name": "Default Board",
+      "tasks": [
+        {
+          "id": "f30a916a-a4aa-4220-b451-51fe9702f38a",
+          "title": "Fix security vulnerabilities",
+          "description": "Implement HMAC keys rotation.",
+          "status": "in_progress",
+          "assignee": null,
+          "comments": [
+            {
+              "user": "Sentinel",
+              "text": "CPU CRITICAL: 87.8% - Investigating high resource usage."
+            }
+          ]
+        },
+        {
+          "id": "b5e86168-1e48-46bf-94fa-00f2e0d7b66e",
+          "title": "Deploy to GCP",
+          "description": "Push latest changes to Google Cloud Run.",
+          "status": "todo",
+          "assignee": null,
+          "comments": []
+        }
+      ],
+      "created_at": "2026-05-29T16:05:15.521884"
+    },
+    "28233628-dfd9-43f4-83e9-437107e0659e": {
+      "name": "System Maintenance",
+      "tasks": [
+        {
+          "id": "23ecfbd6-6293-43ba-8104-ec60161efae8",
+          "title": "Proactive Optimization",
+          "description": "System detected memory or latency patterns in out.log.",
+          "status": "todo",
+          "assignee": null,
+          "comments": []
+        }
+      ],
+      "created_at": "2026-05-29T16:55:03.590586"
+    }
+  }
+}

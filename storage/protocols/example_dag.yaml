@@ -1,0 +1,5 @@
+steps:
+  scan_disk:
+    command: "ls /tmp/Nexum-Core"
+  log_status:
+    command: "echo 'Audit Scan Complete'"

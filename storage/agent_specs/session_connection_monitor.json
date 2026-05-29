@@ -1,0 +1,23 @@
+{
+  "name": "session_connection_monitor",
+  "class_name": "SessionConnectionMonitorAgent",
+  "description": "وكيل سيادي مستقل مولد تلقائياً للقيام بـ: مراقبة وتحليل جلسات الاتصال في الوقت الفعلي، وتحديد الأسباب الدقيقة لفشل عملية المصافحة (Handshake Failure) أو انقطاع الجلسة تلقائياً دون حاجة المستخدم للتشخيص اليدوي.",
+  "tools": [
+    "search_web",
+    "fetch_webpage"
+  ],
+  "triggers": [
+    "every_hour"
+  ],
+  "methods": [
+    "run",
+    "on_trigger",
+    "report"
+  ],
+  "schedule": {
+    "interval": "hourly"
+  },
+  "created_at": "2026-05-29T09:54:08.488541",
+  "status": "BUILT",
+  "path": "/home/madarmutaz/Nexum-Core/agents/generated/session_connection_monitor_agent.py"
+}

@@ -1,3 +1,14 @@
 {
-    "bots": {}
+    "bots": {
+        "telegram_summarizer_bot": {
+            "template": "telegram_summarizer_bot.py",
+            "skill": "summary-config",
+            "enabled": true
+        },
+        "nexum_sentinel": {
+            "template": "nexum_sentinel.py",
+            "skill": "maintenance-config",
+            "enabled": true
+        }
+    }
 }

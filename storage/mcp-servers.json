@@ -1,0 +1,83 @@
+{
+  "mcpServers": {
+    "bigquery": {
+      "command": "npx",
+      "args": ["-y", "@google-cloud/mcp-bigquery"]
+    },
+    "compute": {
+      "command": "npx",
+      "args": ["-y", "@google-cloud/mcp-compute"]
+    },
+    "storage": {
+      "command": "npx",
+      "args": ["-y", "@google-cloud/mcp-storage"]
+    },
+    "logging": {
+      "command": "npx",
+      "args": ["-y", "@google-cloud/mcp-logging"]
+    },
+    "monitoring": {
+      "command": "npx",
+      "args": ["-y", "@google-cloud/mcp-monitoring"]
+    },
+    "vertex-ai": {
+      "command": "npx",
+      "args": ["-y", "@google-cloud/mcp-vertex-ai"]
+    },
+    "run": {
+      "command": "npx",
+      "args": ["-y", "@google-cloud/mcp-run"]
+    },
+    "pubsub": {
+      "command": "npx",
+      "args": ["-y", "@google-cloud/mcp-pubsub"]
+    },
+    "iam": {
+      "command": "npx",
+      "args": ["-y", "@google-cloud/mcp-iam"]
+    },
+    "cloud-functions": {
+      "command": "npx",
+      "args": ["-y", "@google-cloud/mcp-functions"]
+    },
+    "sql": {
+      "command": "npx",
+      "args": ["-y", "@google-cloud/mcp-sql"]
+    },
+    "redis": {
+      "command": "npx",
+      "args": ["-y", "@google-cloud/mcp-redis"]
+    },
+    "gke": {
+      "command": "npx",
+      "args": ["-y", "@google-cloud/mcp-gke"]
+    },
+    "network": {
+      "command": "npx",
+      "args": ["-y", "@google-cloud/mcp-network"]
+    },
+    "dns": {
+      "command": "npx",
+      "args": ["-y", "@google-cloud/mcp-dns"]
+    },
+    "cloud-load-balancing": {
+      "command": "npx",
+      "args": ["-y", "@google-cloud/mcp-load-balancing"]
+    },
+    "cloud-spanner": {
+      "command": "npx",
+      "args": ["-y", "@google-cloud/mcp-spanner"]
+    },
+    "cloud-scheduler": {
+      "command": "npx",
+      "args": ["-y", "@google-cloud/mcp-scheduler"]
+    },
+    "github": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-github"],
+      "env": {
+        "GITHUB_PERSONAL_ACCESS_TOKEN": "${GITHUB_PERSONAL_ACCESS_TOKEN}"
+      }
+    }
+  }
+}

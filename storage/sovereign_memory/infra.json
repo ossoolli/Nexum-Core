@@ -1,0 +1,89 @@
+{
+    "servers": {
+        "hostname": "instance-20260529-065413",
+        "os": "Linux",
+        "arch": "x86_64",
+        "cpu_cores": 2,
+        "ram_gb": 4.1,
+        "disk_gb": 52.6,
+        "python_version": "3.11.2"
+    },
+    "projects": [
+        {
+            "name": "hermes-agent",
+            "path": "/home/madarmutaz/hermes-agent",
+            "type": "Node.js / JavaScript"
+        },
+        {
+            "name": "Nexum-Core",
+            "path": "/home/madarmutaz/Nexum-Core",
+            "type": "Python"
+        },
+        {
+            "name": "Nexum-Core",
+            "path": "/home/madarmutaz/Nexum-Core/Nexum-Core",
+            "type": "Python"
+        }
+    ],
+    "priorities": [],
+    "custom_delegation_rules": [],
+    "trust_matrix": {
+        "system_monitoring": {
+            "level": 0,
+            "score": 0.0,
+            "total_actions": 0,
+            "successful": 0,
+            "failed": 0,
+            "user_overrides": 0,
+            "history": []
+        },
+        "file_management": {
+            "level": 0,
+            "score": 0.0,
+            "total_actions": 0,
+            "successful": 0,
+            "failed": 0,
+            "user_overrides": 0,
+            "history": []
+        },
+        "service_control": {
+            "level": 0,
+            "score": 0.0,
+            "total_actions": 0,
+            "successful": 0,
+            "failed": 0,
+            "user_overrides": 0,
+            "history": []
+        },
+        "code_operations": {
+            "level": 0,
+            "score": 0.0,
+            "total_actions": 0,
+            "successful": 0,
+            "failed": 0,
+            "user_overrides": 0,
+            "history": []
+        },
+        "security_actions": {
+            "level": 0,
+            "score": 0.0,
+            "total_actions": 0,
+            "successful": 0,
+            "failed": 0,
+            "user_overrides": 0,
+            "history": []
+        },
+        "infrastructure": {
+            "level": 0,
+            "score": 0.0,
+            "total_actions": 0,
+            "successful": 0,
+            "failed": 0,
+            "user_overrides": 0,
+            "history": []
+        }
+    },
+    "experience_pool": [],
+    "discovered_patterns": [],
+    "last_updated": "2026-05-29T16:21:58.545072"
+}

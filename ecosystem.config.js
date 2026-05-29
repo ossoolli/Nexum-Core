@@ -28,6 +28,18 @@ module.exports = {
       log_date_format: 'YYYY-MM-DD HH:mm:ss Z',
       error_file: 'storage/logs/api_err.log',
       out_file: 'storage/logs/api_out.log'
+    },
+    {
+      name: 'nexum-sentinel',
+      script: 'agents/nexum_sentinel.py',
+      interpreter: 'python3',
+      watch: false,
+      env: {
+        PYTHONUNBUFFERED: '1'
+      },
+      log_date_format: 'YYYY-MM-DD HH:mm:ss Z',
+      error_file: 'storage/logs/sentinel.log',
+      out_file: 'storage/logs/sentinel.log'
     }
   ]
 };

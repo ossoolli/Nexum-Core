@@ -1,0 +1,23 @@
+{
+  "name": "agent_platform_debugger",
+  "class_name": "AgentPlatformDebuggerAgent",
+  "description": "وكيل سيادي مستقل مولد تلقائياً للقيام بـ: Actively test, validate, and monitor the connection status of agent platform API keys, diagnose session handshake failures in real-time, and alert the user of authentication or quota exhaustion issues.",
+  "tools": [
+    "search_web",
+    "fetch_webpage"
+  ],
+  "triggers": [
+    "every_hour"
+  ],
+  "methods": [
+    "run",
+    "on_trigger",
+    "report"
+  ],
+  "schedule": {
+    "interval": "hourly"
+  },
+  "created_at": "2026-05-29T12:46:04.427271",
+  "status": "BUILT",
+  "path": "/home/madarmutaz/Nexum-Core/agents/generated/agent_platform_debugger_agent.py"
+}

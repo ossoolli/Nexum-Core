@@ -67,6 +67,14 @@ try:
 except ImportError:
     monitor_agent = None
 
+try:
+    from nexum.inspection.engine import perform_inspection, init_inspection_system
+    _INSPECTION_AVAILABLE = True
+except ImportError:
+    perform_inspection = None
+    init_inspection_system = None
+    _INSPECTION_AVAILABLE = False
+
 
 # ═══════════════════════════════════════
 # Pydantic Models
@@ -127,6 +135,13 @@ async def startup_event():
             asyncio.create_task(runtime_kernel.start())
         except Exception:
             pass
+
+    if _INSPECTION_AVAILABLE:
+        try:
+            init_inspection_system()
+        except Exception as e:
+            print(f"⚠️ [Gateway] Failed to initialize inspection system: {e}")
+    
     print("🔱 [Gateway] NEXUM API v5.0 — Online.")
 
 
@@ -146,8 +161,16 @@ async def health_check():
             "bot_fleet": bot_fleet is not None,
             "channel_manager": channel_manager is not None,
             "runtime": _RUNTIME_AVAILABLE,
+            "inspection": _INSPECTION_AVAILABLE,
         }
     }
+
+@app.post("/api/inspection/perform")
+async def perform_system_inspection(target: str):
+    if not perform_inspection:
+        return {"error": "Inspection system not available"}
+    result = perform_inspection(target)
+    return {"status": "success", "result": result}
 
 @app.get("/api/status")
 async def system_status():

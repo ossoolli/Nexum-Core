@@ -1,0 +1,28 @@
+import sqlite3
+
+def create_system_memory_index():
+    db_path = "/home/madarmutaz/.hermes/state.db"
+    conn = sqlite3.connect(db_path)
+    cursor = conn.cursor()
+    
+    # Create the card in the memory store
+    index_summary = """
+    # System Memory Index - Nexum-Core
+    
+    This memory contains indexed project files, documentation, and logs to provide context-aware recall for the Nexum-Core agent.
+    
+    - Workspace: /home/madarmutaz/Nexum-Core
+    - Core Logic: /core/ and /nexum/ directories
+    - Documentation: /docs/ and README.md
+    - Memory Engine: FTS5 integrated via SovereignMemory
+    - Logs: /storage/logs/ (evolution.log tracks indexing history)
+    """
+    
+    cursor.execute("INSERT OR REPLACE INTO memory (key, content) VALUES (?, ?)", 
+                   ("system_memory_index", index_summary))
+    conn.commit()
+    conn.close()
+    print("System Memory Index card created.")
+
+if __name__ == "__main__":
+    create_system_memory_index()

@@ -60,5 +60,39 @@
         ],
         "status": "active",
         "created_at": "2026-05-18T09:25:36.778427"
+    },
+    "session_connection_monitor": {
+        "agent_id": "session_connection_monitor",
+        "name": "session_connection_monitor",
+        "role": "Generated Agent",
+        "capabilities": [
+            "run"
+        ],
+        "tools": [],
+        "protocols": [],
+        "restrictions": [],
+        "awareness": {
+            "last_event_seen": null,
+            "current_memory_context": null
+        },
+        "status": "active",
+        "created_at": "2026-05-29T09:54:25.206767"
+    },
+    "agent_platform_debugger": {
+        "agent_id": "agent_platform_debugger",
+        "name": "agent_platform_debugger",
+        "role": "Generated Agent",
+        "capabilities": [
+            "run"
+        ],
+        "tools": [],
+        "protocols": [],
+        "restrictions": [],
+        "awareness": {
+            "last_event_seen": null,
+            "current_memory_context": null
+        },
+        "status": "active",
+        "created_at": "2026-05-29T12:46:19.101040"
     }
 }

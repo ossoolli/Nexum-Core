@@ -20,6 +20,9 @@ from datetime import datetime
 import telebot
 from config_loader import get_config
 from core.bot_utils import bot_error_handler
+from nexum.gateway.manager import GatewayManager
+from nexum.gateway.platforms.telegram_adapter import TelegramAdapter
+from nexum.interfaces.telegram.runner import TelegramRunner
 
 # ─── 2. الخدمات المركزية ───
 from services.gemini_service import gemini_service
@@ -112,12 +115,20 @@ except RuntimeError as e:
     sys.exit(1)
 
 bot = telebot.TeleBot(cfg.telegram_token)
+gateway_manager = GatewayManager()
+telegram_adapter = TelegramAdapter(bot, TelegramRunner(bot))
+gateway_manager.register_adapter(telegram_adapter)
+
 ui_builder = SovereignUIBuilder()
 ADMIN_ID = cfg.admin_id
 
 # ربط البوت بمحرك الثقة للإشعارات
 trust_engine.bot = bot
 bot._admin_id = ADMIN_ID
+
+# [Start Gateway]
+# Note: This would typically be called after defining all handlers
+# gateway_manager.run_all()
 
 
 # ═══════════════════════════════════════════════════════
@@ -217,6 +228,14 @@ def handle_gemini_status(message):
     for m in models:
         lines.append(f"  - {m}")
     bot.send_message(message.chat.id, "\n".join(lines), parse_mode="HTML")
+
+@bot.message_handler(commands=['recall'])
+@bot_error_handler
+def recall_memory_cmd(message):
+    """استدعاء ذاكرة Nexum: /recall الاستعلام."""
+    from nexum.memory.recall_engine import recall_memory
+    query = message.text.replace("/recall", "").strip()
+    bot.reply_to(message, recall_memory(query))
 
 
 @bot.message_handler(commands=['imagine'])
@@ -1203,4 +1222,9 @@ if __name__ == "__main__":
         print(f"⚠️ [Sentinel Init Error] {e}")
 
     # ─── تشغيل البوت ───
+    # Open Sovereignty Development Mode: Auto-trigger sec_open on startup
+    print("🔓 [Security] Forcing Open Mode for Development.")
+    from core.terminal_controller import terminal_controller
+    terminal_controller.lockdown_mode = False
+    
     bot.infinity_polling(timeout=60, long_polling_timeout=30)
