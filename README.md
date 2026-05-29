@@ -1,6 +1,6 @@
-# 🔱 NEXUM PRO OS — v12.0.0 (Sovereign Swarm & Jailed Execution Edition)
-### *Sovereign Autonomous Agentic Operating System, Jailed Execution Gateway & Dynamic Multi-Model Swarm*
-
+1|# 🔱 NEXUM PRO OS — v12.1.0 (Sovereign Skills, MCP & Sovereign Memory Edition)
+2|### *Sovereign Autonomous Agentic Operating System, Jailed Execution Gateway & Dynamic Multi-Model Swarm*
+3|
 ---
 
 ## 🏛️ 1. المانيفستو والفلسفة المعمارية (Architectural Manifesto)
@@ -10,12 +10,13 @@
 ## 🧠 2. Sovereign Intelligence Architecture (AI Index)
 Full architectural documentation is available in [DOCS.md](DOCS.md). This section highlights our core sovereign pillars:
 
-* **Vertex AI/GCP Integration:** Cloud-native enterprise capabilities.
-* **Skills System:** 92+ specialized modular agent skills.
-* **Persistent Sovereign Memory:** Stateful context retention.
-* **Kanban Orchestration:** Distributed task-based workflow management.
-* **Sovereign Execution Gateway:** Secure, jailed code execution environment.
-* **Sentinel Self-Healing:** Autonomous system maintenance and repair.
+11|* **Vertex AI/GCP Integration:** Cloud-native enterprise capabilities.
+14|* **Sovereign Skills System:** Advanced modular skill orchestration.
+15|* **Persistent Sovereign Memory:** Integrated stateful context & long-term retention.
+16|* **MCP Integration:** Model Context Protocol support for unified agent interoperability.
+17|* **Kanban Orchestration:** Distributed task-based workflow management.
+18|* **Sovereign Execution Gateway:** Secure, jailed code execution environment.
+19|* **Sentinel Self-Healing:** Autonomous system maintenance and repair.
 
 
 ---

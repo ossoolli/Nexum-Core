@@ -215,6 +215,11 @@ def handle_dashboard(bot, call):
             bot.answer_callback_query(call.id, "🧹 Long-term chat context cleared successfully!", show_alert=True)
         elif data == "mem_clear_logs":
             clear_system_log_files(bot, call, chat_id, message_id)
+        elif data == "mem_reindex":
+            import subprocess
+            subprocess.run(["python3", "/home/madarmutaz/Nexum-Core/index_all_logs_and_docs.py"], env={"PYTHONPATH": "/home/madarmutaz/Nexum-Core/"})
+            bot.answer_callback_query(call.id, "🔄 Indexing completed!", show_alert=True)
+            show_memory_hub(bot, chat_id, message_id)
         elif data == "mem_sync":
             bot.answer_callback_query(call.id, "☁️ Cloud Storage Sync initiated dynamically.", show_alert=True)
         elif data == "mem_export":
