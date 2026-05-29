@@ -7,6 +7,17 @@
 
 مشروع **Nexum Pro** هو نظام تشغيل سيادي قائم على الوكلاء المستقلين (**Agentic OS**)، تم ابتكاره وتطويره ليعمل كـ "مايسترو للبنية التحتية الذكية". تندمج فيه استقلالية القرار المعرفي للذكاء الاصطناعي مع آليات الحماية الأمنية المتقدمة لبيئات العمل المحلية والسحابية، مما يضمن استمرارية التشغيل التلقائي بالكامل (**Zero-Fault Tolerance**) والترميم البرمجي الذاتي للتكيف المستمر مع الاحتياجات الفنية ودون الحاجة لتدخل بشري مستمر.
 
+## 🧠 2. Sovereign Intelligence Architecture (AI Index)
+Full architectural documentation is available in [DOCS.md](DOCS.md). This section highlights our core sovereign pillars:
+
+* **Vertex AI/GCP Integration:** Cloud-native enterprise capabilities.
+* **Skills System:** 92+ specialized modular agent skills.
+* **Persistent Sovereign Memory:** Stateful context retention.
+* **Kanban Orchestration:** Distributed task-based workflow management.
+* **Sovereign Execution Gateway:** Secure, jailed code execution environment.
+* **Sentinel Self-Healing:** Autonomous system maintenance and repair.
+
+
 ---
 
 ## ⚡ 2. الميزات والقدرات السيادية الجديدة (Core Advanced Capabilities)
