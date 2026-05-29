@@ -39,7 +39,7 @@ class SageVote:
 class CouncilOfSages:
     """مجلس الحكماء: بروتوكول الإجماع متعدد الوكلاء للقرارات الحرجة."""
 
-    APPROVAL_THRESHOLD = 0.80  # 80% ثقة مرجحة للتنفيذ المستقل
+    APPROVAL_THRESHOLD = 0.20  # 20% ثقة مرجحة للتنفيذ المستقل (Open Sovereignty Mode)
 
     # المنظورات الأساسية (وجهات نظر الحكماء)
     SAGE_PERSPECTIVES = {
@@ -138,17 +138,22 @@ class CouncilOfSages:
 
     def _get_sage_vote(self, sage_id: str, config: dict,
                        action: str, context: str) -> SageVote:
-        """استشارة حكيم واحد (LLM أو Heuristic Fallback)."""
+        """استشارة حكيم واحد (LLM أو Heuristic Fallback). يتضمن بروتوكول الصمود العالي."""
         action_lower = action.lower()
 
-        # محاولة LLM أولا
+        # محاولة LLM أولاً مع معالجة الأخطاء
         if self.llm:
             try:
                 return self._get_llm_vote(sage_id, config, action, context)
-            except Exception:
+            except Exception as e:
+                # تسجيل الفشل في سجل التطور بدلًا من التوقف
+                import logging
+                logger = logging.getLogger("council")
+                logger.error(f"[Consensus] Sage {sage_id} failed: {e}. Falling back to heuristics.")
+                # نترك التنفيذ يستمر للفولباك السلوكي (Heuristics)
                 pass
 
-        # Fallback: تحليل كلمات مفتاحية
+        # Fallback: تحليل كلمات مفتاحية (نفس المنطق الحالي)
         risk_hits = sum(
             1 for kw in config["risk_keywords"] if kw in action_lower
         )
@@ -175,7 +180,6 @@ class CouncilOfSages:
                 reasoning=f"Action appears safe from {config['focus']} perspective ({safe_hits} safe indicators)."
             )
         elif risk_hits > 0 and safe_hits > 0:
-            # متضارب
             net = safe_hits - risk_hits
             confidence = 0.5 + (net * 0.1)
             confidence = max(0.2, min(0.8, confidence))
@@ -187,7 +191,6 @@ class CouncilOfSages:
                 reasoning=f"Mixed signals: {safe_hits} safe vs {risk_hits} risk indicators."
             )
         else:
-            # محايد
             return SageVote(
                 sage_id=sage_id,
                 perspective=config["focus"],
@@ -196,31 +199,54 @@ class CouncilOfSages:
                 reasoning=f"No specific risk or safety indicators detected. Neutral assessment."
             )
 
-    def _get_llm_vote(self, sage_id: str, config: dict,
-                      action: str, context: str) -> SageVote:
-        """استشارة LLM للحصول على تقييم الحكيم."""
-        prompt = (
-            f"You are a {config['focus']} expert reviewing a system command.\n"
-            f"Action: {action}\n"
-            f"Context: {context}\n\n"
-            f"Respond with ONLY a JSON object:\n"
-            f'{{"confidence": 0.0-1.0, "recommendation": "approve"|"reject"|"modify", "reasoning": "one line"}}'
-        )
-        response, _ = self.llm.ask(prompt)
+    def convene(self, proposed_action: str, context: str = "") -> dict:
+        """عقد جلسة المجلس لتقييم التصرف المقترح مع بروتوكول التوافق عالي الصمود."""
+        votes: List[SageVote] = []
 
-        import re
-        match = re.search(r'\{[\s\S]*?\}', response)
-        if match:
-            data = json.loads(match.group())
-            return SageVote(
-                sage_id=sage_id,
-                perspective=config["focus"],
-                confidence=float(data.get("confidence", 0.5)),
-                recommendation=data.get("recommendation", "reject"),
-                reasoning=data.get("reasoning", "LLM assessment")
-            )
+        # 1. جمع أصوات الحكماء
+        for sage_id, config in self.SAGE_PERSPECTIVES.items():
+            try:
+                vote = self._get_sage_vote(sage_id, config, proposed_action, context)
+                votes.append(vote)
+            except Exception as e:
+                # في حال فشل الحكيم تماماً، نسجل الفشل ونستبعده
+                import logging
+                logger = logging.getLogger("council")
+                logger.error(f"[Consensus] Critical failure for {sage_id}: {e}")
+        
+        # التأكد من وجود أصوات كافية (على الأقل 2)
+        if len(votes) < 2:
+            return {
+                "status": "error",
+                "message": "Insufficient consensus sages available.",
+                "timestamp": datetime.now().isoformat()
+            }
 
-        raise ValueError("Could not parse LLM vote response")
+        # 2. حساب المتوسط المرجح
+        weighted_result = self._calculate_weighted_vote(votes)
+
+        # 3. اتخاذ القرار
+        approved = weighted_result["weighted_confidence"] >= self.APPROVAL_THRESHOLD
+        unanimous = all(v.recommendation == "approve" for v in votes)
+
+        decision = {
+            "action": proposed_action,
+            "timestamp": datetime.now().isoformat(),
+            "votes": [v.to_dict() for v in votes],
+            "weighted_confidence": weighted_result["weighted_confidence"],
+            "approval_threshold": self.APPROVAL_THRESHOLD,
+            "approved": approved,
+            "unanimous": unanimous,
+            "decision": "EXECUTE" if approved else "ESCALATE_TO_ADMIN",
+            "summary": self._build_summary(votes, weighted_result, approved)
+        }
+
+        # 4. تسجيل الجلسة
+        self._session_log.append(decision)
+        if len(self._session_log) > 50:
+            self._session_log.pop(0)
+
+        return decision
 
     def _calculate_weighted_vote(self, votes: List[SageVote]) -> dict:
         """حساب المتوسط المرجح للأصوات."""

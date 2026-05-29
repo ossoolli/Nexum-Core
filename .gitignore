@@ -1,62 +1,8 @@
-# 🔱 NEXUM CORE - Git Ignore Rules
-# ================================
-
-# Environment Variables (CRITICAL)
-.env
-.env.local
-credentials.txt
-credentials.env
-keys.env
-config.local.js
-
-# Python Cache
+venv/
+.env*
+storage/gcp_key.json
+storage/.sovereign_key
+*.db
 __pycache__/
-*.py[cod]
-*$py.class
-*.so
-.Python
-env/
-build/
-develop-eggs/
-dist/
-downloads/
-eggs/
-.eggs/
-lib/
-lib64/
-parts/
-sdist/
-var/
-wheels/
-*.egg-info/
-.installed.cfg
-*.egg
-
-# Storage & Runtime Logs
-storage/logs/*
-storage/temp/*
-storage/memory/*
-storage/exports/*
-storage/sovereign_memory/
-registry/system_memory.json
-registry/apps/*
-registry/bots/*
-registry/agents/*
-!storage/logs/.gitkeep
-!storage/memory/.gitkeep
-!registry/apps/.gitkeep
-
-# OS Files
+*.pyc
 .DS_Store
-Thumbs.db
-desktop.ini
-
-# IDES
-.vscode/
-.idea/
-*.swp
-*.swo
-
-# Go / Compiled Binaries
-*.exe
-coordinator

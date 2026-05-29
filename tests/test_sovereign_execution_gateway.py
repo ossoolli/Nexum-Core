@@ -7,6 +7,8 @@ tests/test_sovereign_execution_gateway.py
 """
 
 import os
+os.environ["SOVEREIGN_HMAC_KEY"] = "test_secure_hmac_key_for_unit_testing_1234567890"
+
 import json
 import unittest
 from unittest.mock import patch, MagicMock

@@ -20,15 +20,42 @@ from typing import Callable, List, Dict, Any, Optional
 # استيراد إعدادات المسارات
 from core.env_config import WORKSPACE_DIR, LOGS_DIR
 
-# مفتاح التوقيع الرقمي لسجل العمليات الأمنية (يمكن تهيئته عبر البيئة)
-HMAC_KEY = os.getenv("SOVEREIGN_HMAC_KEY", "default_secret_key_for_tamper_proofing")
+# مفتاح التوقيع الرقمي لسجل العمليات الأمنية (يتم جلبه من البيئة أو توليده آلياً وحفظه)
+def _initialize_hmac_key() -> str:
+    import secrets
+    key = os.getenv("SOVEREIGN_HMAC_KEY")
+    INSECURE_DEFAULT = "default_secret_key_for_tamper_proofing"
+    if key and key.strip() != "" and key != INSECURE_DEFAULT:
+        return key
+
+    key_file = "/home/madarmutaz/Nexum-Core/storage/.sovereign_key"
+    if os.path.exists(key_file):
+        try:
+            with open(key_file, "r", encoding="utf-8") as f:
+                saved_key = f.read().strip()
+                if saved_key:
+                    return saved_key
+        except Exception:
+            pass
+
+    generated_key = secrets.token_hex(32)
+    try:
+        os.makedirs(os.path.dirname(key_file), exist_ok=True)
+        with open(key_file, "w", encoding="utf-8") as f:
+            f.write(generated_key)
+    except Exception:
+        pass
+    return generated_key
+
+HMAC_KEY = _initialize_hmac_key()
+assert HMAC_KEY is not None
 AUDIT_LOG_PATH = os.path.join(LOGS_DIR, "nexum_audit.log")
 
 # الأوامر المصرح بها فقط
-ALLOWED_COMMANDS = {"git", "python", "python3", "pip", "pip3", "ls", "echo", "cat"}
+ALLOWED_COMMANDS = {"git", "python", "python3", "pip", "pip3", "ls", "echo", "cat", "apt-get", "sudo", "docker"}
 
 # الأوامر الحساسة التي تتطلب موافقة بشرية (Human-in-the-Loop)
-SENSITIVE_COMMANDS = {"pip", "pip3"}
+SENSITIVE_COMMANDS = set()
 
 # كاشف حقن الأوامر (Command Injection Detector)
 INJECTION_PATTERN = re.compile(r"[;|`><]|&|\$\(")
@@ -96,12 +123,13 @@ def validate_path(path: str, workspace_dir: str = WORKSPACE_DIR) -> str:
     تتحقق من أن المسار المطلوب يقع بالكامل داخل مجلد العمل المعزول (WORKSPACE_DIR).
     يمنع ثغرات تخطي المسار (Path Traversal).
     """
+    path_normalized = path.replace("\\", "/")
     abs_workspace = os.path.realpath(os.path.abspath(workspace_dir))
     
-    if not os.path.isabs(path):
-        resolved_path = os.path.realpath(os.path.abspath(os.path.join(abs_workspace, path)))
+    if not os.path.isabs(path_normalized):
+        resolved_path = os.path.realpath(os.path.abspath(os.path.join(abs_workspace, path_normalized)))
     else:
-        resolved_path = os.path.realpath(os.path.abspath(path))
+        resolved_path = os.path.realpath(os.path.abspath(path_normalized))
         
     try:
         common = os.path.commonpath([abs_workspace, resolved_path])

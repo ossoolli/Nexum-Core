@@ -21,6 +21,7 @@ sys.path.insert(0, BASE_DIR)
 
 from services.gemini_service import gemini_service
 from core.agent_registry import agent_registry
+from core.learning.curator import Curator
 
 logger = logging.getLogger(__name__)
 
@@ -28,6 +29,7 @@ class SovereignEvolutionEngine:
     def __init__(self, sovereign_memory=None, council=None):
         self.memory = sovereign_memory
         self.council = council
+        self.curator = Curator(council=council)
         self.evolution_log_path = os.path.join(BASE_DIR, "storage", "logs", "evolution.log")
         os.makedirs(os.path.dirname(self.evolution_log_path), exist_ok=True)
 
@@ -45,13 +47,14 @@ class SovereignEvolutionEngine:
     def run_diagnostics_and_evolve(self, admin_id: int) -> dict:
         """تشغيل دورة الفحص الشاملة والتطوير الذاتي"""
         self.log_evolution("Starting autonomous diagnostics and evolution cycle...")
-        
+
         report = {
             "timestamp": datetime.now().isoformat(),
             "scanned_errors": 0,
             "repaired_agents": [],
             "discovered_gaps": [],
             "spawned_agents": [],
+            "distilled_skills": [],
             "status": "nominal"
         }
 
@@ -78,6 +81,24 @@ class SovereignEvolutionEngine:
                     self.log_evolution(f"Autonomously synthesized and registered agent: {spawned}")
         except Exception as e:
             self.log_evolution(f"Capability evolution error: {e}", level="ERROR")
+
+        # 2.5 ──── تقطير المهارات (Skill Distillation) ────
+        try:
+            from nexum.kanban.orchestrator import KanbanOrchestrator
+            kanban = KanbanOrchestrator()
+            # Assuming board ID is static or manageable
+            # Let's list boards or tasks first if needed.
+            # For now, let's iterate and find successful tasks across all boards
+            for board_id in kanban.data["boards"]:
+                tasks = kanban.list_tasks(board_id)
+                for task in tasks:
+                    if task.get("status") == "done":
+                        skill_path = asyncio.run(self.curator.distill_task(task))
+                        if skill_path:
+                            report["distilled_skills"].append(skill_path)
+                            self.log_evolution(f"Distilled new skill: {skill_path}")
+        except Exception as e:
+            self.log_evolution(f"Skill distillation error: {e}", level="ERROR")
 
         # 3. ──── حفظ تقرير التطور ────
         try:
@@ -183,6 +204,8 @@ class SovereignEvolutionEngine:
                 with open(agent_file, "w", encoding="utf-8") as f:
                     f.write(repaired_code)
                 self.log_evolution(f"🛡️ Successfully patched agent file: {agent_file}")
+                from nexum.kanban.sentinel_integration import sync_sentinel_to_kanban
+                sync_sentinel_to_kanban(f"{agent_name}_repair", "SUCCESS", "Autonomously repaired.")
                 repaired_names.append(agent_name)
             except Exception as e:
                 self.log_evolution(f"❌ Failed to write patch for {agent_name}: {e}", level="ERROR")

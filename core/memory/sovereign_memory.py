@@ -11,23 +11,33 @@ import os
 import json
 from datetime import datetime
 from typing import Any
-
+from nexum.memory.store import SovereignMemoryStore
 from core.memory.components import InfrastructureMap, DecisionMemory, MissionLog
-
 
 class SovereignMemory:
     """
     المحرك الرئيسي والواجهة الموحدة للذاكرة السيادية المزامنة مع النواة.
-    تجمع: خرائط البنية التحتية + أنماط القرارات + سجل المأموريات.
+    تجمع: خرائط البنية التحتية + أنماط القرارات + سجل المأموريات + نظام البحث الذكي (SQLite/FTS5).
     """
 
-    def __init__(self, base_path: str = "storage/sovereign_memory"):
+    def __init__(self, base_path: str = "storage/sovereign_memory", shared_path: str = "storage/shared_memory"):
         self.base_path = base_path
+        self.shared_path = shared_path
         os.makedirs(self.base_path, exist_ok=True)
+        os.makedirs(self.shared_path, exist_ok=True)
 
         self.infrastructure = InfrastructureMap(os.path.join(base_path, "infra.json"))
         self.decisions = DecisionMemory(os.path.join(base_path, "decisions.json"))
         self.missions = MissionLog(os.path.join(base_path, "missions.json"))
+        self.store = SovereignMemoryStore(os.path.join(base_path, "memory.db"))
+
+    def add_memory(self, role: str, content: str):
+        """إضافة ذكرى جديدة لنظام البحث الذكي."""
+        self.store.add_memory(role, content)
+
+    def search_memory(self, query: str):
+        """البحث في الذكريات باستخدام FTS5."""
+        return self.store.search_memory(query)
 
     def get_full_context(self) -> str:
         """توليد النص السياقي الشامل لحقنه في تعليمات الـ LLM."""

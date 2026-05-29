@@ -15,6 +15,8 @@ import json
 import time
 from typing import Dict, Any, List, Optional
 
+from nexum.cloud.mcp_dispatcher import MCPDispatcher
+from nexum.intelligence.orchestrator import Orchestrator
 # إعداد السجل المهيكل للبيئة السحابية
 logger = logging.getLogger("nexum.agent_platform_connector")
 
@@ -26,9 +28,15 @@ try:
     from google.cloud import dialogflowcx_v3 as dialogflow
     from google.cloud import discoveryengine_v1beta as discoveryengine
     GCP_LIBS_AVAILABLE = True
-except ImportError as e:
-    logger.warning(f"[GCP Connector] Google Cloud SDK libraries not fully installed. Falling back to simulated mode. Details: {e}")
+except Exception as e:
+    # تهيئة المتغيرات لضمان عدم حدوث NameError أثناء التشغيل في وضع المحاكاة
+    service_account = None
+    ClientOptions = None
+    GoogleAPICallError = None
+    dialogflow = None
+    discoveryengine = None
     GCP_LIBS_AVAILABLE = False
+    logger.info(f"[GCP Connector] Google Cloud SDK not fully installed ({type(e).__name__}). Falling back to simulated mode seamlessly.")
 
 
 class NexumSecurityConfig:
@@ -91,13 +99,30 @@ class DialogflowCXConnector:
             logger.info("[Dialogflow CX] Operating in simulation mode (client offline).")
             return
         try:
+            # التأكد من تحميل ملف الاعتمادات السحابية إذا كان متوفراً
+            creds_path = os.getenv("GOOGLE_APPLICATION_CREDENTIALS")
+            if creds_path and os.path.exists(creds_path):
+                os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = creds_path
+            
+            # قراءة خوادم MCP المحددة في الملف
+            mcp_config_path = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))), "storage", "mcp-servers.json")
+            if os.path.exists(mcp_config_path):
+                with open(mcp_config_path, 'r') as f:
+                    mcp_config = json.load(f)
+                    self.mcp_servers = mcp_config.get("mcpServers", {})
+                    logger.info(f"✅ Loaded {len(self.mcp_servers)} MCP Servers for Google Cloud.")
+            
             # تهيئة عميل الجلسات وتحديد خادم النطاق الجغرافي
             api_endpoint = f"{self.config.location}-dialogflow.googleapis.com"
             client_options = ClientOptions(api_endpoint=api_endpoint)
+            # استخدام المفتاح المصرح به ديناميكياً
             self.client = dialogflow.SessionsClient(
                 credentials=self.config.credentials,
                 client_options=client_options
             )
+            # إيقاف وضع المحاكاة عند وجود المفتاح
+            self.is_simulated = False
+            logger.info("✅ Google Cloud Vertex AI Connected Successfully.")
             logger.info(f"[Dialogflow CX] SessionsClient initialized successfully for location: {self.config.location}")
         except Exception as e:
             logger.error(f"[Dialogflow CX] Initialization failed: {e}")
@@ -313,6 +338,7 @@ class GoogleAgentPlatformConnector:
         agent_id: str = "agent-platform-cx-99",
         search_engine_id: str = "knowledge-rag-engine"
     ):
+        self.mcp_dispatcher = MCPDispatcher()
         self.config = NexumSecurityConfig(
             service_account_path=service_account_path,
             project_id=project_id,
@@ -322,6 +348,7 @@ class GoogleAgentPlatformConnector:
         )
         self.dialogflow = DialogflowCXConnector(self.config)
         self.search = DiscoveryEngineConnector(self.config)
+        self.orchestrator = Orchestrator(self.config)
         
         logger.info("[GCP Gateway] GoogleAgentPlatformConnector initiated cleanly.")
 
@@ -336,6 +363,12 @@ class GoogleAgentPlatformConnector:
         
         # 1. تحليل المقصد
         dialog_res = self.dialogflow.detect_intent(user_prompt, session_id=session_id)
+        
+        # Route the task
+        model = self.orchestrator.route_task(user_prompt)
+        
+        # Dispatch to MCP if needed
+        mcp_task = self.mcp_dispatcher.find_relevant_mcp_server(user_prompt)
         
         # 2. جلب سياق المعرفة (RAG)
         search_res = self.search.search_knowledge(user_prompt)
@@ -353,6 +386,8 @@ class GoogleAgentPlatformConnector:
             "detected_intent": dialog_res.get("intent_name", ""),
             "confidence": dialog_res.get("confidence", 0.0),
             "parameters": dialog_res.get("parameters", {}),
+            "mcp_task": mcp_task,
+            "model_assigned": model,
             "rag_knowledge_context": merged_snippets,
             "gcp_connected": dialog_res.get("status") == "success",
             "timestamp": time.time()

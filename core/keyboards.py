@@ -18,7 +18,7 @@ class SovereignUIBuilder:
         self.webapp_url = os.getenv("WEBAPP_URL", "https://ossoolli.github.io/Nexum-Core/webapp/")
 
     # ╔══════════════════════════════════════════╗
-    # ║         الشاشة الرئيسية (Home)          ║
+    # ║         الشاشة الرئيسية (الرئيسية)        ║
     # ╚══════════════════════════════════════════╝
     def build_main_control_plane(self) -> InlineKeyboardMarkup:
         """القائمة الرئيسية — 9 أقسام تفاعلية"""
@@ -26,120 +26,128 @@ class SovereignUIBuilder:
 
         # زر Mini App العلوي
         m.add(InlineKeyboardButton(
-            "🎛️ Open Sovereign Dashboard",
+            "🎛️ لوحة التحكم السيادية",
             web_app=WebAppInfo(url=self.webapp_url)
         ))
 
         # الصف الأول: Runtime + Agents
         m.row(
-            InlineKeyboardButton("⚡ Runtime", callback_data="menu_runtime"),
-            InlineKeyboardButton("🤖 Agents", callback_data="menu_agents")
-        )
-        # الصف الثاني: Protocols + Deployments
-        m.row(
-            InlineKeyboardButton("🧬 Protocols", callback_data="menu_protocols"),
-            InlineKeyboardButton("🚀 Deployments", callback_data="menu_deploy")
-        )
-        # الصف الثالث: AI + Security
-        m.row(
-            InlineKeyboardButton("🧠 AI Brain", callback_data="menu_ai"),
-            InlineKeyboardButton("🛡️ Security", callback_data="menu_security")
-        )
-        # الصف الرابع: Memory + Docker
-        m.row(
-            InlineKeyboardButton("💾 Memory", callback_data="menu_memory"),
-            InlineKeyboardButton("🐳 Docker", callback_data="menu_docker")
-        )
-        # الصف الخامس: Settings + Audit Logs
-        m.row(
-            InlineKeyboardButton("⚙️ Settings", callback_data="menu_settings"),
-            InlineKeyboardButton("📋 Audit Logs", callback_data="audit_logs")
-        )
-        # الصف السادس: Google Cloud (جديد) 🔱
-        m.add(InlineKeyboardButton("☁️ Google Cloud", callback_data="menu_cloud"))
-        return m
+            # زر Mini App العلوي
+            m.add(InlineKeyboardButton(
+                "🎛️ فتح لوحة التحكم السيادية",
+                web_app=WebAppInfo(url=self.webapp_url)
+            ))
 
-    # ╔══════════════════════════════════════════╗
-    # ║         قائمة Runtime الفرعية           ║
-    # ╚══════════════════════════════════════════╝
-    def build_runtime_menu(self) -> InlineKeyboardMarkup:
-        m = InlineKeyboardMarkup(row_width=2)
-        m.row(
-            InlineKeyboardButton("📊 System Status", callback_data="hw_status"),
-            InlineKeyboardButton("📈 Live Metrics", callback_data="rt_metrics")
-        )
-        m.row(
-            InlineKeyboardButton("🔌 WebSocket", callback_data="rt_websocket"),
-            InlineKeyboardButton("📡 Event Bus", callback_data="rt_eventbus")
-        )
-        m.row(
-            InlineKeyboardButton("🔄 Restart Runtime", callback_data="rt_restart"),
-            InlineKeyboardButton("🧹 Clear Cache", callback_data="rt_clear_cache")
-        )
-        m.add(InlineKeyboardButton("⬅️ Back to Main", callback_data="back_main"))
-        return m
+            # الصف الأول: Runtime + Agents
+            m.row(
+                InlineKeyboardButton("⚡ تشغيل النظام", callback_data="menu_runtime"),
+                InlineKeyboardButton("🤖 الوكلاء", callback_data="menu_agents")
+            )
+            # الصف الثاني: Protocols + Deployments
+            m.row(
+                InlineKeyboardButton("🧬 البروتوكولات", callback_data="menu_protocols"),
+                InlineKeyboardButton("🚀 النشر", callback_data="menu_deploy")
+            )
+            # الصف الثالث: AI + Security
+            m.row(
+                InlineKeyboardButton("🧠 العقل الاصطناعي", callback_data="menu_ai"),
+                InlineKeyboardButton("🛡️ الأمان", callback_data="menu_security")
+            )
+            # الصف الرابع: Memory + Docker
+            m.row(
+                InlineKeyboardButton("💾 الذاكرة", callback_data="menu_memory"),
+                InlineKeyboardButton("🐳 دوكر", callback_data="menu_docker")
+            )
+            # الصف الخامس: Settings + Audit Logs
+            m.row(
+                InlineKeyboardButton("⚙️ الإعدادات", callback_data="menu_settings"),
+                InlineKeyboardButton("📋 سجلات التدقيق", callback_data="audit_logs")
+            )
+            # الصف السادس: Google Cloud 🔱
+            m.add(InlineKeyboardButton("☁️ جوجل كلاود", callback_data="menu_cloud"))
+            return m
 
-    # ╔══════════════════════════════════════════╗
-    # ║         قائمة Agents الفرعية            ║
-    # ╚══════════════════════════════════════════╝
-    def build_agents_menu(self) -> InlineKeyboardMarkup:
-        m = InlineKeyboardMarkup(row_width=2)
-        m.row(
-            InlineKeyboardButton("📋 Agent Roster", callback_data="list_agents"),
-            InlineKeyboardButton("➕ Spawn Agent", callback_data="ag_spawn")
-        )
-        m.row(
-            InlineKeyboardButton("🔍 Inspect Agent", callback_data="ag_inspect"),
-            InlineKeyboardButton("📊 Agent Metrics", callback_data="ag_metrics")
-        )
-        m.row(
-            InlineKeyboardButton("🛡️ Sentinel Status", callback_data="sentinel_status"),
-            InlineKeyboardButton("🔌 Bridge Events", callback_data="bridge_events")
-        )
-        m.row(
-            InlineKeyboardButton("🧬 ADK Swarm Flow", callback_data="adk_swarm_hub")
-        )
-        m.row(
-            InlineKeyboardButton("⏹️ Stop All", callback_data="ag_stop_all"),
-            InlineKeyboardButton("🔄 Restart All", callback_data="ag_restart_all")
-        )
-        m.add(InlineKeyboardButton("⬅️ Back to Main", callback_data="back_main"))
-        return m
+            # ╔══════════════════════════════════════════╗
+            # ║         قائمة Runtime الفرعية           ║
+            # ╚══════════════════════════════════════════╝
+            def build_runtime_menu(self) -> InlineKeyboardMarkup:
+            m = InlineKeyboardMarkup(row_width=2)
+            m.row(
+                InlineKeyboardButton("📊 حالة النظام", callback_data="hw_status"),
+                InlineKeyboardButton("📈 المقاييس الحية", callback_data="rt_metrics")
+            )
+            m.row(
+                InlineKeyboardButton("🔌 WebSocket", callback_data="rt_websocket"),
+                InlineKeyboardButton("📡 ناقل الأحداث", callback_data="rt_eventbus")
+            )
+            m.row(
+                InlineKeyboardButton("🔄 إعادة التشغيل", callback_data="rt_restart"),
+                InlineKeyboardButton("🧹 تنظيف التخزين", callback_data="rt_clear_cache")
+            )
+            m.add(InlineKeyboardButton("⬅️ العودة للرئيسية", callback_data="back_main"))
+            return m
 
-    def build_agent_card(self, agent_id, agent_name, status) -> InlineKeyboardMarkup:
-        """بطاقة تحكم لوكيل محدد"""
-        m = InlineKeyboardMarkup(row_width=3)
-        m.row(
-            InlineKeyboardButton("▶️ Start", callback_data=f"agctl_start:{agent_id}"),
-            InlineKeyboardButton("⏹️ Stop", callback_data=f"agctl_stop:{agent_id}"),
-            InlineKeyboardButton("🔄 Restart", callback_data=f"agctl_restart:{agent_id}")
-        )
-        m.row(
-            InlineKeyboardButton("📋 Logs", callback_data=f"agctl_logs:{agent_id}"),
-            InlineKeyboardButton("🧠 Memory", callback_data=f"agctl_memory:{agent_id}"),
-            InlineKeyboardButton("📊 Tasks", callback_data=f"agctl_tasks:{agent_id}")
-        )
-        m.add(InlineKeyboardButton("⬅️ Back to Agents", callback_data="menu_agents"))
-        return m
+            # ╔══════════════════════════════════════════╗
+            # ║         قائمة Agents الفرعية            ║
+            # ╚══════════════════════════════════════════╝
+            def build_agents_menu(self) -> InlineKeyboardMarkup:
+            m = InlineKeyboardMarkup(row_width=2)
+            m.row(
+                InlineKeyboardButton("📋 سجل الوكلاء", callback_data="list_agents"),
+                InlineKeyboardButton("➕ إضافة وكيل", callback_data="ag_spawn")
+            )
+            m.row(
+                InlineKeyboardButton("🔍 فحص وكيل", callback_data="ag_inspect"),
+                InlineKeyboardButton("📊 مقاييس الوكلاء", callback_data="ag_metrics")
+            )
+            m.row(
+                InlineKeyboardButton("🛡️ حالة الحارس", callback_data="sentinel_status"),
+                InlineKeyboardButton("🔌 أحداث الجسر", callback_data="bridge_events")
+            )
+            m.row(
+                InlineKeyboardButton("🧬 تدفق السرب", callback_data="adk_swarm_hub")
+            )
+            m.row(
+                InlineKeyboardButton("⏹️ إيقاف الكل", callback_data="ag_stop_all"),
+                InlineKeyboardButton("🔄 إعادة تشغيل الكل", callback_data="ag_restart_all")
+            )
+            m.add(InlineKeyboardButton("⬅️ العودة للرئيسية", callback_data="back_main"))
+            return m
 
-    # ╔══════════════════════════════════════════╗
-    # ║       قائمة Protocols الفرعية           ║
-    # ╚══════════════════════════════════════════╝
-    def build_protocols_menu(self) -> InlineKeyboardMarkup:
-        m = InlineKeyboardMarkup(row_width=2)
-        m.row(
-            InlineKeyboardButton("📜 Active Protocols", callback_data="pr_list"),
-            InlineKeyboardButton("🆕 Create Protocol", callback_data="pr_create")
-        )
-        m.row(
-            InlineKeyboardButton("🔬 Protocol Inspector", callback_data="pr_inspect"),
-            InlineKeyboardButton("📊 Execution Graph", callback_data="pr_graph")
-        )
-        m.row(
-            InlineKeyboardButton("▶️ Run Protocol", callback_data="pr_run"),
-            InlineKeyboardButton("⬅️ Back to Main", callback_data="back_main")
-        )
-        return m
+            def build_agent_card(self, agent_id, agent_name, status) -> InlineKeyboardMarkup:
+            """بطاقة تحكم لوكيل محدد"""
+            m = InlineKeyboardMarkup(row_width=3)
+            m.row(
+                InlineKeyboardButton("▶️ بدء", callback_data=f"agctl_start:{agent_id}"),
+                InlineKeyboardButton("⏹️ إيقاف", callback_data=f"agctl_stop:{agent_id}"),
+                InlineKeyboardButton("🔄 إعادة", callback_data=f"agctl_restart:{agent_id}")
+            )
+            m.row(
+                InlineKeyboardButton("📋 سجلات", callback_data=f"agctl_logs:{agent_id}"),
+                InlineKeyboardButton("🧠 ذاكرة", callback_data=f"agctl_memory:{agent_id}"),
+                InlineKeyboardButton("📊 مهام", callback_data=f"agctl_tasks:{agent_id}")
+            )
+            m.add(InlineKeyboardButton("⬅️ العودة للوكلاء", callback_data="menu_agents"))
+            return m
+
+            # ╔══════════════════════════════════════════╗
+            # ║       قائمة Protocols الفرعية           ║
+            # ╚══════════════════════════════════════════╝
+            def build_protocols_menu(self) -> InlineKeyboardMarkup:
+            m = InlineKeyboardMarkup(row_width=2)
+            m.row(
+                InlineKeyboardButton("📜 البروتوكولات النشطة", callback_data="pr_list"),
+                InlineKeyboardButton("🆕 إنشاء بروتوكول", callback_data="pr_create")
+            )
+            m.row(
+                InlineKeyboardButton("🔬 فاحص البروتوكولات", callback_data="pr_inspect"),
+                InlineKeyboardButton("📊 مخطط التنفيذ", callback_data="pr_graph")
+            )
+            m.row(
+                InlineKeyboardButton("▶️ تشغيل بروتوكول", callback_data="pr_run"),
+                InlineKeyboardButton("⬅️ العودة للرئيسية", callback_data="back_main")
+            )
+            return m
 
     # ╔══════════════════════════════════════════╗
     # ║        قائمة Deployments الفرعية        ║
@@ -205,6 +213,7 @@ class SovereignUIBuilder:
             InlineKeyboardButton("🔑 Rotate Keys", callback_data="sec_rotate"),
             InlineKeyboardButton("🧬 Integrity Check", callback_data="sec_integrity")
         )
+        m.add(InlineKeyboardButton("🛡️ Inspection System", callback_data="sec_inspection"))
         m.add(InlineKeyboardButton("⬅️ Back to Main", callback_data="back_main"))
         return m
 
@@ -349,6 +358,41 @@ class SovereignUIBuilder:
             InlineKeyboardButton("💜 Cyber Neon", callback_data="settheme_cyberpunk")
         )
         m.add(InlineKeyboardButton("⬅️ Back to Settings", callback_data="menu_settings"))
+        return m
+
+    # ╔══════════════════════════════════════════╗
+    # ║          قائمة Skills                   ║
+    # ╚══════════════════════════════════════════╝
+    def build_skills_menu(self, skill_list: list) -> InlineKeyboardMarkup:
+        m = InlineKeyboardMarkup(row_width=2)
+        for skill in skill_list:
+            m.add(InlineKeyboardButton(f"🧠 {skill}", callback_data=f"skill_load:{skill}"))
+        m.add(InlineKeyboardButton("⬅️ Back to Main", callback_data="back_main"))
+        return m
+
+    # ╔══════════════════════════════════════════╗
+    # ║          قائمة Scheduler                ║
+    # ╚══════════════════════════════════════════╝
+    def build_scheduler_menu(self) -> InlineKeyboardMarkup:
+        m = InlineKeyboardMarkup(row_width=2)
+        m.row(
+            InlineKeyboardButton("📅 View Tasks", callback_data="sch_list"),
+            InlineKeyboardButton("➕ Add Job", callback_data="sch_add")
+        )
+        m.row(
+            InlineKeyboardButton("🛑 Stop Job", callback_data="sch_stop"),
+            InlineKeyboardButton("🔄 Restart Job", callback_data="sch_restart")
+        )
+        m.row(
+            InlineKeyboardButton("📊 Dashboard", callback_data="sch_dash"),
+            InlineKeyboardButton("⬅️ Back to Main", callback_data="back_main")
+        )
+        return m
+
+    def build_kanban_menu(self) -> InlineKeyboardMarkup:
+        m = InlineKeyboardMarkup(row_width=1)
+        m.add(InlineKeyboardButton("➕ Create Board", callback_data="kan_create"))
+        m.add(InlineKeyboardButton("⬅️ Back to Main", callback_data="back_main"))
         return m
 
 

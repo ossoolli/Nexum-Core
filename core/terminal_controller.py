@@ -102,6 +102,7 @@ class SovereignTerminalController:
         self._lock = threading.Lock()
         self._execution_count = 0
         self._blocked_count = 0
+        self.lockdown_mode = False  # Persistent forced Open Mode
         self.lockdown_mode = False
 
     def validate_command(self, command: str) -> dict:

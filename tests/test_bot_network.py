@@ -1,13 +1,16 @@
-import sys, os
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-import unittest
-from core.bot_network import bot_network
+from nexum.swarm.bridge import Bridge
+import os
+import json
 
-class TestBotNetwork(unittest.TestCase):
-    def test_local_fallback(self):
-        # We assume redis is not connected in tests
-        res = bot_network.broadcast_all("test_bot", "Hello Network")
-        self.assertIsInstance(res, int)
+def test_bridge_interaction():
+    bridge = Bridge(bridge_path="/home/madarmutaz/Nexum-Core/storage/test_bridge")
+    bridge.send_message("Nexum-Core", "Summarizer-Bot", "Please summarize current logs.", {"priority": "high"})
+    
+    messages = bridge.read_messages("Summarizer-Bot")
+    assert len(messages) > 0
+    assert messages[0]["sender"] == "Nexum-Core"
+    assert messages[0]["message"] == "Please summarize current logs."
+    print("Test passed: Bridge interaction verified.")
 
 if __name__ == "__main__":
-    unittest.main()
+    test_bridge_interaction()
