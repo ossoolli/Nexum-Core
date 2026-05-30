@@ -104,7 +104,8 @@ tool_registry = ToolRegistry()
 
 # تسجيل الأدوات المتقدمة (Pillar 3)
 try:
-    from core.tools.semantic_browser import semantic_search_web
+    from core.tools.semantic_browser import semantic_search_web, advanced_scrape
     tool_registry.register_local_tool("semantic_search_web", semantic_search_web)
+    tool_registry.register_local_tool("advanced_scrape", advanced_scrape)
 except ImportError:
     pass

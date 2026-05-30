@@ -41,3 +41,20 @@ def semantic_search_web(url: str, query: str) -> str:
     
     answer, _ = gemini_service.ask(prompt, system_instruction="You extract precise facts from web content.")
     return answer
+
+
+def advanced_scrape(url: str) -> str:
+    """
+    يقوم بجلب المحتوى النصي الكامل لصفحة الويب وتنسيقه بشكل مقروء وواضح.
+    :param url: رابط الموقع المطلوب كشطه
+    """
+    from core.browser_sandbox import execute_browser_command
+    
+    logger.info(f"[SemanticBrowser] Running advanced scrape on {url}...")
+    res = execute_browser_command(action="scrape", url=url)
+    content = res.get("output", "")
+    
+    if len(content) < 100:
+        return f"❌ فشل جلب المحتوى من {url}"
+        
+    return content

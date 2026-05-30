@@ -207,10 +207,16 @@ if __name__ == "__main__":
         if "discord" in platforms:
             try:
                 from core.protocols.adapters.discord_adapter import discord_adapter
-                # هنا يمكن تحديد channel_id من الإعدادات
                 results["discord"] = discord_adapter.send_message(os.getenv("DISCORD_CHANNEL_ID", ""), message)
             except Exception as e:
                 results["discord_error"] = str(e)
+
+        if "slack" in platforms:
+            try:
+                from core.protocols.adapters.slack_adapter import slack_adapter
+                results["slack"] = slack_adapter.send_message(os.getenv("SLACK_CHANNEL_ID", ""), message)
+            except Exception as e:
+                results["slack_error"] = str(e)
 
         # التليجرام هو الأساسي دائماً
         if "telegram" in platforms:
