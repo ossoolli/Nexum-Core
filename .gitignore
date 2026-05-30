@@ -22,3 +22,8 @@ logs/
 *.key
 *.token
 *.secret
+
+.env
+Nexum-Core/
+storage/memory/
+storage/sovereign_memory/

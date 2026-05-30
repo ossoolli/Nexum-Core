@@ -1,0 +1,23 @@
+{
+  "name": "github_publisher_agent",
+  "class_name": "GithubPublisherAgentAgent",
+  "description": "وكيل سيادي مستقل مولد تلقائياً للقيام بـ: الاتصال بمستودعات GitHub الخارجية بشكل فعلي، وإدارة عمليات Git (مثل add و commit و push) لرفع وتحديث الملفات البرمجية مباشرة من واجهة النظام إلى المستودع الحقيقي.",
+  "tools": [
+    "search_web",
+    "fetch_webpage"
+  ],
+  "triggers": [
+    "every_hour"
+  ],
+  "methods": [
+    "run",
+    "on_trigger",
+    "report"
+  ],
+  "schedule": {
+    "interval": "hourly"
+  },
+  "created_at": "2026-05-30T02:47:35.633609",
+  "status": "BUILT",
+  "path": "/home/madarmutaz/Nexum-Core/agents/generated/github_publisher_agent_agent.py"
+}

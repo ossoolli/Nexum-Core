@@ -1,0 +1,23 @@
+{
+  "name": "github_connector",
+  "class_name": "GithubConnectorAgent",
+  "description": "وكيل سيادي مستقل مولد تلقائياً للقيام بـ: الاتصال بمستودعات GitHub الخارجية لرفع الملفات البرمجية، وإجراء عمليات الالتزام (Commit) والدفع (Push) تلقائياً وبشكل حقيقي بناءً على طلبات المستخدم.",
+  "tools": [
+    "search_web",
+    "fetch_webpage"
+  ],
+  "triggers": [
+    "every_hour"
+  ],
+  "methods": [
+    "run",
+    "on_trigger",
+    "report"
+  ],
+  "schedule": {
+    "interval": "hourly"
+  },
+  "created_at": "2026-05-29T22:40:48.166794",
+  "status": "BUILT",
+  "path": "/home/madarmutaz/Nexum-Core/agents/generated/github_connector_agent.py"
+}

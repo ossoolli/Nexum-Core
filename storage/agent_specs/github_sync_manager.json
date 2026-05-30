@@ -1,0 +1,23 @@
+{
+  "name": "github_sync_manager",
+  "class_name": "GithubSyncManagerAgent",
+  "description": "وكيل سيادي مستقل مولد تلقائياً للقيام بـ: الاتصال الفعلي والآمن بمستودعات GitHub الخاصة بالمستخدم لرفع التحديثات البرمجية، وإدارة عمليات الالتزام (Commits) والدفع (Push) بشكل حقيقي ومباشر بدلاً من المحاكاة النصية.",
+  "tools": [
+    "search_web",
+    "fetch_webpage"
+  ],
+  "triggers": [
+    "every_hour"
+  ],
+  "methods": [
+    "run",
+    "on_trigger",
+    "report"
+  ],
+  "schedule": {
+    "interval": "hourly"
+  },
+  "created_at": "2026-05-30T01:45:56.893716",
+  "status": "BUILT",
+  "path": "/home/madarmutaz/Nexum-Core/agents/generated/github_sync_manager_agent.py"
+}

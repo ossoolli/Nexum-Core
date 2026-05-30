@@ -1,0 +1,23 @@
+{
+  "name": "github_repository_manager",
+  "class_name": "GithubRepositoryManagerAgent",
+  "description": "وكيل سيادي مستقل مولد تلقائياً للقيام بـ: الاتصال الفعلي بمستودعات GitHub الخارجية، وإدارة الفروع (Branches)، وتنفيذ عمليات الحفظ (Commit) والرفع (Push) البرمجي بشكل حقيقي وآمن مباشرة من بيئة النظام",
+  "tools": [
+    "search_web",
+    "fetch_webpage"
+  ],
+  "triggers": [
+    "every_hour"
+  ],
+  "methods": [
+    "run",
+    "on_trigger",
+    "report"
+  ],
+  "schedule": {
+    "interval": "hourly"
+  },
+  "created_at": "2026-05-29T21:39:04.681415",
+  "status": "BUILT",
+  "path": "/home/madarmutaz/Nexum-Core/agents/generated/github_repository_manager_agent.py"
+}

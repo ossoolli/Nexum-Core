@@ -94,5 +94,209 @@
         },
         "status": "active",
         "created_at": "2026-05-29T12:46:19.101040"
+    },
+    "git_integration_agent": {
+        "agent_id": "git_integration_agent",
+        "name": "git_integration_agent",
+        "role": "Generated Agent",
+        "capabilities": [
+            "run"
+        ],
+        "tools": [],
+        "protocols": [],
+        "restrictions": [],
+        "awareness": {
+            "last_event_seen": null,
+            "current_memory_context": null
+        },
+        "status": "active",
+        "created_at": "2026-05-30T01:15:23.833991"
+    },
+    "github_integration_agent": {
+        "agent_id": "github_integration_agent",
+        "name": "github_integration_agent",
+        "role": "Generated Agent",
+        "capabilities": [
+            "run"
+        ],
+        "tools": [],
+        "protocols": [],
+        "restrictions": [],
+        "awareness": {
+            "last_event_seen": null,
+            "current_memory_context": null
+        },
+        "status": "active",
+        "created_at": "2026-05-30T01:00:02.094613"
+    },
+    "github_repository_manager": {
+        "agent_id": "github_repository_manager",
+        "name": "github_repository_manager",
+        "role": "Generated Agent",
+        "capabilities": [
+            "run"
+        ],
+        "tools": [],
+        "protocols": [],
+        "restrictions": [],
+        "awareness": {
+            "last_event_seen": null,
+            "current_memory_context": null
+        },
+        "status": "active",
+        "created_at": "2026-05-29T21:39:25.589844"
+    },
+    "github_sync_agent": {
+        "agent_id": "github_sync_agent",
+        "name": "github_sync_agent",
+        "role": "Generated Agent",
+        "capabilities": [
+            "run"
+        ],
+        "tools": [],
+        "protocols": [],
+        "restrictions": [],
+        "awareness": {
+            "last_event_seen": null,
+            "current_memory_context": null
+        },
+        "status": "active",
+        "created_at": "2026-05-29T21:54:54.047931"
+    },
+    "github_deployment_manager": {
+        "agent_id": "github_deployment_manager",
+        "name": "github_deployment_manager",
+        "role": "Generated Agent",
+        "capabilities": [
+            "run"
+        ],
+        "tools": [],
+        "protocols": [],
+        "restrictions": [],
+        "awareness": {
+            "last_event_seen": null,
+            "current_memory_context": null
+        },
+        "status": "active",
+        "created_at": "2026-05-29T23:42:49.271412"
+    },
+    "github_connector": {
+        "agent_id": "github_connector",
+        "name": "github_connector",
+        "role": "Generated Agent",
+        "capabilities": [
+            "run"
+        ],
+        "tools": [],
+        "protocols": [],
+        "restrictions": [],
+        "awareness": {
+            "last_event_seen": null,
+            "current_memory_context": null
+        },
+        "status": "active",
+        "created_at": "2026-05-29T22:41:05.607711"
+    },
+    "github_deployment_agent": {
+        "agent_id": "github_deployment_agent",
+        "name": "github_deployment_agent",
+        "role": "Generated Agent",
+        "capabilities": [
+            "run"
+        ],
+        "tools": [],
+        "protocols": [],
+        "restrictions": [],
+        "awareness": {
+            "last_event_seen": null,
+            "current_memory_context": null
+        },
+        "status": "active",
+        "created_at": "2026-05-29T23:27:25.233380"
+    },
+    "github_integration_manager": {
+        "agent_id": "github_integration_manager",
+        "name": "github_integration_manager",
+        "role": "Generated Agent",
+        "capabilities": [
+            "run"
+        ],
+        "tools": [],
+        "protocols": [],
+        "restrictions": [],
+        "awareness": {
+            "last_event_seen": null,
+            "current_memory_context": null
+        },
+        "status": "active",
+        "created_at": "2026-05-30T02:32:27.619362"
+    },
+    "git_deployment_agent": {
+        "agent_id": "git_deployment_agent",
+        "name": "git_deployment_agent",
+        "role": "Generated Agent",
+        "capabilities": [
+            "run"
+        ],
+        "tools": [],
+        "protocols": [],
+        "restrictions": [],
+        "awareness": {
+            "last_event_seen": null,
+            "current_memory_context": null
+        },
+        "status": "active",
+        "created_at": "2026-05-30T00:13:43.183622"
+    },
+    "github_connector_agent": {
+        "agent_id": "github_connector_agent",
+        "name": "github_connector_agent",
+        "role": "Generated Agent",
+        "capabilities": [
+            "run"
+        ],
+        "tools": [],
+        "protocols": [],
+        "restrictions": [],
+        "awareness": {
+            "last_event_seen": null,
+            "current_memory_context": null
+        },
+        "status": "active",
+        "created_at": "2026-05-30T00:29:08.385879"
+    },
+    "github_sync_manager": {
+        "agent_id": "github_sync_manager",
+        "name": "github_sync_manager",
+        "role": "Generated Agent",
+        "capabilities": [
+            "run"
+        ],
+        "tools": [],
+        "protocols": [],
+        "restrictions": [],
+        "awareness": {
+            "last_event_seen": null,
+            "current_memory_context": null
+        },
+        "status": "active",
+        "created_at": "2026-05-30T01:46:11.818004"
+    },
+    "github_publisher_agent": {
+        "agent_id": "github_publisher_agent",
+        "name": "github_publisher_agent",
+        "role": "Generated Agent",
+        "capabilities": [
+            "run"
+        ],
+        "tools": [],
+        "protocols": [],
+        "restrictions": [],
+        "awareness": {
+            "last_event_seen": null,
+            "current_memory_context": null
+        },
+        "status": "active",
+        "created_at": "2026-05-30T02:47:54.762362"
     }
 }

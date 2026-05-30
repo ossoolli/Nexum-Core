@@ -1,0 +1,23 @@
+{
+  "name": "github_deployment_agent",
+  "class_name": "GithubDeploymentAgentAgent",
+  "description": "وكيل سيادي مستقل مولد تلقائياً للقيام بـ: الاتصال الفعلي بمستودعات GitHub الخارجية لتنفيذ عمليات رفع الأكواد (Git Push/Commit) وتحديث الملفات البرمجية حقيقياً بدلاً من مجرد محاكاتها في الواجهة",
+  "tools": [
+    "search_web",
+    "fetch_webpage"
+  ],
+  "triggers": [
+    "every_hour"
+  ],
+  "methods": [
+    "run",
+    "on_trigger",
+    "report"
+  ],
+  "schedule": {
+    "interval": "hourly"
+  },
+  "created_at": "2026-05-29T23:27:06.641464",
+  "status": "BUILT",
+  "path": "/home/madarmutaz/Nexum-Core/agents/generated/github_deployment_agent_agent.py"
+}
