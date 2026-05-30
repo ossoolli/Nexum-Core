@@ -1,0 +1,23 @@
+{
+  "name": "وكيل_اتخاذ_القرار_السيادي_المستقل",
+  "class_name": "وكيلاتخاذالقرارالسياديالمستقلAgent",
+  "description": "وكيل سيادي مستقل مولد تلقائياً للقيام بـ: تمكين نموذج GPT لاتخاذ قرارات سيادية مستقلة للنظام دون تدخل بشري مباشر أو الحاجة لأوامر محددة لكل قرار، ومعالجة أي عوائق تقنية أو مالية تعيق هذا الدور.",
+  "tools": [
+    "search_web",
+    "fetch_webpage"
+  ],
+  "triggers": [
+    "every_hour"
+  ],
+  "methods": [
+    "run",
+    "on_trigger",
+    "report"
+  ],
+  "schedule": {
+    "interval": "hourly"
+  },
+  "created_at": "2026-05-30T11:04:56.402718",
+  "status": "BUILT",
+  "path": "/home/madarmutaz/Nexum-Core/agents/generated/وكيل_اتخاذ_القرار_السيادي_المستقل_agent.py"
+}

@@ -1,0 +1,23 @@
+{
+  "name": "sovereign_consensus_engine",
+  "class_name": "SovereignConsensusEngineAgent",
+  "description": "وكيل سيادي مستقل مولد تلقائياً للقيام بـ: To facilitate or perform 'Sovereign Scrutiny', integrate 'Consensus' decisions from various inputs (e.g., individual votes, system analyses), and extract a unified, strict programmatic output based on these decisions for the system to implement. The user described this engine as having already processed a consensus and extracted a programmatic output, but did not task NEXUM PRO with performing this consensus-building and output extraction process itself.",
+  "tools": [
+    "search_web",
+    "fetch_webpage"
+  ],
+  "triggers": [
+    "every_hour"
+  ],
+  "methods": [
+    "run",
+    "on_trigger",
+    "report"
+  ],
+  "schedule": {
+    "interval": "hourly"
+  },
+  "created_at": "2026-05-30T11:20:36.604535",
+  "status": "BUILT",
+  "path": "/home/madarmutaz/Nexum-Core/agents/generated/sovereign_consensus_engine_agent.py"
+}

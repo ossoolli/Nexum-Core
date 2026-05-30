@@ -1,0 +1,23 @@
+{
+  "name": "sentinel_critical_logger",
+  "class_name": "SentinelCriticalLoggerAgent",
+  "description": "وكيل سيادي مستقل مولد تلقائياً للقيام بـ: Monitor and log critical system failures and security alerts (e.g., primary AI failure, security breaches) to a dedicated, secure, and potentially external 'sentinel' system, beyond standard logging. This implies a specialized agent or integration for robust critical event management and alerting.",
+  "tools": [
+    "search_web",
+    "fetch_webpage"
+  ],
+  "triggers": [
+    "every_hour"
+  ],
+  "methods": [
+    "run",
+    "on_trigger",
+    "report"
+  ],
+  "schedule": {
+    "interval": "hourly"
+  },
+  "created_at": "2026-05-30T09:47:40.800698",
+  "status": "BUILT",
+  "path": "/home/madarmutaz/Nexum-Core/agents/generated/sentinel_critical_logger_agent.py"
+}

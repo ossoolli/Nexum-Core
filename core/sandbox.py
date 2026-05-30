@@ -286,9 +286,10 @@ class SandboxRuntime:
         else:
             return False, f"🚫 رفض الصلاحية: الوكيل [{agent_id}] لا يملك صلاحية IAM المطلوبة [{permission}]."
 
-    def execute_in_sandbox(self, agent_id: str, script_content: str, language="python") -> Dict[str, Any]:
+    def execute_in_sandbox(self, agent_id: str, script_content: str, language="python", serverless: bool = False) -> Dict[str, Any]:
         """
         ينفذ الكود داخل بيئة عزل صارمة مع التحقق التلقائي للأمان والصلاحيات والتنسيق مع سيرفرات MCP.
+        يدعم الآن التشغيل السحابي (Serverless) كخيار فائق الأمان (Pillar 4).
         """
         # 1. التحقق من صلاحيات IAM للوكيل لإنشاء بيئة العزل
         iam_ok, iam_msg = self.check_iam_permission(agent_id, "nexum:sandbox:create")
@@ -303,6 +304,16 @@ class SandboxRuntime:
                     "reason": iam_msg
                 }
             }
+
+        # 1.5 التحقق من خيار التشغيل السحابي (Pillar 4)
+        if serverless:
+            try:
+                from core.runtime.serverless_adapter import serverless_adapter
+                if serverless_adapter.enabled:
+                    self._log_security_event("SANDBOX_SERVERLESS_START", f"Dispatching to cloud sandbox for agent: {agent_id}", "INFO")
+                    return serverless_adapter.execute(script_content, language)
+            except Exception as e:
+                self._log_security_event("SERVERLESS_ADAPTER_ERROR", str(e), "ERROR")
 
         # 2. فحص الأمان الاستباقي عبر موديول Security Warden (SAST)
         self._log_security_event("SECURITY_SCAN_START", f"Scanning script for agent: {agent_id}", "INFO")

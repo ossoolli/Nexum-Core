@@ -1,0 +1,23 @@
+{
+  "name": "system_entity_monitor",
+  "class_name": "SystemEntityMonitorAgent",
+  "description": "وكيل سيادي مستقل مولد تلقائياً للقيام بـ: Automatically detect, onboard, and monitor the health and status of user-defined system components or processes (e.g., 'Mutaz live') that are not explicitly pre-configured or known within NEXUM PRO's current operational scope or monitored environments, and report on any identified errors or unexpected behavior.",
+  "tools": [
+    "search_web",
+    "fetch_webpage"
+  ],
+  "triggers": [
+    "every_hour"
+  ],
+  "methods": [
+    "run",
+    "on_trigger",
+    "report"
+  ],
+  "schedule": {
+    "interval": "hourly"
+  },
+  "created_at": "2026-05-30T09:31:57.370085",
+  "status": "BUILT",
+  "path": "/home/madarmutaz/Nexum-Core/agents/generated/system_entity_monitor_agent.py"
+}

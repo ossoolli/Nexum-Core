@@ -28,6 +28,8 @@ class SecurityValidator:
             return False, "blocked"
         for danger in DANGEROUS_PATTERNS:
             if danger in cmd:
+                if "reboot" in cmd or "shutdown" in cmd:
+                     return True, "confirm"
                 return True, "confirm"
         return True, "free"
 

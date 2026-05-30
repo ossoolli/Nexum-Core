@@ -241,9 +241,10 @@ class AgentSmith(BaseAgent):
     def _generate_with_llm(self, spec):
         """توليد كود الوكيل بالـ LLM"""
         try:
-            from services.gemini_service import GeminiService
-            svc = GeminiService(os.getenv("GOOGLE_API_KEY"))
-            prompt = (
+            from services.gemini_service import gemini_service
+            from core.learning.prompt_compiler import prompt_compiler
+            
+            default_prompt = (
                 f"أنشئ ملف Python كامل لوكيل ذكاء اصطناعي.\n\n"
                 f"الاسم: {spec['name']}\nالكلاس: {spec['class_name']}\n"
                 f"الهدف: {spec['description']}\n"
@@ -255,7 +256,11 @@ class AgentSmith(BaseAgent):
                 "3. try/except في كل method مع self.log()\n"
                 "4. أعد كود Python فقط بدون شرح — ابدأ بـ import\n"
             )
-            res, _ = svc.ask(prompt)
+            
+            # جلب المطالبة المحسنة من مجمع المطالبات (Pillar 1)
+            optimized_system = prompt_compiler.get_optimized_prompt("agent_synthesis", "You are the AgentSmith Synthesizer.")
+            
+            res, _ = gemini_service.ask(default_prompt, system_instruction=optimized_system)
             if res and ("class " in res and "BaseAgent" in res):
                 import re
                 res = re.sub(r'^```(?:python)?\s*', '', res.strip())

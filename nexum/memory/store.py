@@ -11,17 +11,18 @@ from dotenv import load_dotenv
 PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 load_dotenv(dotenv_path=os.path.join(PROJECT_ROOT, ".env"), override=True)
 
+import sqlite3
+
 db_key = os.getenv("NEXUM_DB_ENCRYPTION_KEY")
+_use_cipher = False
+cipher_sqlite3 = None
+
 if db_key:
     try:
-        from pysqlcipher3 import dbapi2 as sqlite3
+        from pysqlcipher3 import dbapi2 as cipher_sqlite3
         _use_cipher = True
     except ImportError:
-        import sqlite3
-        _use_cipher = False
-else:
-    import sqlite3
-    _use_cipher = False
+        pass
 
 class SovereignMemoryStore:
     def __init__(self, db_path: str = None):
@@ -74,23 +75,32 @@ class SovereignMemoryStore:
         # Use simple retry-wait for locked database
         while True:
             try:
-                if _use_cipher and db_key:
+                # Plaintext databases (like memory.db) should utilize standard sqlite3 directly to support FTS5
+                if "memory.db" in self.db_path:
+                    return sqlite3.connect(self.db_path, timeout=10)
+
+                if _use_cipher and db_key and cipher_sqlite3:
                     # Try SQLCipher 3 first
                     safe_key = db_key.replace("'", "''")
                     try:
-                        conn = sqlite3.connect(self.db_path, timeout=10)
+                        conn = cipher_sqlite3.connect(self.db_path, timeout=10)
                         cursor = conn.cursor()
                         cursor.execute(f"PRAGMA key = '{safe_key}';")
                         cursor.execute("PRAGMA cipher_compatibility = 3;")
                         cursor.execute("SELECT 1 FROM sqlite_master LIMIT 1;")
                         return conn
                     except Exception:
-                        # Try SQLCipher 4
-                        conn = sqlite3.connect(self.db_path, timeout=10)
-                        cursor = conn.cursor()
-                        cursor.execute(f"PRAGMA key = '{safe_key}';")
-                        cursor.execute("PRAGMA cipher_compatibility = 4;")
-                        return conn
+                        try:
+                            # Try SQLCipher 4
+                            conn = cipher_sqlite3.connect(self.db_path, timeout=10)
+                            cursor = conn.cursor()
+                            cursor.execute(f"PRAGMA key = '{safe_key}';")
+                            cursor.execute("PRAGMA cipher_compatibility = 4;")
+                            cursor.execute("SELECT 1 FROM sqlite_master LIMIT 1;")
+                            return conn
+                        except Exception:
+                            # Plaintext fallback (operate as standard SQLite without key)
+                            return sqlite3.connect(self.db_path, timeout=10)
                 else:
                     return sqlite3.connect(self.db_path, timeout=10)
             except sqlite3.OperationalError as e:

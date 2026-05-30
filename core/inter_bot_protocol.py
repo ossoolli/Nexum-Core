@@ -199,4 +199,24 @@ if __name__ == "__main__":
 '''
 
 
+    def broadcast_to_platforms(self, message: str, platforms: list = None):
+        """إرسال رسالة عبر منصات متعددة (Pillar 2)"""
+        platforms = platforms or ["telegram"]
+        results = {}
+
+        if "discord" in platforms:
+            try:
+                from core.protocols.adapters.discord_adapter import discord_adapter
+                # هنا يمكن تحديد channel_id من الإعدادات
+                results["discord"] = discord_adapter.send_message(os.getenv("DISCORD_CHANNEL_ID", ""), message)
+            except Exception as e:
+                results["discord_error"] = str(e)
+
+        # التليجرام هو الأساسي دائماً
+        if "telegram" in platforms:
+            # افتراضياً يتم الإرسال عبر البوت الرئيسي أو sub-bots
+            pass
+
+        return results
+
 inter_bot_protocol = InterBotProtocol()

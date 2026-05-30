@@ -13,6 +13,7 @@ import re
 import sys
 import json
 import logging
+import asyncio
 from datetime import datetime
 from typing import Dict, List, Any, Optional
 
@@ -100,7 +101,16 @@ class SovereignEvolutionEngine:
         except Exception as e:
             self.log_evolution(f"Skill distillation error: {e}", level="ERROR")
 
-        # 3. ──── حفظ تقرير التطور ────
+        # 3. ──── التجميع والتحسين التلقائي للمطالبات (Pillar 1) ────
+        try:
+            import asyncio
+            from core.learning.prompt_compiler import prompt_compiler
+            asyncio.run(prompt_compiler.compile_all())
+            self.log_evolution("Prompt compilation and optimization cycle completed.")
+        except Exception as e:
+            self.log_evolution(f"Prompt compilation error: {e}", level="ERROR")
+
+        # 4. ──── حفظ تقرير التطور ────
         try:
             history_path = os.path.join(BASE_DIR, "storage", "sovereign_memory", "evolution_history.json")
             os.makedirs(os.path.dirname(history_path), exist_ok=True)

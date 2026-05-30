@@ -332,5 +332,22 @@
         },
         "status": "active",
         "created_at": "2026-05-30T09:01:24.422178"
+    },
+    "hermes_agent": {
+        "agent_id": "hermes_agent",
+        "name": "hermes_agent",
+        "role": "Generated Agent",
+        "capabilities": [
+            "run"
+        ],
+        "tools": [],
+        "protocols": [],
+        "restrictions": [],
+        "awareness": {
+            "last_event_seen": null,
+            "current_memory_context": null
+        },
+        "status": "active",
+        "created_at": "2026-05-30T12:45:37.165955"
     }
 }

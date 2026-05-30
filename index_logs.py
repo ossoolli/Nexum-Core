@@ -6,17 +6,7 @@ import dotenv
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 dotenv.load_dotenv(os.path.join(BASE_DIR, ".env"))
 
-db_key = os.getenv("NEXUM_DB_ENCRYPTION_KEY")
-if db_key:
-    try:
-        from pysqlcipher3 import dbapi2 as sqlite3
-        _use_cipher = True
-    except ImportError:
-        import sqlite3
-        _use_cipher = False
-else:
-    import sqlite3
-    _use_cipher = False
+import sqlite3
 
 log_dir = os.path.join(BASE_DIR, "storage", "logs")
 db_path = os.path.join(BASE_DIR, "storage", "sovereign_memory", "memory.db")
@@ -27,15 +17,6 @@ log_files = [
 ]
 
 conn = sqlite3.connect(db_path)
-if _use_cipher and db_key:
-    cursor = conn.cursor()
-    escaped_key = db_key.replace("'", "''")
-    cursor.execute(f"PRAGMA key = '{escaped_key}';")
-    try:
-        cursor.execute("PRAGMA cipher_compatibility = 3;")
-        cursor.execute("SELECT 1 FROM sqlite_master LIMIT 1;")
-    except Exception:
-        cursor.execute("PRAGMA cipher_compatibility = 4;")
 cursor = conn.cursor()
 
 for log_file in log_files:
