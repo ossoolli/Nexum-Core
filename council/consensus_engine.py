@@ -38,6 +38,49 @@ class ConsensusToken:
     merged_output: str
     timestamp: str
 
+def trigger_emergency_wallet_alert():
+    import requests
+    token = os.getenv("TELEGRAM_TOKEN") or os.getenv("TELEGRAM_BOT_TOKEN")
+    chat_id = os.getenv("LOG_CHANNEL_ID") or os.getenv("HERMES_SESSION_CHAT_ID") or "-1003969021809"
+    if token and chat_id:
+        msg = "🚨 **تنبيه طوارئ Nexum-Core** 🚨\nفشل التراجع السيادي: عجز في الدفع أو رصيد غير كافٍ على العقدة الاحتياطية (Error 402 - Payment Required)!"
+        url = f"https://api.telegram.org/bot{token}/sendMessage"
+        try:
+            requests.post(url, json={"chat_id": chat_id, "text": msg, "parse_mode": "Markdown"}, timeout=5)
+        except Exception as e:
+            logger.error(f"Failed to send emergency telegram alert: {e}")
+
+def call_secure_internal_llm(prompt):
+    import requests
+    secure_endpoint = os.getenv("SOVEREIGN_AI_BACKUP_URL", "https://openrouter.ai/api/v1/chat/completions")
+    secure_key = os.getenv("SOVEREIGN_AI_KEY") or os.getenv("OPENROUTER_API_KEY")
+    headers = {
+        "Authorization": f"Bearer {secure_key}",
+        "Content-Type": "application/json"
+    }
+    data = {
+        "model": "anthropic/claude-sonnet-4",
+        "messages": [{"role": "user", "content": prompt}],
+        "max_tokens": 1200
+    }
+    try:
+        response = requests.post(secure_endpoint, json=data, headers=headers, timeout=10)
+        if response.status_code == 402:
+            trigger_emergency_wallet_alert()
+            raise Exception("Sovereign Fallback Failed: Payment Required on Backup Node (HTTP 402).")
+        response.raise_for_status()
+        res_json = response.json()
+        if "choices" in res_json:
+            return res_json["choices"][0]["message"]["content"]
+        elif "response" in res_json:
+            return res_json["response"]
+        else:
+            return str(res_json)
+    except Exception as e:
+        if "402" in str(e):
+            trigger_emergency_wallet_alert()
+        raise e
+
 class CouncilConsensusEngine:
     def __init__(self):
         self.debate_protocol = CouncilDebateProtocol(self)
@@ -57,28 +100,28 @@ class CouncilConsensusEngine:
         """تحديد ما إذا كان الرد يمثل خطأ استدعاء أو عطلاً في الرصيد/الشبكة"""
         if isinstance(res, Exception):
             return True
-        res_str = str(res)
+        res_str = str(res).strip()
+        if res_str.startswith("❌") or res_str.startswith("Error:"):
+            return True
+        # Check for technical signatures at the start of the response (first 100 chars)
+        prefix = res_str[:100].lower()
         error_indicators = [
-            "خطأ في الاتصال",
-            "Payment Required",
-            "402",
-            "Rate Limit",
-            "429",
-            "Unauthorized",
-            "401",
-            "Internal Server Error",
-            "500",
-            "Bad Gateway",
-            "502",
-            "404",
-            "NOT_FOUND",
-            "not found",
-            "خطأ في Agent Platform",
-            "Exception",
-            "exception",
-            "failed to"
+            "payment required",
+            "rate limit",
+            "resource_exhausted",
+            "unauthorized",
+            "internal server error",
+            "bad gateway",
+            "unauthenticated",
+            "api_key_invalid",
+            "http 401",
+            "http 404",
+            "http 429",
+            "http 402",
+            "http 500",
+            "http 502"
         ]
-        return any(ind in res_str for ind in error_indicators)
+        return any(ind in prefix for ind in error_indicators)
 
     async def _ask_fallback(self, prompt: str, target_sage: str) -> str:
         """استدعاء وكيل احتياطي سيادي (Gemini) للتصويت بالنيابة عن الموديل المتعطل برمجياً"""
@@ -92,10 +135,20 @@ class CouncilConsensusEngine:
             f"Here is the original deliberation prompt:\n{prompt}"
         )
         try:
-            res, _ = await asyncio.to_thread(gemini_service.ask, fallback_prompt, model="gemini-3.5-flash")
+            res, _ = await asyncio.to_thread(gemini_service.ask, fallback_prompt, model="gemini-2.5-flash")
+            if not res or any(ind in str(res) for ind in ["RESOURCE_EXHAUSTED", "429", "خطأ", "Exception", "failed to"]):
+                raise RuntimeError(f"Gemini failed or rate limited: {res}")
             return f"♻️ [Fallback for {target_sage.upper()}] " + res
         except Exception as e:
-            return f"REJECTED: Fallback alternate failed: {e}"
+            logger.warning(f"[Council Fallback] Gemini failed: {e}. Activating Sovereign Local Fallback...")
+            try:
+                res = await asyncio.to_thread(call_secure_internal_llm, fallback_prompt)
+                if not res or "❌" in res or "خطأ" in res:
+                    raise RuntimeError(f"Sovereign Local Fallback failed: {res}")
+                return f"♻️ [Fallback for {target_sage.upper()} via Sovereign Local] " + res
+            except Exception as fb_err:
+                logger.error(f"[Council Fallback] All fallbacks failed: {fb_err}")
+                return f"REJECTED: Fallback alternate failed: {fb_err}"
 
     async def _ask_sage_by_id(self, sage_id: str, prompt: str) -> str:
         """
@@ -176,7 +229,7 @@ class CouncilConsensusEngine:
             active_models = [
                 {"id": "claude", "model_name": "anthropic/claude-sonnet-4"},
                 {"id": "gpt", "model_name": "gpt-4o-mini"},
-                {"id": "gemini", "model_name": "gemini-3.5-flash"}
+                {"id": "gemini", "model_name": "gemini-2.5-flash"}
             ]
 
         # تشغيل جميع النماذج النشطة بالتوازي عبر خيوط معالجة آمنة

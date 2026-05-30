@@ -1,10 +1,14 @@
 import os
+import sys
+sys.path.insert(0, "/home/madarmutaz/Nexum-Core")
+from dotenv import load_dotenv
+load_dotenv()
 from telebot import TeleBot
 from nexum.skills import SovereignSkillsManager
-from nexum.cloud.agent_platform_connector import AgentPlatformConnector
+from nexum.cloud.agent_platform_connector import GoogleAgentPlatformConnector as AgentPlatformConnector
 
 # Setup
-bot_token = os.getenv("TELEGRAM_BOT_TOKEN")
+bot_token = os.getenv("TELEGRAM_TOKEN") or os.getenv("TELEGRAM_BOT_TOKEN")
 bot = TeleBot(bot_token)
 manager = SovereignSkillsManager(skills_dir="/home/madarmutaz/Nexum-Core/storage/skills")
 connector = AgentPlatformConnector()

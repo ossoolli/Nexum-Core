@@ -11,9 +11,8 @@ def test_protocol_engine():
     
     results = engine.execute_workflow(workflow)
     
-    assert 'step1' in results
-    assert 'step2' in results
-    assert 'step3' in results
+    assert 'scan_disk' in results
+    assert 'log_status' in results
     print("Workflow executed successfully!")
 
 if __name__ == '__main__':

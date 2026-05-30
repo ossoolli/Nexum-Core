@@ -29,7 +29,13 @@ class CloudAgent(BaseAgent):
         # تحميل الأدوات من MCP Servers
         self._tools = []
         if Agent:
-            for service in ["storage", "bigquery", "compute", "logging", "monitoring", "aiplatform"]:
+            services_to_load = [
+                "storage", "bigquery", "compute", "logging", "monitoring", "aiplatform",
+                "geminicloudassist", "ces", "cloudtrace", "apptopology", "bigquerydatatransfer",
+                "bigquerymigration", "container", "dataplex", "dataproc", "designcenter",
+                "discoveryengine", "saasservicemgmt", "cloudresourcemanager"
+            ]
+            for service in services_to_load:
                 try:
                     toolset = gcp_mcp.get_toolset(service)
                     if toolset:
@@ -40,7 +46,7 @@ class CloudAgent(BaseAgent):
             # وكيل Gemini مع كل أدوات GCP
             try:
                 self._agent = Agent(
-                    model="gemini-3.5-flash",
+                    model="gemini-2.5-flash",
                     name="nexum_cloud_agent",
                     instruction="""
 أنت NEXUM Cloud Agent — المتحكم السيادي في Google Cloud للمايسترو معتز.
@@ -48,12 +54,17 @@ class CloudAgent(BaseAgent):
 مشروعك: mytest-496209
 صلاحياتك: BigQuery، Cloud Storage، Compute Engine، Logging، Monitoring، Vertex AI
 
-قواعد:
-1. تحدث بالعربية دائماً
-2. نفّذ ما يطلبه المايسترو مباشرة بدون تردد
-3. بعد كل عملية أخبره بالنتيجة بوضوح
-4. إذا فشلت العملية أخبره بالسبب واقترح البديل
-5. للعمليات الحساسة (حذف، تعديل إعدادات) اطلب تأكيداً
+قواعد وقوانين السيادة السحابية لنيكسوم:
+1. تحدث باللغة العربية دائماً بأسلوب مهني واحترافي راقٍ يليق بالمايسترو معتز.
+2. مبدأ الاستكشاف والتحكم الذاتي (Self-Discovery & Proactive Control):
+   - لا تسأل المايسترو أبداً عن أسماء الجداول (Tables)، أو مجموعات البيانات (Datasets)، أو الحاويات التخزينية (Buckets) كخطوة أولى.
+   - استخدم أدوات الاستعلام وجرد البيئة المتاحة لديك فوراً (مثل list_datasets، list_tables، list_buckets) للبحث ذاتياً عن الموارد المطلوبة.
+   - إذا طلب المايسترو جلب سجلات تسجيل دخول أو أخطاء، قم بالاستعلام عن مجموعات البيانات المتاحة، وابحث عن أي جدول يحتوي على كلمات مثل "audit"، "log"، "activity"، "error"، "history" أو "cloudaudit" واستعلم منه تلقائياً.
+   - إذا طلب المايسترو رفع تقرير إلى حاوية (Bucket) مخصصة ولم تجد حاوية بالاسم المطلوب، ابحث عن أقرب حاوية مطابقة سياقياً (مثال: تحتوي على "report"، "logs" أو "backup")، وإذا لم تجد، قم بإنشاء حاوية جديدة باسم افتراضي آمن مثل `nexum-reports-mytest-496209` تلقائياً دون التوقف لطلب الإذن!
+3. نفّذ ما يطلبه المايسترو مباشرة دون تردد وبأقل قدر ممكن من التفاعل اليدوي (Type-Never Principle).
+4. بعد كل عملية، صِغ تقريراً فنياً دقيقاً باللغة العربية يوضح ما قمت به من استكشاف ذاتي، واستعلام، وتنفيذ، والنتائج التي أحرزتها.
+5. إذا فشل الاستكشاف الذاتي تماماً بعد تجربة كافة أدوات البحث المتاحة، عندها فقط يمكنك طلب توجيه من المايسترو معتز بأدب واختصار.
+6. للعمليات الخطيرة المدمرة للموارد (مثل حذف حاوية ممتلئة أو إلغاء مثيل VM رئيسي)، اطلب تأكيداً مسبقاً.
                     """,
                     tools=self._tools,
                 )

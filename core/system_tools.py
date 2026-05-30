@@ -12,6 +12,7 @@ from typing import Dict, Any
 
 from core.tool_registry import tool_registry
 from core.sandbox import sandbox
+from core.browser_sandbox import browser_sandbox
 from core.executor import executor
 from core.cloud_storage import cloud_manager
 import shutil
@@ -60,6 +61,19 @@ def run_in_sandbox(agent_id: str, script_content: str, language: str = "python")
     استخدم هذا لتنفيذ أكواد حسابية معقدة، فحص مكتبات خارجية، أو تجربة سكربتات غير موثوقة.
     """
     return sandbox.execute_in_sandbox(agent_id, script_content, language)
+
+
+def execute_browser_command(action: str, url: str, selector: str = "", value: str = "", approved_by_human: bool = False) -> Dict[str, Any]:
+    """
+    يقوم بتشغيل متصفح ويب معزول كلياً لتصفح وقراءة المواقع والوثائق التقنية (Playwright/Docker).
+    مع تطبيق بروتوكول الأمان الصارم المعتمد (بيئة معزولة، موافقة بشرية للكتابة، قائمة نطاقات مسموحة، تطهير البيانات).
+    """
+    params = {
+        "selector": selector,
+        "value": value,
+        "approved_by_human": approved_by_human
+    }
+    return browser_sandbox.execute_browser_command(action, url, params)
 
 
 def run_host_terminal(command: str) -> Dict[str, Any]:
@@ -203,6 +217,7 @@ def register_all_system_tools():
     """يسجل جميع أدوات النظام في السجل المركزي"""
     # ─── أدوات النظام الأساسية ───
     tool_registry.register_local_tool("run_in_sandbox", run_in_sandbox)
+    tool_registry.register_local_tool("execute_browser_command", execute_browser_command)
     tool_registry.register_local_tool("run_host_terminal", run_host_terminal)
     tool_registry.register_local_tool("write_file", write_file)
     tool_registry.register_local_tool("read_file", read_file)

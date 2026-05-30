@@ -1,10 +1,26 @@
-import sqlite3
+import os
 import threading
 import time
 import json
 import logging
 from datetime import datetime
 from typing import Optional, List, Dict, Any
+from dotenv import load_dotenv
+
+# Load environment variables to ensure we have the DB encryption key
+load_dotenv(dotenv_path="/home/madarmutaz/Nexum-Core/.env", override=True)
+
+db_key = os.getenv("NEXUM_DB_ENCRYPTION_KEY")
+if db_key:
+    try:
+        from pysqlcipher3 import dbapi2 as sqlite3
+        _use_cipher = True
+    except ImportError:
+        import sqlite3
+        _use_cipher = False
+else:
+    import sqlite3
+    _use_cipher = False
 
 class SovereignMemoryStore:
     def __init__(self, db_path: str = "/home/madarmutaz/.hermes/state.db"):
@@ -57,7 +73,24 @@ class SovereignMemoryStore:
         # Use simple retry-wait for locked database
         while True:
             try:
-                return sqlite3.connect(self.db_path, timeout=10)
+                if _use_cipher and db_key:
+                    # Try SQLCipher 3 first
+                    try:
+                        conn = sqlite3.connect(self.db_path, timeout=10)
+                        cursor = conn.cursor()
+                        cursor.execute(f"PRAGMA key = '{db_key}';")
+                        cursor.execute("PRAGMA cipher_compatibility = 3;")
+                        cursor.execute("SELECT 1 FROM sqlite_master LIMIT 1;")
+                        return conn
+                    except Exception:
+                        # Try SQLCipher 4
+                        conn = sqlite3.connect(self.db_path, timeout=10)
+                        cursor = conn.cursor()
+                        cursor.execute(f"PRAGMA key = '{db_key}';")
+                        cursor.execute("PRAGMA cipher_compatibility = 4;")
+                        return conn
+                else:
+                    return sqlite3.connect(self.db_path, timeout=10)
             except sqlite3.OperationalError as e:
                 if "database is locked" in str(e):
                     time.sleep(0.1)
@@ -103,5 +136,18 @@ class SovereignMemoryStore:
                     # Very simple compression: keep newest N, summarize oldest
                     # This is just a stub for now as requested
                     pass
+            finally:
+                conn.close()
+
+    def add_memories_batch(self, memories: List[tuple]):
+        """Insert multiple memory entries efficiently in a single batch."""
+        if not memories:
+            return
+        with self.lock:
+            conn = self._get_connection()
+            try:
+                cursor = conn.cursor()
+                cursor.executemany("INSERT INTO memories (role, content) VALUES (?, ?)", memories)
+                conn.commit()
             finally:
                 conn.close()

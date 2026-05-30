@@ -14,15 +14,30 @@ LOCATION = "global"
 
 # MCP Servers المتاحة مع أدواتها
 MCP_SERVERS = {
-    "bigquery":         f"projects/{PROJECT_ID}/locations/{LOCATION}/mcpServers/bigquery.googleapis.com",
-    "storage":          f"projects/{PROJECT_ID}/locations/{LOCATION}/mcpServers/storage.googleapis.com",
-    "compute":          f"projects/{PROJECT_ID}/locations/{LOCATION}/mcpServers/compute.googleapis.com",
-    "logging":          f"projects/{PROJECT_ID}/locations/{LOCATION}/mcpServers/logging.googleapis.com",
-    "monitoring":       f"projects/{PROJECT_ID}/locations/{LOCATION}/mcpServers/monitoring.googleapis.com",
-    "aiplatform":       f"projects/{PROJECT_ID}/locations/{LOCATION}/mcpServers/aiplatform.googleapis.com",
-    "geminicloudassist":f"projects/{PROJECT_ID}/locations/{LOCATION}/mcpServers/geminicloudassist.googleapis.com",
-    "agentregistry":    f"projects/{PROJECT_ID}/locations/{LOCATION}/mcpServers/agentregistry.googleapis.com",
-    "cloudtrace":       f"projects/{PROJECT_ID}/locations/{LOCATION}/mcpServers/cloudtrace.googleapis.com",
+    "bigquery":             f"projects/{PROJECT_ID}/locations/{LOCATION}/mcpServers/bigquery.googleapis.com",
+    "storage":              f"projects/{PROJECT_ID}/locations/{LOCATION}/mcpServers/storage.googleapis.com",
+    "compute":              f"projects/{PROJECT_ID}/locations/{LOCATION}/mcpServers/compute.googleapis.com",
+    "logging":              f"projects/{PROJECT_ID}/locations/{LOCATION}/mcpServers/logging.googleapis.com",
+    "monitoring":           f"projects/{PROJECT_ID}/locations/{LOCATION}/mcpServers/monitoring.googleapis.com",
+    "aiplatform":           f"projects/{PROJECT_ID}/locations/{LOCATION}/mcpServers/aiplatform.googleapis.com",
+    "geminicloudassist":    f"projects/{PROJECT_ID}/locations/{LOCATION}/mcpServers/geminicloudassist.googleapis.com",
+    "agentregistry":        f"projects/{PROJECT_ID}/locations/{LOCATION}/mcpServers/agentregistry.googleapis.com",
+    "cloudtrace":           f"projects/{PROJECT_ID}/locations/{LOCATION}/mcpServers/cloudtrace.googleapis.com",
+    "pubsub":               f"projects/{PROJECT_ID}/locations/{LOCATION}/mcpServers/pubsub.googleapis.com",
+    "spanner":              f"projects/{PROJECT_ID}/locations/{LOCATION}/mcpServers/spanner.googleapis.com",
+    "sqladmin":             f"projects/{PROJECT_ID}/locations/{LOCATION}/mcpServers/sqladmin.googleapis.com",
+    # خوادم GCP MCP الإضافية كما طلب المايسترو
+    "apptopology":          f"projects/{PROJECT_ID}/locations/{LOCATION}/mcpServers/apptopology.googleapis.com",
+    "bigquerydatatransfer": f"projects/{PROJECT_ID}/locations/{LOCATION}/mcpServers/bigquerydatatransfer.googleapis.com",
+    "bigquerymigration":    f"projects/{PROJECT_ID}/locations/{LOCATION}/mcpServers/bigquerymigration.googleapis.com",
+    "ces":                  f"projects/{PROJECT_ID}/locations/{LOCATION}/mcpServers/ces.googleapis.com",
+    "container":            f"projects/{PROJECT_ID}/locations/{LOCATION}/mcpServers/container.googleapis.com",
+    "dataplex":             f"projects/{PROJECT_ID}/locations/{LOCATION}/mcpServers/dataplex.googleapis.com",
+    "dataproc":             f"projects/{PROJECT_ID}/locations/{LOCATION}/mcpServers/dataproc.googleapis.com",
+    "designcenter":         f"projects/{PROJECT_ID}/locations/{LOCATION}/mcpServers/designcenter.googleapis.com",
+    "discoveryengine":      f"projects/{PROJECT_ID}/locations/{LOCATION}/mcpServers/discoveryengine.googleapis.com",
+    "saasservicemgmt":      f"projects/{PROJECT_ID}/locations/{LOCATION}/mcpServers/saasservicemgmt.googleapis.com",
+    "cloudresourcemanager": f"projects/{PROJECT_ID}/locations/{LOCATION}/mcpServers/cloudresourcemanager.googleapis.com",
 }
 
 def header_provider(context):

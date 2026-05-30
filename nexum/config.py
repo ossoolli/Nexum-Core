@@ -3,6 +3,7 @@ from pydantic import Field
 from pathlib import Path
 from typing import Optional
 import os
+from dotenv import load_dotenv
 
 # تحديد المجلد الرئيسي للمشروع بدقة
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -20,6 +21,9 @@ for pf in POSSIBLE_FILES:
     if pf.exists():
         selected_file = str(pf)
         break
+
+if selected_file:
+    load_dotenv(dotenv_path=selected_file, override=True)
 
 print(f"[Config] Loading credentials from: {selected_file}")
 
@@ -48,8 +52,8 @@ class NexumConfig(BaseSettings):
     google_cloud_project: str = Field(default="", alias="GOOGLE_CLOUD_PROJECT")
     google_cloud_location: str = Field(default="global", alias="GOOGLE_CLOUD_LOCATION")
     google_genai_use_vertexai: bool = Field(default=False, alias="GOOGLE_GENAI_USE_VERTEXAI")
-    gemini_model: str = Field(default="gemini-3.5-flash", alias="GEMINI_MODEL")
-    gemini_image_model: str = Field(default="gemini-3.5-flash", alias="GEMINI_IMAGE_MODEL")
+    gemini_model: str = Field(default="gemini-2.5-flash", alias="GEMINI_MODEL")
+    gemini_image_model: str = Field(default="gemini-2.5-flash", alias="GEMINI_IMAGE_MODEL")
 
     # Internal paths & configs
     storage_dir: Path = Field(default=BASE_DIR / "storage")

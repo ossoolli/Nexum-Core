@@ -43,7 +43,7 @@ class CouncilKnowledgeArchive:
                 task_id=getattr(token, "task_id", str(hash(task))),
                 approved=token.approved,
                 votes=votes_list,
-                merged_output=token.merged_output[:2000] if token.merged_output else "",
+                merged_output=token.merged_output if token.merged_output else "",
                 consensus_grade=token.consensus_grade
             )
             

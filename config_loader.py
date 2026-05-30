@@ -56,10 +56,9 @@ def get_config() -> SimpleNamespace:
             env_vars = _load_env_file(pf)
             break
             
-    # Populate os.environ with variables loaded from file if they aren't already set
+    # Populate os.environ with variables loaded from file, prioritizing .env
     for k, v in env_vars.items():
-        if not os.getenv(k):
-            os.environ[k] = v
+        os.environ[k] = v
 
     cfg = {}
     yaml_path = os.path.join(os.path.dirname(__file__), "config.yaml")

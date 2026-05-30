@@ -26,7 +26,7 @@ logger = logging.getLogger("nexum.agent_platform")
 # ⚠️ يجب استخدام أسماء الموديلات المتاحة فعلياً على المشروع
 MODEL_MAPPING = {
     # Google Models — الموديلات المستقرة الحديثة
-    "gemini-3.5-flash": "gemini-3.5-flash",
+    "gemini-3.5-flash": "gemini-2.5-flash",
     "gemini-3.1-flash-lite": "gemini-3.1-flash-lite",
     "gemini-2.5-flash": "gemini-2.5-flash",
     "gemini-2.5-pro": "gemini-2.5-pro",
@@ -52,8 +52,8 @@ MODEL_MAPPING = {
     
     # GPT — يُعالج عبر OpenAI مباشرة (غير متاح في Model Garden)
     # يُوجّه كاحتياطي إلى Gemini إن لم يتوفر مفتاح OpenAI
-    "gpt-4o": "gemini-3.5-flash",
-    "gpt-4o-mini": "gemini-3.5-flash",
+    "gpt-4o": "gemini-2.5-flash",
+    "gpt-4o-mini": "gemini-2.5-flash",
     
     # Grok via Model Garden / Partner Publishers or Custom Endpoints
     "grok-beta": "publishers/xai/models/grok-beta",
@@ -128,7 +128,7 @@ class AgentPlatformEngine:
         """تحقق من جاهزية المحرك"""
         return self._available and self.client is not None
 
-    def ask(self, prompt: str, model: str = "gemini-3.5-flash") -> Tuple[str, None]:
+    def ask(self, prompt: str, model: str = "gemini-2.5-flash") -> Tuple[str, None]:
         """
         استدعاء موديل عبر Vertex AI Agent Platform.
 
@@ -159,6 +159,27 @@ class AgentPlatformEngine:
 
         except Exception as e:
             error_msg = str(e)
+            # Check if it's an authentication error
+            is_auth_error = any(k in error_msg.lower() for k in ["401", "unauthenticated", "invalid authentication", "credentials"])
+            if is_auth_error:
+                logger.warning("[AgentPlatform] Detected authentication failure. Attempting fallback to standard Application Default Credentials (ADC)...")
+                try:
+                    from google import genai
+                    from google.genai.types import HttpOptions
+                    # Initialize using standard ADC
+                    fallback_client = genai.Client(http_options=HttpOptions(api_version="v1"))
+                    response = fallback_client.models.generate_content(
+                        model=target_model,
+                        contents=prompt,
+                    )
+                    if response and response.text:
+                        # Success! Update our main client for future requests
+                        self.client = fallback_client
+                        logger.info("[AgentPlatform] Standard ADC fallback succeeded. Updated client to use ADC.")
+                        return response.text, None
+                except Exception as fallback_err:
+                    logger.error(f"[AgentPlatform] ADC Fallback also failed: {fallback_err}")
+            
             logger.error(
                 f"[AgentPlatform] Model '{model}' (-> '{target_model}') failed: {error_msg}"
             )

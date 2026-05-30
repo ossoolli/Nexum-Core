@@ -1,0 +1,11 @@
+{
+  "agent_id": "nexum-sentinel",
+  "version": "2026.5.30",
+  "allowed_scopes": ["read_logs", "fts5_indexing", "check_ports"],
+  "forbidden_scopes": ["delete_database", "change_iam_roles", "disable_pm2_clusters"],
+  "require_human_approval": {
+    "terminal_commands": ["rm -rf", "pm2 delete", "chmod 777"],
+    "file_modifications": ["/home/madarmutaz/Nexum-Core/nexum-core.py"]
+  },
+  "max_memory_limit_mb": 512
+}

@@ -597,23 +597,73 @@ def handle_deliberation(message):
         loop = asyncio.new_event_loop()
         token = loop.run_until_complete(council_consensus.deliberate(task))
         
-        votes_str = "\n".join([f"• `{model}`: {'APPROVED ✅' if vote else 'REJECTED ❌'}" for model, vote in token.votes.items()])
-        
+        votes_str = "\n".join([f"• <code>{model}</code>: {'APPROVED ✅' if vote else 'REJECTED ❌'}" for model, vote in token.votes.items()])
         status_icon = "🏆 APPROVED & EXECUTING" if token.approved else "❌ REJECTED"
+        
         output = (
-            f"🏛️ **تقرير جلسة مجلس الحكماء:**\n\n"
-            f"📌 **المهمة:** `{task}`\n\n"
-            f"📊 **الأصوات والقرار:**\n{votes_str}\n\n"
-            f"🧬 **درجة التوافق والقرار الكلي:** `{token.consensus_grade}`\n"
-            f"👑 **الحالة النهائية:** `{status_icon}`\n\n"
+            f"🏛️ <b>تقرير جلسة مجلس الحكماء:</b>\n\n"
+            f"📌 <b>المهمة:</b> <code>{task}</code>\n\n"
+            f"📊 <b>الأصوات والقرار:</b>\n{votes_str}\n\n"
+            f"🧬 <b>درجة التوافق والقرار الكلي:</b> <code>{token.consensus_grade}</code>\n"
+            f"👑 <b>الحالة النهائية:</b> <code>{status_icon}</code>\n\n"
         )
-        if token.approved and token.merged_output:
-            output += f"💻 **المخرج البرمجي المدمج المعتمد:**\n<pre>{token.merged_output[:2500]}</pre>"
-        else:
-            reason_str = "\n\n".join([f"🗣️ **{model.upper()}:** {reason}" for model, reason in token.reasoning.items()])
-            output += f"📝 **مسودة النقاش والاعتراضات:**\n{reason_str[:1500]}"
+
+        def split_text_by_newlines(text: str, max_chars: int = 3800) -> list:
+            """تجزئة النص بشكل ذكي ومحاولة القطع عند السطور لعدم إفساد التنسيق"""
+            if len(text) <= max_chars:
+                return [text]
             
-        bot.send_message(message.chat.id, output, parse_mode="HTML")
+            chunks = []
+            lines = text.split('\n')
+            current_chunk = []
+            current_length = 0
+            
+            for line in lines:
+                if len(line) > max_chars:
+                    if current_chunk:
+                        chunks.append('\n'.join(current_chunk))
+                        current_chunk = []
+                        current_length = 0
+                    for i in range(0, len(line), max_chars):
+                        chunks.append(line[i:i+max_chars])
+                    continue
+                    
+                if current_length + len(line) + 1 > max_chars:
+                    chunks.append('\n'.join(current_chunk))
+                    current_chunk = [line]
+                    current_length = len(line)
+                else:
+                    current_chunk.append(line)
+                    current_length += len(line) + 1
+                    
+            if current_chunk:
+                chunks.append('\n'.join(current_chunk))
+            return chunks
+
+        if token.approved and token.merged_output:
+            output += f"💻 <b>المخرج البرمجي المدمج المعتمد:</b>"
+            bot.send_message(message.chat.id, output, parse_mode="HTML")
+            
+            # إرسال الكود البرمجي كاملاً دون اقتطاع على دفعات منسقة ومغلفة بـ <pre>
+            chunks = split_text_by_newlines(token.merged_output, max_chars=3500)
+            for idx, chunk in enumerate(chunks):
+                part_suffix = f"\n\n<i>(يتبع في الرسالة التالية...)</i>" if idx < len(chunks) - 1 else ""
+                part_prefix = f"<i>(تكملة المخرج المعتمد...)</i>\n\n" if idx > 0 else ""
+                chunk_msg = f"{part_prefix}<pre>{chunk}</pre>{part_suffix}"
+                bot.send_message(message.chat.id, chunk_msg, parse_mode="HTML")
+        else:
+            reason_str = "\n\n".join([f"🗣️ <b>{model.upper()}:</b> {reason}" for model, reason in token.reasoning.items()])
+            output += f"📝 <b>مسودة النقاش والاعتراضات:</b>"
+            bot.send_message(message.chat.id, output, parse_mode="HTML")
+            
+            # إرسال الاعتراضات والمسودة كاملة دون اقتطاع على دفعات منسقة
+            chunks = split_text_by_newlines(reason_str, max_chars=3500)
+            for idx, chunk in enumerate(chunks):
+                part_suffix = f"\n\n<i>(يتبع...)</i>" if idx < len(chunks) - 1 else ""
+                part_prefix = f"<i>(تكملة مسودة النقاش...)</i>\n\n" if idx > 0 else ""
+                chunk_msg = f"{part_prefix}{chunk}{part_suffix}"
+                bot.send_message(message.chat.id, chunk_msg, parse_mode="HTML")
+                
     except Exception as e:
         bot.reply_to(message, f"❌ حدث خطأ أثناء انعقاد الجلسة: {e}")
 
@@ -982,8 +1032,46 @@ def handle_universal(message):
     if message.from_user.id != ADMIN_ID:
         return
 
-    chat_id = message.chat.id
     text = message.text or message.caption or ""
+
+    # التحقق من نوع الشات (مجموعة أو قناة) لتجنب الرد العشوائي على كل شيء
+    if message.chat.type != 'private':
+        # الحالات التي يجب على البوت الاستجابة فيها في المجموعات والقنوات المشتركة:
+        # 1. إذا كانت الرسالة أمراً يبدأ بـ '/'
+        is_command = text.strip().startswith('/')
+        
+        # 2. الحصول على اسم مستخدم البوت وهويته
+        try:
+            if not hasattr(bot, "username_cached") or not bot.username_cached:
+                me = bot.get_me()
+                bot.username_cached = me.username
+                bot.user_id_cached = me.id
+        except Exception:
+            bot.username_cached = None
+            bot.user_id_cached = None
+
+        # 3. التحقق مما إذا تم الإشارة إلى البوت صراحة عبر المنشن
+        has_mention = False
+        if bot.username_cached:
+            has_mention = f"@{bot.username_cached.lower()}" in text.lower()
+            
+        # 4. إذا كانت الرسالة رداً على رسالة سابقة من هذا البوت تحديداً
+        is_reply_to_this_bot = False
+        try:
+            if (message.reply_to_message is not None and 
+                message.reply_to_message.from_user is not None):
+                if bot.user_id_cached:
+                    is_reply_to_this_bot = (message.reply_to_message.from_user.id == bot.user_id_cached)
+                else:
+                    is_reply_to_this_bot = message.reply_to_message.from_user.is_bot
+        except Exception:
+            is_reply_to_this_bot = False
+            
+        # إذا لم يكن أمراً، ولم يتم منشن البوت صراحة، ولم يكن رداً على هذا البوت تحديداً، يتم تجاهل الرسالة تماماً لتجنب حلقات اللوب اللانهائية
+        if not (is_command or has_mention or is_reply_to_this_bot):
+            return
+
+    chat_id = message.chat.id
 
     # معالجة الملفات والوسائط
     file_data = None
@@ -1119,6 +1207,32 @@ def _handle_chat(message, text, file_data=None, mime_type=None):
     # حفظ السياق
     context_memory.save_context(ADMIN_ID, text if text else "[Media/File]", role='user')
     context_memory.save_context(ADMIN_ID, res[:2000], role='model')
+
+
+# ═══════════════════════════════════════════════════════
+# ║  قناة التواصل السيادية (Channel Post Handler Hook)  ║
+# ═══════════════════════════════════════════════════════
+
+@bot.channel_post_handler(content_types=['photo', 'document', 'text'])
+@bot_error_handler
+def handle_channel_posts_as_messages(message):
+    """تحويل منشورات القنوات الآتية من القناة المصرح بها إلى رسائل تبدو كأنها من المدير."""
+    class ShadowUser:
+        def __init__(self, admin_id):
+            self.id = admin_id
+            self.is_bot = False
+            self.first_name = "Admin"
+            self.username = "admin"
+            self.last_name = ""
+            self.language_code = "ar"
+
+    message.from_user = ShadowUser(ADMIN_ID)
+    
+    # محاولة تشغيل المعالجات المسجلة في البوت عن أول معالج يتطابق مع هذه الرسالة المحدثة
+    for handler in bot.message_handlers:
+        if bot._test_message_handler(handler, message):
+            handler['function'](message)
+            break
 
 
 # ═══════════════════════════════════════════════════════

@@ -110,7 +110,7 @@
             "current_memory_context": null
         },
         "status": "active",
-        "created_at": "2026-05-30T01:15:23.833991"
+        "created_at": "2026-05-30T03:18:43.710254"
     },
     "github_integration_agent": {
         "agent_id": "github_integration_agent",
@@ -212,7 +212,7 @@
             "current_memory_context": null
         },
         "status": "active",
-        "created_at": "2026-05-29T23:27:25.233380"
+        "created_at": "2026-05-30T06:26:21.008954"
     },
     "github_integration_manager": {
         "agent_id": "github_integration_manager",
@@ -229,7 +229,7 @@
             "current_memory_context": null
         },
         "status": "active",
-        "created_at": "2026-05-30T02:32:27.619362"
+        "created_at": "2026-05-30T05:14:15.654327"
     },
     "git_deployment_agent": {
         "agent_id": "git_deployment_agent",
@@ -298,5 +298,39 @@
         },
         "status": "active",
         "created_at": "2026-05-30T02:47:54.762362"
+    },
+    "mutaz_live_monitoring_agent": {
+        "agent_id": "mutaz_live_monitoring_agent",
+        "name": "mutaz_live_monitoring_agent",
+        "role": "Generated Agent",
+        "capabilities": [
+            "run"
+        ],
+        "tools": [],
+        "protocols": [],
+        "restrictions": [],
+        "awareness": {
+            "last_event_seen": null,
+            "current_memory_context": null
+        },
+        "status": "active",
+        "created_at": "2026-05-30T08:09:22.848288"
+    },
+    "sentinel_logger": {
+        "agent_id": "sentinel_logger",
+        "name": "sentinel_logger",
+        "role": "Generated Agent",
+        "capabilities": [
+            "run"
+        ],
+        "tools": [],
+        "protocols": [],
+        "restrictions": [],
+        "awareness": {
+            "last_event_seen": null,
+            "current_memory_context": null
+        },
+        "status": "active",
+        "created_at": "2026-05-30T09:01:24.422178"
     }
 }

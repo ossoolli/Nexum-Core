@@ -63,8 +63,8 @@ class SovereignTerminalController:
 
     # قائمة الأوامر المحظورة أمنيا -- لا يسمح بتنفيذها أبدا (Regex مع حدود الكلمات)
     FORBIDDEN_REGEX = [
-        re.compile(r"\brm\s+-rf\s+\/\b", re.IGNORECASE),
-        re.compile(r"\brm\s+-rf\s+\/\*\b", re.IGNORECASE),
+        re.compile(r"\brm\s+-rf\s+\/(?:\s|$)", re.IGNORECASE),
+        re.compile(r"\brm\s+-rf\s+\/\*(?:\s|$)", re.IGNORECASE),
         re.compile(r"\bmkfs\b", re.IGNORECASE),
         re.compile(r"\bshutdown\b", re.IGNORECASE),
         re.compile(r"\breboot\b", re.IGNORECASE),

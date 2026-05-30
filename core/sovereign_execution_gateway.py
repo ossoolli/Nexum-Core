@@ -55,7 +55,7 @@ AUDIT_LOG_PATH = os.path.join(LOGS_DIR, "nexum_audit.log")
 ALLOWED_COMMANDS = {"git", "python", "python3", "pip", "pip3", "ls", "echo", "cat", "apt-get", "sudo", "docker"}
 
 # الأوامر الحساسة التي تتطلب موافقة بشرية (Human-in-the-Loop)
-SENSITIVE_COMMANDS = set()
+SENSITIVE_COMMANDS = {"pip", "pip3", "apt-get", "sudo"}
 
 # كاشف حقن الأوامر (Command Injection Detector)
 INJECTION_PATTERN = re.compile(r"[;|`><]|&|\$\(")

@@ -37,6 +37,28 @@ class NexumSentinel:
         self.council = council_consensus
         self.predictive_sentinel = PredictiveSentinel()
         self.interval = 60
+        self.cycle_count = 0
+
+    async def index_system_state(self):
+        """بناء الفهرس المعرفي السيادي للمشروع والسجلات تلقائياً."""
+        try:
+            logger.info("📥 Sentinel Indexing: Building sovereign cognitive index...")
+            
+            # Execute deep indexing of files
+            from deep_index_script import deep_index
+            count, lessons = deep_index()
+            logger.info(f"✅ Cognitive index: {count} documents and {lessons} lessons learned.")
+            
+            # Index logs safely in a subprocess to avoid DB locks in the main thread
+            import subprocess
+            res = subprocess.run([sys.executable, os.path.join(PROJECT_ROOT, "index_logs.py")], 
+                                 capture_output=True, text=True)
+            if res.returncode == 0:
+                logger.info("✅ Log indexing completed successfully.")
+            else:
+                logger.error(f"❌ Log indexing failed with exit code {res.returncode}: {res.stderr}")
+        except Exception as e:
+            logger.error(f"❌ Error during Sentinel indexing: {e}")
 
     async def run(self):
         """Infinite loop for autonomous maintenance and evolution."""
@@ -64,6 +86,11 @@ class NexumSentinel:
                 
                 # 4. Run Predictive Monitor
                 self.predictive_sentinel.analyze_logs()
+
+                # 5. Periodic Sovereign Cognitive Indexing (Every 10 cycles)
+                if self.cycle_count % 10 == 0:
+                    await self.index_system_state()
+                self.cycle_count += 1
 
             except Exception as e:
                 logger.error(f"❌ Sentinel Error: {e}")

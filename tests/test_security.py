@@ -15,7 +15,7 @@ def test_rate_limiter():
 
 def test_dangerous_commands_logic():
     # هذا اختبار تجريبي لمنطق الحماية المخطط له في guard.py لاحقاً
-    from core.security import security_manager
+    from core.security import security
     dangerous = "rm -rf /"
     # النظام الحالي يجب أن يحجب الكلمات المفتاحية
     assert any(word in dangerous for word in ["rm -rf", "mkfs"])

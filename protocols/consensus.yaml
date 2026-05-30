@@ -14,7 +14,7 @@ active_models:
     weight: 1.0
     specialty: "creativity, strategy, API design"
   - id: "gemini"
-    model_name: "gemini-3.5-flash"
+    model_name: "gemini-2.5-flash"
     weight: 1.0
     specialty: "multimodal vision, quick execution, search integration"
   - id: "grok"

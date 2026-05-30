@@ -1,7 +1,7 @@
 {
   "name": "git_integration_agent",
   "class_name": "GitIntegrationAgentAgent",
-  "description": "وكيل سيادي مستقل مولد تلقائياً للقيام بـ: الاتصال الحقيقي والآمن بمستودعات GitHub لإدارة الفروع (Branches)، وتجهيز الملفات (Stage)، وتنفيذ عمليات الالتزام (Commit) والدفع (Push) للتحديثات البرمجية مباشرة إلى المستودع البعيد.",
+  "description": "وكيل سيادي مستقل مولد تلقائياً للقيام بـ: الاتصال الفعلي بمستودعات GitHub لإدارة النسخ وتمرير التحديثات البرمجية، ورفع الملفات ومزامنتها (Git Push/Commit) بشكل حقيقي وآمن بدلاً من محاكاة سطر الأوامر.",
   "tools": [
     "search_web",
     "fetch_webpage"
@@ -17,7 +17,7 @@
   "schedule": {
     "interval": "hourly"
   },
-  "created_at": "2026-05-30T01:15:08.055807",
+  "created_at": "2026-05-30T03:18:27.388617",
   "status": "BUILT",
   "path": "/home/madarmutaz/Nexum-Core/agents/generated/git_integration_agent_agent.py"
 }

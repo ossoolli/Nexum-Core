@@ -13,7 +13,7 @@ def index_files():
     ]
     
     # Walk through key directories
-    target_dirs = ["core", "nexum", "handlers", "services", "swarm"]
+    target_dirs = ["core", "nexum", "handlers", "services", "swarm", "scripts", "plugins", "tools", "optional-skills", "optional-mcps", "skills"]
     
     for dir_name in target_dirs:
         dir_path = os.path.join(project_dir, dir_name)

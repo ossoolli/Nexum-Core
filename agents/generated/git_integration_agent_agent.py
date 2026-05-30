@@ -1,198 +1,198 @@
 import os
-import subprocess
-import shutil
-from typing import List, Dict, Any
+import json
+import base64
+import requests
+from typing import Dict, Any, Optional
 from core.base_agent import BaseAgent
 
 class GitIntegrationAgentAgent(BaseAgent):
     """
-    GitIntegrationAgentAgent is an autonomous agent designed to securely connect 
-    to GitHub repositories, manage branches, stage modifications, commit updates,
-    and push changes to remote repositories automatically.
+    An autonomous agent that securely connects to GitHub repositories
+    to manage branches, commit updates, and push files using the GitHub REST API.
     """
-
-    def __init__(self, name: str = "git_integration_agent", *args, **kwargs):
+    
+    def __init__(self, agent_id: str, name: str = "git_integration_agent", config: Optional[Dict[str, Any]] = None):
         try:
-            super().__init__(name=name, *args, **kwargs)
+            super().__init__(agent_id=agent_id, name=name, config=config)
             self.tools = ['search_web', 'fetch_webpage']
             self.triggers = ['every_hour']
             
-            # Secure configurations from environment
-            self.github_token = os.getenv("GITHUB_TOKEN")
-            self.repo_owner = os.getenv("GITHUB_REPO_OWNER")
-            self.repo_name = os.getenv("GITHUB_REPO_NAME")
-            self.target_branch = os.getenv("GITHUB_BRANCH", "main")
-            self.local_path = os.getenv("LOCAL_REPO_PATH", "./cloned_repo")
-            self.git_author_name = os.getenv("GIT_AUTHOR_NAME", "Git Integration Agent")
-            self.git_author_email = os.getenv("GIT_AUTHOR_EMAIL", "agent@git-integration.local")
+            # Retrieve credentials from environment or config
+            self.github_token = os.environ.get("GITHUB_TOKEN") or (config.get("github_token") if config else None)
+            self.default_repo = os.environ.get("GITHUB_REPO") or (config.get("default_repo") if config else None)
+            self.api_url = "https://api.github.com"
             
-            self.log(f"Agent {self.name} initialized with tools {self.tools} and triggers {self.triggers}.")
+            self.log("GitIntegrationAgentAgent successfully initialized.")
         except Exception as e:
             if hasattr(self, 'log'):
-                self.log(f"Error during initialization: {str(e)}")
+                self.log(f"Error initializing GitIntegrationAgentAgent: {str(e)}", level="ERROR")
             else:
-                print(f"Error during initialization: {str(e)}")
+                print(f"Error initializing GitIntegrationAgentAgent: {str(e)}")
 
-    def run(self, payload: Dict[str, Any] = None) -> Dict[str, Any]:
-        """
-        Main execution loop triggered hourly. Checks credentials, pulls the repo,
-        applies any automated updates, and safely commits/pushes them.
-        """
+    def _get_headers(self) -> Dict[str, str]:
+        """Generates required headers for GitHub API requests."""
         try:
-            self.log("Starting Git Integration execution cycle...")
+            if not self.github_token:
+                raise ValueError("GitHub Personal Access Token (GITHUB_TOKEN) is missing.")
+            return {
+                "Authorization": f"Bearer {self.github_token}",
+                "Accept": "application/vnd.github+json",
+                "X-GitHub-Api-Version": "2022-11-28"
+            }
+        except Exception as e:
+            self.log(f"Error generating headers: {str(e)}", level="ERROR")
+            raise
+
+    def get_file_sha(self, repo: str, path: str, ref: str = "main") -> Optional[str]:
+        """Retrieves the SHA of a file if it exists, necessary for updates."""
+        try:
+            url = f"{self.api_url}/repos/{repo}/contents/{path}"
+            headers = self._get_headers()
+            params = {"ref": ref}
             
-            if not self.github_token or not self.repo_owner or not self.repo_name:
-                self.log("Missing GitHub configuration environment variables (GITHUB_TOKEN, GITHUB_REPO_OWNER, GITHUB_REPO_NAME).")
-                return {"status": "failed", "reason": "Missing environment credentials"}
-
-            # Step 1: Clone or update the repository
-            self.log("Synchronizing repository...")
-            sync_success = self._sync_repository()
-            if not sync_success:
-                return {"status": "failed", "reason": "Repository synchronization failed"}
-
-            # Step 2: Configure Git User Info
-            self._configure_git_user()
-
-            # Step 3: Manage local branch
-            self.log(f"Setting branch to: {self.target_branch}")
-            if not self._checkout_branch(self.target_branch):
-                return {"status": "failed", "reason": f"Failed to checkout/create branch {self.target_branch}"}
-
-            # Step 4: Detect changes or perform mock automation updates
-            # (In a real scenario, other tasks/agents write files to self.local_path)
-            self._apply_pending_updates()
-
-            # Step 5: Stage, Commit and Push changes
-            staged = self._stage_changes()
-            if staged:
-                commit_msg = "Auto-update by Git Integration Agent"
-                if self._commit_changes(commit_msg):
-                    if self._push_changes(self.target_branch):
-                        self.log("Successfully committed and pushed updates to remote repository.")
-                        return {"status": "success", "action": "pushed_updates"}
-                    else:
-                        self.log("Failed to push updates.")
-                        return {"status": "failed", "reason": "Push failed"}
-                else:
-                    self.log("Failed to commit updates.")
-                    return {"status": "failed", "reason": "Commit failed"}
+            response = requests.get(url, headers=headers, params=params)
+            if response.status_code == 200:
+                return response.json().get("sha")
+            elif response.status_code == 404:
+                return None
             else:
-                self.log("No changes detected to stage or push.")
-                return {"status": "success", "action": "no_changes"}
-
+                self.log(f"GitHub API returned code {response.status_code}: {response.text}", level="WARNING")
+                return None
         except Exception as e:
-            self.log(f"Error in run execution: {str(e)}")
-            return {"status": "failed", "error": str(e)}
+            self.log(f"Error retrieving file SHA for {path}: {str(e)}", level="ERROR")
+            return None
 
-    def _run_git_command(self, args: List[str], cwd: str = None) -> tuple:
-        """Helper to run shell git commands securely."""
+    def create_or_update_file(self, repo: str, path: str, content: str, commit_message: str, branch: str = "main") -> bool:
+        """Commits and pushes a file to the specified repository path."""
         try:
-            if cwd is None:
-                cwd = self.local_path
-            result = subprocess.run(
-                args,
-                cwd=cwd,
-                stdout=subprocess.PIPE,
-                stderr=subprocess.PIPE,
-                text=True,
-                check=True
-            )
-            return True, result.stdout.strip()
-        except subprocess.CalledProcessError as e:
-            self.log(f"Git command failed: {' '.join(args)} | Error: {e.stderr.strip()}")
-            return False, e.stderr.strip()
-        except Exception as e:
-            self.log(f"Unexpected error running git command: {str(e)}")
-            return False, str(e)
-
-    def _sync_repository(self) -> bool:
-        """Clones the repo if not exists, or pulls latest changes."""
-        try:
-            auth_url = f"https://{self.github_token}@github.com/{self.repo_owner}/{self.repo_name}.git"
+            url = f"{self.api_url}/repos/{repo}/contents/{path}"
+            headers = self._get_headers()
             
-            if os.path.exists(os.path.join(self.local_path, ".git")):
-                self.log("Local repository found. Pulling latest...")
-                success, _ = self._run_git_command(["git", "fetch", "--all"])
-                if success:
-                    success, _ = self._run_git_command(["git", "reset", "--hard", f"origin/{self.target_branch}"])
-                return success
+            # Fetch SHA if the file already exists (required for updates)
+            sha = self.get_file_sha(repo, path, branch)
+            
+            # Base64 encode file content
+            encoded_content = base64.b64encode(content.encode("utf-8")).decode("utf-8")
+            
+            data = {
+                "message": commit_message,
+                "content": encoded_content,
+                "branch": branch
+            }
+            if sha:
+                data["sha"] = sha
+                
+            response = requests.put(url, headers=headers, json=data)
+            
+            if response.status_code in [200, 201]:
+                self.log(f"Successfully committed and pushed '{path}' to branch '{branch}' in repository '{repo}'.")
+                return True
             else:
-                self.log("No local repository found. Cloning remotely...")
-                if os.path.exists(self.local_path):
-                    shutil.rmtree(self.local_path)
-                os.makedirs(self.local_path, exist_ok=True)
-                
-                # Clone command executed in parent directory of self.local_path
-                parent_dir = os.path.dirname(os.path.abspath(self.local_path))
-                folder_name = os.path.basename(self.local_path)
-                
-                success, _ = self._run_git_command(
-                    ["git", "clone", auth_url, folder_name],
-                    cwd=parent_dir
-                )
-                return success
-        except Exception as e:
-            self.log(f"Error in _sync_repository: {str(e)}")
-            return False
-
-    def _configure_git_user(self):
-        """Sets git configurations locally inside the repository."""
-        try:
-            self._run_git_command(["git", "config", "user.name", self.git_author_name])
-            self._run_git_command(["git", "config", "user.email", self.git_author_email])
-        except Exception as e:
-            self.log(f"Error configuring git user: {str(e)}")
-
-    def _checkout_branch(self, branch_name: str) -> bool:
-        """Checks out existing branch or creates a new one if it doesn't exist."""
-        try:
-            success, _ = self._run_git_command(["git", "checkout", branch_name])
-            if not success:
-                self.log(f"Branch {branch_name} not found. Creating locally...")
-                success, _ = self._run_git_command(["git", "checkout", "-b", branch_name])
-            return success
-        except Exception as e:
-            self.log(f"Error checking out branch {branch_name}: {str(e)}")
-            return False
-
-    def _apply_pending_updates(self):
-        """Mock method simulating generation of programmatic updates or agent logging."""
-        try:
-            agent_log_path = os.path.join(self.local_path, "agent_status.json")
-            with open(agent_log_path, "w", encoding="utf-8") as f:
-                f.write(f'{{"last_checked": "hourly", "agent": "{self.name}", "status": "active"}}')
-            self.log("Status log file updated/written to the workspace.")
-        except Exception as e:
-            self.log(f"Error generating update files: {str(e)}")
-
-    def _stage_changes(self) -> bool:
-        """Stages all updated files."""
-        try:
-            success, _ = self._run_git_command(["git", "add", "-A"])
-            if not success:
+                self.log(f"Failed to commit file. Status code: {response.status_code}. Response: {response.text}", level="ERROR")
                 return False
-            # Check if there are actual modifications staged
-            _, status_out = self._run_git_command(["git", "status", "--porcelain"])
-            return len(status_out.strip()) > 0
         except Exception as e:
-            self.log(f"Error staging changes: {str(e)}")
+            self.log(f"Exception during create_or_update_file: {str(e)}", level="ERROR")
             return False
 
-    def _commit_changes(self, message: str) -> bool:
-        """Commits staged changes."""
+    def create_branch(self, repo: str, new_branch_name: str, source_branch: str = "main") -> bool:
+        """Creates a new branch from an existing source branch."""
         try:
-            success, _ = self._run_git_command(["git", "commit", "-m", message])
-            return success
+            headers = self._get_headers()
+            
+            # Get base branch ref SHA
+            ref_url = f"{self.api_url}/repos/{repo}/git/ref/heads/{source_branch}"
+            ref_response = requests.get(ref_url, headers=headers)
+            
+            if ref_response.status_code != 200:
+                self.log(f"Could not find branch {source_branch}. Status code: {ref_response.status_code}", level="ERROR")
+                return False
+                
+            sha = ref_response.json().get("object", {}).get("sha")
+            
+            # Create new reference
+            create_ref_url = f"{self.api_url}/repos/{repo}/git/refs"
+            payload = {
+                "ref": f"refs/heads/{new_branch_name}",
+                "sha": sha
+            }
+            
+            response = requests.post(create_ref_url, headers=headers, json=payload)
+            if response.status_code == 201:
+                self.log(f"Successfully created branch '{new_branch_name}' from '{source_branch}' in '{repo}'.")
+                return True
+            else:
+                self.log(f"Failed to create branch. Status code: {response.status_code}. Response: {response.text}", level="ERROR")
+                return False
         except Exception as e:
-            self.log(f"Error committing changes: {str(e)}")
+            self.log(f"Exception during create_branch: {str(e)}", level="ERROR")
             return False
 
-    def _push_changes(self, branch_name: str) -> bool:
-        """Pushes modifications safely to the authenticated remote."""
+    def search_web(self, query: str) -> str:
+        """Tool implementation: Mocked web search for retrieving updates to integrate."""
         try:
-            success, _ = self._run_git_command(["git", "push", "-u", "origin", branch_name])
-            return success
+            self.log(f"Executing web search for: '{query}'")
+            # Simulated search response
+            return f"Search Results for '{query}': AI and Git integrations are rapidly standardizing CI/CD pipelines."
         except Exception as e:
-            self.log(f"Error pushing changes to branch {branch_name}: {str(e)}")
-            return False
+            self.log(f"Error executing search_web: {str(e)}", level="ERROR")
+            return ""
+
+    def fetch_webpage(self, url: str) -> str:
+        """Tool implementation: Fetching page information for updates."""
+        try:
+            self.log(f"Fetching webpage content from: {url}")
+            response = requests.get(url, timeout=10)
+            return response.text[:2000] # Safe slice for logging/handling
+        except Exception as e:
+            self.log(f"Error executing fetch_webpage for {url}: {str(e)}", level="ERROR")
+            return ""
+
+    def run(self) -> Dict[str, Any]:
+        """
+        Main execution loop. Fetches data, processes updates,
+        and securely performs genuine commits to the target GitHub repository.
+        """
+        try:
+            self.log("Starting GitIntegrationAgentAgent execution workflow.")
+            
+            if not self.github_token or not self.default_repo:
+                self.log("Missing configuration: 'GITHUB_TOKEN' and 'GITHUB_REPO' are required for operation.", level="ERROR")
+                return {"status": "error", "message": "Credentials/Repository missing"}
+
+            # Phase 1: Retrieve context/information using tools
+            search_query = "latest Python repository automated workflows 2024"
+            search_context = self.search_web(search_query)
+            
+            # Phase 2: Formulate dynamic content to save
+            report_content = (
+                f"# Git Integration Agent Sync Report\n\n"
+                f"**Agent Name:** {self.name}\n"
+                f"**Trigger:** Hourly Synchronizer\n\n"
+                f"### Collected Information Context:\n"
+                f"{search_context}\n\n"
+                f"--- \n*Generated automatically by sovereign GitIntegrationAgentAgent.*"
+            )
+            
+            # Phase 3: Perform secure commits using GitHub REST API
+            target_file_path = "reports/agent_sync_report.md"
+            target_branch = "main"
+            
+            self.log(f"Attempting to commit update directly to GitHub target: {target_file_path}")
+            success = self.create_or_update_file(
+                repo=self.default_repo,
+                path=target_file_path,
+                content=report_content,
+                commit_message="chore: automated sovereign update of sync report [skip ci]",
+                branch=target_branch
+            )
+            
+            if success:
+                self.log("Sovereign execution and commit completed successfully.")
+                return {"status": "success", "file_updated": target_file_path, "branch": target_branch}
+            else:
+                self.log("Failed to commit sync report to GitHub.", level="ERROR")
+                return {"status": "failure", "message": "Commit operation returned false status"}
+                
+        except Exception as e:
+            self.log(f"Execution failed in run(): {str(e)}", level="ERROR")
+            return {"status": "error", "exception": str(e)}

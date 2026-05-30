@@ -14,6 +14,11 @@ import re
 import logging
 from typing import Optional, List, Tuple, Any
 
+from dotenv import load_dotenv
+load_dotenv(dotenv_path=os.path.join(
+    os.path.dirname(os.path.dirname(os.path.abspath(__file__))), ".env"
+), override=True)
+
 from google import genai
 from google.genai import types
 from google.genai.types import HttpOptions

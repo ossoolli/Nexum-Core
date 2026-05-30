@@ -17,7 +17,8 @@ class OpenRouterEngine:
         
         data = {
             "model": model,
-            "messages": [{"role": "user", "content": prompt}]
+            "messages": [{"role": "user", "content": prompt}],
+            "max_tokens": 1200
         }
         
         try:
@@ -51,6 +52,25 @@ class OpenAIEngine:
             result = response.json()
             return result['choices'][0]['message']['content'], None
         except Exception as e:
+            # Fallback to OpenRouter for GPT
+            try:
+                openrouter_key = os.getenv("OPENROUTER_API_KEY")
+                if openrouter_key:
+                    fallback_url = "https://openrouter.ai/api/v1/chat/completions"
+                    fb_headers = {
+                        "Authorization": f"Bearer {openrouter_key}",
+                        "Content-Type": "application/json"
+                    }
+                    fb_data = {
+                        "model": f"openai/{model}" if not model.startswith("openai/") else model,
+                        "messages": [{"role": "user", "content": prompt}],
+                        "max_tokens": 1200
+                    }
+                    fb_res = requests.post(fallback_url, headers=fb_headers, json=fb_data)
+                    if fb_res.status_code == 200:
+                        return fb_res.json()['choices'][0]['message']['content'], None
+            except:
+                pass
             return f"❌ خطأ في الاتصال بـ OpenAI: {str(e)}", None
 
 # Singletons

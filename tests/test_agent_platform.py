@@ -12,7 +12,7 @@ from services.gemini_service import GeminiService
 svc1 = GeminiService(api_key="test-key-123", use_vertex=False)
 s1 = svc1.get_status()
 assert s1['auth_mode'] == 'API_Key'
-assert s1['model'] == 'gemini-3.5-flash'
+assert s1['model'] in ['gemini-3.5-flash', 'gemini-2.5-flash']
 assert s1['connected'] == True
 print('  API Key mode: OK (connected=' + str(s1['connected']) + ')')
 
