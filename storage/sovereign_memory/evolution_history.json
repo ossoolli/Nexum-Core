@@ -1,230 +1,5 @@
 [
     {
-        "timestamp": "2026-05-30T08:37:31.352313",
-        "scanned_errors": 0,
-        "repaired_agents": [],
-        "discovered_gaps": [],
-        "spawned_agents": [],
-        "distilled_skills": [],
-        "status": "nominal"
-    },
-    {
-        "timestamp": "2026-05-30T08:38:31.422538",
-        "scanned_errors": 0,
-        "repaired_agents": [],
-        "discovered_gaps": [],
-        "spawned_agents": [],
-        "distilled_skills": [],
-        "status": "nominal"
-    },
-    {
-        "timestamp": "2026-05-30T08:39:31.489037",
-        "scanned_errors": 0,
-        "repaired_agents": [],
-        "discovered_gaps": [],
-        "spawned_agents": [],
-        "distilled_skills": [],
-        "status": "nominal"
-    },
-    {
-        "timestamp": "2026-05-30T08:40:31.571932",
-        "scanned_errors": 0,
-        "repaired_agents": [],
-        "discovered_gaps": [],
-        "spawned_agents": [],
-        "distilled_skills": [],
-        "status": "nominal"
-    },
-    {
-        "timestamp": "2026-05-30T08:41:31.639767",
-        "scanned_errors": 0,
-        "repaired_agents": [],
-        "discovered_gaps": [],
-        "spawned_agents": [],
-        "distilled_skills": [],
-        "status": "nominal"
-    },
-    {
-        "timestamp": "2026-05-30T08:42:31.704480",
-        "scanned_errors": 0,
-        "repaired_agents": [],
-        "discovered_gaps": [],
-        "spawned_agents": [],
-        "distilled_skills": [],
-        "status": "nominal"
-    },
-    {
-        "timestamp": "2026-05-30T08:43:16.930851",
-        "scanned_errors": 0,
-        "repaired_agents": [],
-        "discovered_gaps": [],
-        "spawned_agents": [],
-        "distilled_skills": [],
-        "status": "nominal"
-    },
-    {
-        "timestamp": "2026-05-30T08:44:16.980882",
-        "scanned_errors": 0,
-        "repaired_agents": [],
-        "discovered_gaps": [],
-        "spawned_agents": [],
-        "distilled_skills": [],
-        "status": "nominal"
-    },
-    {
-        "timestamp": "2026-05-30T08:45:17.041635",
-        "scanned_errors": 0,
-        "repaired_agents": [],
-        "discovered_gaps": [],
-        "spawned_agents": [],
-        "distilled_skills": [],
-        "status": "nominal"
-    },
-    {
-        "timestamp": "2026-05-30T08:45:31.870277",
-        "scanned_errors": 0,
-        "repaired_agents": [],
-        "discovered_gaps": [],
-        "spawned_agents": [],
-        "distilled_skills": [],
-        "status": "nominal"
-    },
-    {
-        "timestamp": "2026-05-30T08:46:17.102557",
-        "scanned_errors": 0,
-        "repaired_agents": [],
-        "discovered_gaps": [],
-        "spawned_agents": [],
-        "distilled_skills": [],
-        "status": "nominal"
-    },
-    {
-        "timestamp": "2026-05-30T08:46:59.511481",
-        "scanned_errors": 0,
-        "repaired_agents": [],
-        "discovered_gaps": [],
-        "spawned_agents": [],
-        "distilled_skills": [],
-        "status": "nominal"
-    },
-    {
-        "timestamp": "2026-05-30T08:47:59.582961",
-        "scanned_errors": 0,
-        "repaired_agents": [],
-        "discovered_gaps": [],
-        "spawned_agents": [],
-        "distilled_skills": [],
-        "status": "nominal"
-    },
-    {
-        "timestamp": "2026-05-30T08:48:09.524669",
-        "scanned_errors": 0,
-        "repaired_agents": [],
-        "discovered_gaps": [],
-        "spawned_agents": [],
-        "distilled_skills": [],
-        "status": "nominal"
-    },
-    {
-        "timestamp": "2026-05-30T08:48:15.833149",
-        "scanned_errors": 0,
-        "repaired_agents": [],
-        "discovered_gaps": [],
-        "spawned_agents": [],
-        "distilled_skills": [],
-        "status": "nominal"
-    },
-    {
-        "timestamp": "2026-05-30T08:49:17.452556",
-        "scanned_errors": 0,
-        "repaired_agents": [],
-        "discovered_gaps": [],
-        "spawned_agents": [],
-        "distilled_skills": [],
-        "status": "nominal"
-    },
-    {
-        "timestamp": "2026-05-30T08:50:17.517954",
-        "scanned_errors": 0,
-        "repaired_agents": [],
-        "discovered_gaps": [],
-        "spawned_agents": [],
-        "distilled_skills": [],
-        "status": "nominal"
-    },
-    {
-        "timestamp": "2026-05-30T08:51:17.584420",
-        "scanned_errors": 0,
-        "repaired_agents": [],
-        "discovered_gaps": [],
-        "spawned_agents": [],
-        "distilled_skills": [],
-        "status": "nominal"
-    },
-    {
-        "timestamp": "2026-05-30T08:52:17.655192",
-        "scanned_errors": 0,
-        "repaired_agents": [],
-        "discovered_gaps": [],
-        "spawned_agents": [],
-        "distilled_skills": [],
-        "status": "nominal"
-    },
-    {
-        "timestamp": "2026-05-30T08:53:17.728304",
-        "scanned_errors": 0,
-        "repaired_agents": [],
-        "discovered_gaps": [],
-        "spawned_agents": [],
-        "distilled_skills": [],
-        "status": "nominal"
-    },
-    {
-        "timestamp": "2026-05-30T08:54:17.764350",
-        "scanned_errors": 0,
-        "repaired_agents": [],
-        "discovered_gaps": [],
-        "spawned_agents": [],
-        "distilled_skills": [],
-        "status": "nominal"
-    },
-    {
-        "timestamp": "2026-05-30T08:55:17.794027",
-        "scanned_errors": 0,
-        "repaired_agents": [],
-        "discovered_gaps": [],
-        "spawned_agents": [],
-        "distilled_skills": [],
-        "status": "nominal"
-    },
-    {
-        "timestamp": "2026-05-30T08:56:17.862831",
-        "scanned_errors": 0,
-        "repaired_agents": [],
-        "discovered_gaps": [],
-        "spawned_agents": [],
-        "distilled_skills": [],
-        "status": "nominal"
-    },
-    {
-        "timestamp": "2026-05-30T08:57:17.922292",
-        "scanned_errors": 0,
-        "repaired_agents": [],
-        "discovered_gaps": [],
-        "spawned_agents": [],
-        "distilled_skills": [],
-        "status": "nominal"
-    },
-    {
-        "timestamp": "2026-05-30T08:58:17.989204",
-        "scanned_errors": 0,
-        "repaired_agents": [],
-        "discovered_gaps": [],
-        "spawned_agents": [],
-        "distilled_skills": [],
-        "status": "nominal"
-    },
-    {
         "timestamp": "2026-05-30T08:59:19.045242",
         "scanned_errors": 0,
         "repaired_agents": [],
@@ -278,6 +53,231 @@
     },
     {
         "timestamp": "2026-05-30T09:03:19.303748",
+        "scanned_errors": 0,
+        "repaired_agents": [],
+        "discovered_gaps": [],
+        "spawned_agents": [],
+        "distilled_skills": [],
+        "status": "nominal"
+    },
+    {
+        "timestamp": "2026-05-30T09:04:19.367758",
+        "scanned_errors": 0,
+        "repaired_agents": [],
+        "discovered_gaps": [],
+        "spawned_agents": [],
+        "distilled_skills": [],
+        "status": "nominal"
+    },
+    {
+        "timestamp": "2026-05-30T09:05:19.432414",
+        "scanned_errors": 0,
+        "repaired_agents": [],
+        "discovered_gaps": [],
+        "spawned_agents": [],
+        "distilled_skills": [],
+        "status": "nominal"
+    },
+    {
+        "timestamp": "2026-05-30T09:06:19.499757",
+        "scanned_errors": 0,
+        "repaired_agents": [],
+        "discovered_gaps": [],
+        "spawned_agents": [],
+        "distilled_skills": [],
+        "status": "nominal"
+    },
+    {
+        "timestamp": "2026-05-30T09:07:19.566876",
+        "scanned_errors": 0,
+        "repaired_agents": [],
+        "discovered_gaps": [],
+        "spawned_agents": [],
+        "distilled_skills": [],
+        "status": "nominal"
+    },
+    {
+        "timestamp": "2026-05-30T09:08:19.632330",
+        "scanned_errors": 0,
+        "repaired_agents": [],
+        "discovered_gaps": [],
+        "spawned_agents": [],
+        "distilled_skills": [],
+        "status": "nominal"
+    },
+    {
+        "timestamp": "2026-05-30T09:09:20.528485",
+        "scanned_errors": 0,
+        "repaired_agents": [],
+        "discovered_gaps": [],
+        "spawned_agents": [],
+        "distilled_skills": [],
+        "status": "nominal"
+    },
+    {
+        "timestamp": "2026-05-30T09:10:20.592791",
+        "scanned_errors": 0,
+        "repaired_agents": [],
+        "discovered_gaps": [],
+        "spawned_agents": [],
+        "distilled_skills": [],
+        "status": "nominal"
+    },
+    {
+        "timestamp": "2026-05-30T09:11:20.660644",
+        "scanned_errors": 0,
+        "repaired_agents": [],
+        "discovered_gaps": [],
+        "spawned_agents": [],
+        "distilled_skills": [],
+        "status": "nominal"
+    },
+    {
+        "timestamp": "2026-05-30T09:12:20.718378",
+        "scanned_errors": 0,
+        "repaired_agents": [],
+        "discovered_gaps": [],
+        "spawned_agents": [],
+        "distilled_skills": [],
+        "status": "nominal"
+    },
+    {
+        "timestamp": "2026-05-30T09:13:20.781954",
+        "scanned_errors": 0,
+        "repaired_agents": [],
+        "discovered_gaps": [],
+        "spawned_agents": [],
+        "distilled_skills": [],
+        "status": "nominal"
+    },
+    {
+        "timestamp": "2026-05-30T09:14:20.849895",
+        "scanned_errors": 0,
+        "repaired_agents": [],
+        "discovered_gaps": [],
+        "spawned_agents": [],
+        "distilled_skills": [],
+        "status": "nominal"
+    },
+    {
+        "timestamp": "2026-05-30T09:15:20.921144",
+        "scanned_errors": 0,
+        "repaired_agents": [],
+        "discovered_gaps": [],
+        "spawned_agents": [],
+        "distilled_skills": [],
+        "status": "nominal"
+    },
+    {
+        "timestamp": "2026-05-30T09:16:20.979666",
+        "scanned_errors": 0,
+        "repaired_agents": [],
+        "discovered_gaps": [],
+        "spawned_agents": [],
+        "distilled_skills": [],
+        "status": "nominal"
+    },
+    {
+        "timestamp": "2026-05-30T09:16:24.429052",
+        "scanned_errors": 0,
+        "repaired_agents": [],
+        "discovered_gaps": [],
+        "spawned_agents": [],
+        "distilled_skills": [],
+        "status": "nominal"
+    },
+    {
+        "timestamp": "2026-05-30T09:17:21.044008",
+        "scanned_errors": 0,
+        "repaired_agents": [],
+        "discovered_gaps": [],
+        "spawned_agents": [],
+        "distilled_skills": [],
+        "status": "nominal"
+    },
+    {
+        "timestamp": "2026-05-30T09:18:21.117981",
+        "scanned_errors": 0,
+        "repaired_agents": [],
+        "discovered_gaps": [],
+        "spawned_agents": [],
+        "distilled_skills": [],
+        "status": "nominal"
+    },
+    {
+        "timestamp": "2026-05-30T09:19:23.084536",
+        "scanned_errors": 0,
+        "repaired_agents": [],
+        "discovered_gaps": [],
+        "spawned_agents": [],
+        "distilled_skills": [],
+        "status": "nominal"
+    },
+    {
+        "timestamp": "2026-05-30T09:20:23.153901",
+        "scanned_errors": 0,
+        "repaired_agents": [],
+        "discovered_gaps": [],
+        "spawned_agents": [],
+        "distilled_skills": [],
+        "status": "nominal"
+    },
+    {
+        "timestamp": "2026-05-30T09:21:23.219673",
+        "scanned_errors": 0,
+        "repaired_agents": [],
+        "discovered_gaps": [],
+        "spawned_agents": [],
+        "distilled_skills": [],
+        "status": "nominal"
+    },
+    {
+        "timestamp": "2026-05-30T09:22:23.283842",
+        "scanned_errors": 0,
+        "repaired_agents": [],
+        "discovered_gaps": [],
+        "spawned_agents": [],
+        "distilled_skills": [],
+        "status": "nominal"
+    },
+    {
+        "timestamp": "2026-05-30T09:23:23.355256",
+        "scanned_errors": 0,
+        "repaired_agents": [],
+        "discovered_gaps": [],
+        "spawned_agents": [],
+        "distilled_skills": [],
+        "status": "nominal"
+    },
+    {
+        "timestamp": "2026-05-30T09:24:23.401666",
+        "scanned_errors": 0,
+        "repaired_agents": [],
+        "discovered_gaps": [],
+        "spawned_agents": [],
+        "distilled_skills": [],
+        "status": "nominal"
+    },
+    {
+        "timestamp": "2026-05-30T09:25:23.467728",
+        "scanned_errors": 0,
+        "repaired_agents": [],
+        "discovered_gaps": [],
+        "spawned_agents": [],
+        "distilled_skills": [],
+        "status": "nominal"
+    },
+    {
+        "timestamp": "2026-05-30T09:26:23.493314",
+        "scanned_errors": 0,
+        "repaired_agents": [],
+        "discovered_gaps": [],
+        "spawned_agents": [],
+        "distilled_skills": [],
+        "status": "nominal"
+    },
+    {
+        "timestamp": "2026-05-30T09:27:23.556861",
         "scanned_errors": 0,
         "repaired_agents": [],
         "discovered_gaps": [],
