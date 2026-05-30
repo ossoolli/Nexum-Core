@@ -1,7 +1,9 @@
 from core.memory.sovereign_memory import SovereignMemory
 
 def verify_recall():
-    mem = SovereignMemory(base_path="/home/madarmutaz/Nexum-Core/storage/sovereign_memory")
+    import os
+    project_dir = os.path.dirname(os.path.abspath(__file__))
+    mem = SovereignMemory(base_path=os.path.join(project_dir, "storage", "sovereign_memory"))
     
     queries = ["Nexum OS philosophy", "Security gateway design"]
     

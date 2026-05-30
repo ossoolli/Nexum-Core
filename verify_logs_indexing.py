@@ -2,7 +2,9 @@ import sys
 import sqlite3
 
 def verify_indexed_logs():
-    db_path = "/home/madarmutaz/Nexum-Core/storage/sovereign_memory.db"
+    import os
+    project_dir = os.path.dirname(os.path.abspath(__file__))
+    db_path = os.path.join(project_dir, "storage", "sovereign_memory.db")
     conn = sqlite3.connect(db_path)
     cursor = conn.cursor()
     

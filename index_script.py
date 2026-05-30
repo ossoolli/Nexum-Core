@@ -1,16 +1,16 @@
 import sys
 import os
 
-# Add Nexum-Core to path if needed
-sys.path.append("/home/madarmutaz/Nexum-Core")
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+sys.path.append(BASE_DIR)
 
 from core.memory.sovereign_memory import SovereignMemory
 
 # Initialize
-mem = SovereignMemory(base_path="/home/madarmutaz/Nexum-Core/storage/sovereign_memory")
+mem = SovereignMemory(base_path=os.path.join(BASE_DIR, "storage", "sovereign_memory"))
 
 # 1. Logs
-log_dir = "/home/madarmutaz/Nexum-Core/storage/logs"
+log_dir = os.path.join(BASE_DIR, "storage", "logs")
 count = 0
 for root, dirs, files in os.walk(log_dir):
     for file in files:
@@ -23,7 +23,7 @@ for root, dirs, files in os.walk(log_dir):
                     count += 1
 
 # 2. Docs
-docs_dir = "/home/madarmutaz/Nexum-Core/docs"
+docs_dir = os.path.join(BASE_DIR, "docs")
 for root, dirs, files in os.walk(docs_dir):
     for file in files:
         if file.endswith(".md"):
@@ -34,7 +34,7 @@ for root, dirs, files in os.walk(docs_dir):
                 count += 1
 
 # 3. README
-readme = "/home/madarmutaz/Nexum-Core/README.md"
+readme = os.path.join(BASE_DIR, "README.md")
 if os.path.exists(readme):
     with open(readme, 'r', errors='ignore') as f:
         content = f.read()

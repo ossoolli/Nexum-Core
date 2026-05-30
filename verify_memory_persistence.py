@@ -4,10 +4,11 @@ from core.memory.sovereign_memory import SovereignMemory
 
 def test_memory_persistence():
     # Define db path
-    db_path = "/home/madarmutaz/.hermes/state.db"
+    db_path = os.path.expanduser("~/.hermes/state.db")
     
     # 1. Initialize SovereignMemory
-    mem = SovereignMemory(base_path="/home/madarmutaz/Nexum-Core/storage/sovereign_memory")
+    project_dir = os.path.dirname(os.path.abspath(__file__))
+    mem = SovereignMemory(base_path=os.path.join(project_dir, "storage", "sovereign_memory"))
     
     # 2. Write a dummy memory
     test_content = "System Memory: This is a persistent test entry."

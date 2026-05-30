@@ -2,11 +2,12 @@ import os
 from core.memory.sovereign_memory import SovereignMemory
 
 def index_skills():
-    mem = SovereignMemory(base_path="/home/madarmutaz/Nexum-Core/storage/sovereign_memory")
+    project_dir = os.path.dirname(os.path.abspath(__file__))
+    mem = SovereignMemory(base_path=os.path.join(project_dir, "storage", "sovereign_memory"))
     skills_dirs = [
-        "/home/madarmutaz/Nexum-Core/storage/skills",
-        "/home/madarmutaz/Nexum-Core/optional-skills",
-        "/home/madarmutaz/Nexum-Core/skills"
+        os.path.join(project_dir, "storage", "skills"),
+        os.path.join(project_dir, "optional-skills"),
+        os.path.join(project_dir, "skills")
     ]
     
     files_to_index = []

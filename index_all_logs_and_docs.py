@@ -2,8 +2,10 @@ import os
 import sys
 from nexum.memory.store import SovereignMemoryStore
 
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+
 # Set path to the memory database
-db_path = "/home/madarmutaz/Nexum-Core/storage/sovereign_memory/memory.db"
+db_path = os.path.join(BASE_DIR, "storage", "sovereign_memory", "memory.db")
 store = SovereignMemoryStore(db_path=db_path)
 
 def index_files(directory, role_name):
@@ -21,11 +23,11 @@ def index_files(directory, role_name):
                 print(f"Failed to index {file_path}: {e}")
 
 # Index logs
-log_dir = "/home/madarmutaz/Nexum-Core/storage/logs"
+log_dir = os.path.join(BASE_DIR, "storage", "logs")
 index_files(log_dir, "log_entry")
 
 # Index docs
-doc_dir = "/home/madarmutaz/Nexum-Core/docs"
+doc_dir = os.path.join(BASE_DIR, "docs")
 index_files(doc_dir, "documentation")
 
 print("Indexing complete.")

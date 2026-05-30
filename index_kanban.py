@@ -4,15 +4,16 @@ import json
 import sqlite3
 
 # Add the project directory to path
-sys.path.append('/home/madarmutaz/Nexum-Core')
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+sys.path.append(BASE_DIR)
 
 from nexum.memory.store import SovereignMemoryStore
 
 def index_kanban():
-    db_path = "/home/madarmutaz/.hermes/state.db"
+    db_path = os.path.expanduser("~/.hermes/state.db")
     store = SovereignMemoryStore(db_path=db_path)
     
-    kanban_file = "/home/madarmutaz/Nexum-Core/storage/kanban/boards.json"
+    kanban_file = os.path.join(BASE_DIR, "storage", "kanban", "boards.json")
     
     if os.path.exists(kanban_file):
         print(f"Indexing {kanban_file}...")

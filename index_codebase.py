@@ -3,8 +3,8 @@ import sys
 from core.memory.sovereign_memory import SovereignMemory
 
 def index_files():
-    mem = SovereignMemory(base_path="/home/madarmutaz/Nexum-Core/storage/sovereign_memory")
-    project_dir = "/home/madarmutaz/Nexum-Core"
+    project_dir = os.path.dirname(os.path.abspath(__file__))
+    mem = SovereignMemory(base_path=os.path.join(project_dir, "storage", "sovereign_memory"))
     
     files_to_index = [
         "README.md",
@@ -23,7 +23,7 @@ def index_files():
                     if file.endswith((".py", ".md", ".go", ".yaml", ".json")):
                         files_to_index.append(os.path.join(root, file))
 
-    log_file = "/home/madarmutaz/Nexum-Core/storage/logs/evolution.log"
+    log_file = os.path.join(project_dir, "storage", "logs", "evolution.log")
     
     with open(log_file, "a") as f:
         for file_path in files_to_index:

@@ -4,7 +4,7 @@ from core.memory.sovereign_memory import SovereignMemory
 
 def index_project_to_memory():
     memory = SovereignMemory()
-    project_dir = "/home/madarmutaz/Nexum-Core"
+    project_dir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
     
     print("🔍 بدء عملية فهرسة ملفات الكود والمشروع...")
     

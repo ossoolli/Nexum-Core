@@ -1,7 +1,8 @@
 import sys
 import os
 import logging
-sys.path.append('/home/madarmutaz/Nexum-Core')
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+sys.path.append(BASE_DIR)
 
 from nexum.cloud.agent_platform_connector import GoogleAgentPlatformConnector
 

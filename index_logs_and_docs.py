@@ -3,9 +3,9 @@ import sys
 from core.memory.sovereign_memory import SovereignMemory
 
 def index_data():
-    mem = SovereignMemory(base_path="/home/madarmutaz/Nexum-Core/storage/sovereign_memory")
-    project_dir = "/home/madarmutaz/Nexum-Core"
-    logs_dir = os.path.join(project_dir, "storage/logs")
+    project_dir = os.path.dirname(os.path.abspath(__file__))
+    mem = SovereignMemory(base_path=os.path.join(project_dir, "storage", "sovereign_memory"))
+    logs_dir = os.path.join(project_dir, "storage", "logs")
     docs_dir = os.path.join(project_dir, "docs")
     readme_path = os.path.join(project_dir, "README.md")
 

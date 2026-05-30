@@ -27,19 +27,22 @@ def recall_memory(query: str):
     """
     Retrieves and summarizes the top 3 relevant past interactions from the database.
     """
-    try:
-        if not os.path.exists(DB_PATH):
-            return "Memory database not found."
+    if not os.path.exists(DB_PATH):
+        return "Memory database not found."
 
+    conn = None
+    try:
         conn = sqlite3.connect(DB_PATH)
         if _use_cipher and db_key:
+            safe_key = db_key.replace("'", "''")
             cursor = conn.cursor()
-            cursor.execute(f"PRAGMA key = '{db_key}';")
+            cursor.execute(f"PRAGMA key = '{safe_key}';")
             try:
                 cursor.execute("PRAGMA cipher_compatibility = 3;")
                 cursor.execute("SELECT 1 FROM sqlite_master LIMIT 1;")
             except Exception:
                 cursor.execute("PRAGMA cipher_compatibility = 4;")
+        
         cursor = conn.cursor()
 
         # FTS5 search (assuming a table 'memory' exists, will try to adapt)
@@ -64,7 +67,9 @@ def recall_memory(query: str):
         for i, row in enumerate(results, 1):
             summary += f"{i}. {row[0]}\n"
             
-        conn.close()
         return summary
     except Exception as e:
         return f"Error accessing memory: {e}"
+    finally:
+        if conn:
+            conn.close()

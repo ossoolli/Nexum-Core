@@ -5,7 +5,13 @@ from telebot import TeleBot
 from supabase import create_client, Client
 from dotenv import load_dotenv
 
-load_dotenv()
+base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+load_dotenv(dotenv_path=os.path.join(base_dir, ".env"))
+
+# Sanitize environment variables for dynamic pathing
+for k, v in list(os.environ.items()):
+    if isinstance(v, str) and "/home/madarmutaz/Nexum-Core" in v:
+        os.environ[k] = v.replace("/home/madarmutaz/Nexum-Core", base_dir)
 
 class CloudStorageManager:
     def __init__(self, bot: TeleBot = None):

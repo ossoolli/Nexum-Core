@@ -2,7 +2,9 @@ import sqlite3
 
 def create_system_memory_index():
     # Use the database identified in the storage directory
-    db_path = "/home/madarmutaz/Nexum-Core/storage/sovereign_memory.db"
+    import os
+    base_dir = os.path.dirname(os.path.abspath(__file__))
+    db_path = os.path.join(base_dir, "storage", "sovereign_memory.db")
     conn = sqlite3.connect(db_path)
     cursor = conn.cursor()
     
@@ -12,12 +14,12 @@ def create_system_memory_index():
     print(f"Tables: {tables}")
     
     # Assuming 'memories' or similar based on context
-    index_summary = """
+    index_summary = f"""
     # System Memory Index - Nexum-Core
     
     This memory contains indexed project files, documentation, and logs to provide context-aware recall for the Nexum-Core agent.
     
-    - Workspace: /home/madarmutaz/Nexum-Core
+    - Workspace: {base_dir}
     - Core Logic: /core/ and /nexum/ directories
     - Documentation: /docs/ and README.md
     - Memory Engine: FTS5 integrated via SovereignMemory

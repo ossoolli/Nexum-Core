@@ -217,7 +217,10 @@ def handle_dashboard(bot, call):
             clear_system_log_files(bot, call, chat_id, message_id)
         elif data == "mem_reindex":
             import subprocess
-            subprocess.run(["python3", "/home/madarmutaz/Nexum-Core/index_all_logs_and_docs.py"], env={"PYTHONPATH": "/home/madarmutaz/Nexum-Core/"})
+            import sys
+            project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+            script_path = os.path.join(project_root, "index_all_logs_and_docs.py")
+            subprocess.run([sys.executable, script_path], env={"PYTHONPATH": project_root})
             bot.answer_callback_query(call.id, "🔄 Indexing completed!", show_alert=True)
             show_memory_hub(bot, chat_id, message_id)
         elif data == "mem_sync":
@@ -541,9 +544,12 @@ def show_websocket_status(bot, chat_id, message_id):
 
 def show_skills_hub(bot, chat_id, message_id):
     """بوابة التحكم في المهارات."""
-    skills_dir = "/home/madarmutaz/Nexum-Core/storage/skills"
+    project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    skills_dir = os.path.join(project_root, "storage", "skills")
     import os
-    skills = [f for f in os.listdir(skills_dir) if os.path.isdir(os.path.join(skills_dir, f))]
+    skills = []
+    if os.path.exists(skills_dir):
+        skills = [f for f in os.listdir(skills_dir) if os.path.isdir(os.path.join(skills_dir, f))]
     text = "🧠 <b>Sovereign Skills Hub</b>\nSelect a skill to load:"
     bot.edit_message_text(
         text, chat_id, message_id, parse_mode="HTML",

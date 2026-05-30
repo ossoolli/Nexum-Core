@@ -1,6 +1,7 @@
 import sqlite3
 
-db_path = "/home/madarmutaz/.hermes/state.db"
+import os
+db_path = os.path.join(os.path.expanduser("~"), ".hermes", "state.db")
 conn = sqlite3.connect(db_path)
 cursor = conn.cursor()
 

@@ -1,17 +1,19 @@
 import sqlite3
 
 def create_system_memory_index():
-    db_path = "/home/madarmutaz/.hermes/state.db"
+    import os
+    db_path = os.path.join(os.path.expanduser("~"), ".hermes", "state.db")
+    project_dir = os.path.dirname(os.path.abspath(__file__))
     conn = sqlite3.connect(db_path)
     cursor = conn.cursor()
     
     # Create the card in the memory store
-    index_summary = """
+    index_summary = f"""
     # System Memory Index - Nexum-Core
     
     This memory contains indexed project files, documentation, and logs to provide context-aware recall for the Nexum-Core agent.
     
-    - Workspace: /home/madarmutaz/Nexum-Core
+    - Workspace: {project_dir}
     - Core Logic: /core/ and /nexum/ directories
     - Documentation: /docs/ and README.md
     - Memory Engine: FTS5 integrated via SovereignMemory

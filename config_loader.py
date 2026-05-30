@@ -58,6 +58,8 @@ def get_config() -> SimpleNamespace:
             
     # Populate os.environ with variables loaded from file, prioritizing .env
     for k, v in env_vars.items():
+        if isinstance(v, str) and "/home/madarmutaz/Nexum-Core" in v:
+            v = v.replace("/home/madarmutaz/Nexum-Core", base_dir)
         os.environ[k] = v
 
     cfg = {}

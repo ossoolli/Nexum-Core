@@ -2,16 +2,17 @@ import sys
 import os
 
 # Add the project directory to path
-sys.path.append('/home/madarmutaz/Nexum-Core')
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+sys.path.append(BASE_DIR)
 
 from nexum.memory.store import SovereignMemoryStore
 
 def index_all_logs():
     # Use the persistent database
-    db_path = "/home/madarmutaz/Nexum-Core/storage/sovereign_memory.db"
+    db_path = os.path.join(BASE_DIR, "storage", "sovereign_memory.db")
     store = SovereignMemoryStore(db_path=db_path)
     
-    log_dir = "/home/madarmutaz/Nexum-Core/storage/logs/"
+    log_dir = os.path.join(BASE_DIR, "storage", "logs")
     
     for root, dirs, files in os.walk(log_dir):
         for filename in files:

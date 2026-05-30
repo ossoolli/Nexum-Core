@@ -3,8 +3,9 @@ import sqlite3
 from nexum.memory.store import SovereignMemoryStore
 
 def deep_index():
-    store = SovereignMemoryStore(db_path="/home/madarmutaz/Nexum-Core/storage/sovereign_memory/memory.db")
-    project_dir = "/home/madarmutaz/Nexum-Core"
+    project_dir = os.path.dirname(os.path.abspath(__file__))
+    db_path = os.path.join(project_dir, "storage", "sovereign_memory", "memory.db")
+    store = SovereignMemoryStore(db_path=db_path)
     indexed_count = 0
     lessons_learned = 0
     batch = []

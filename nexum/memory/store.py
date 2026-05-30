@@ -76,10 +76,11 @@ class SovereignMemoryStore:
             try:
                 if _use_cipher and db_key:
                     # Try SQLCipher 3 first
+                    safe_key = db_key.replace("'", "''")
                     try:
                         conn = sqlite3.connect(self.db_path, timeout=10)
                         cursor = conn.cursor()
-                        cursor.execute(f"PRAGMA key = '{db_key}';")
+                        cursor.execute(f"PRAGMA key = '{safe_key}';")
                         cursor.execute("PRAGMA cipher_compatibility = 3;")
                         cursor.execute("SELECT 1 FROM sqlite_master LIMIT 1;")
                         return conn
@@ -87,7 +88,7 @@ class SovereignMemoryStore:
                         # Try SQLCipher 4
                         conn = sqlite3.connect(self.db_path, timeout=10)
                         cursor = conn.cursor()
-                        cursor.execute(f"PRAGMA key = '{db_key}';")
+                        cursor.execute(f"PRAGMA key = '{safe_key}';")
                         cursor.execute("PRAGMA cipher_compatibility = 4;")
                         return conn
                 else:

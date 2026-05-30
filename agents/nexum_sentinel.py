@@ -15,8 +15,8 @@ import sys
 import asyncio
 import logging
 
-# Absolute path correction for project structure
-PROJECT_ROOT = "/home/madarmutaz/Nexum-Core"
+# Dynamic path resolution for project structure
+PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, PROJECT_ROOT)
 
 from core.sovereign_execution_gateway import execute_command, write_file as secure_write

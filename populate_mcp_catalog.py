@@ -3,7 +3,13 @@ from core.memory.sovereign_memory import SovereignMemory
 
 def populate_mcp_catalog():
     memory = SovereignMemory()
-    with open("/home/madarmutaz/Nexum-Core/storage/mcp-servers.json", "r") as f:
+    import os
+    project_dir = os.path.dirname(os.path.abspath(__file__))
+    catalog_path = os.path.join(project_dir, "storage", "mcp-servers.json")
+    if not os.path.exists(catalog_path):
+        print(f"MCP catalog file not found at {catalog_path}")
+        return
+    with open(catalog_path, "r") as f:
         data = json.load(f)
     
     servers = data.get("mcpServers", {})

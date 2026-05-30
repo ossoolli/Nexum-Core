@@ -7,9 +7,13 @@
 import os
 from dotenv import load_dotenv
 
-load_dotenv(dotenv_path=os.path.join(
-    os.path.dirname(os.path.dirname(os.path.abspath(__file__))), ".env"
-), override=True)
+base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+load_dotenv(dotenv_path=os.path.join(base_dir, ".env"), override=True)
+
+# Sanitize environment variables for dynamic pathing
+for k, v in list(os.environ.items()):
+    if isinstance(v, str) and "/home/madarmutaz/Nexum-Core" in v:
+        os.environ[k] = v.replace("/home/madarmutaz/Nexum-Core", base_dir)
 
 
 class LLMFactory:

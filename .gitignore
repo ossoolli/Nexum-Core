@@ -32,3 +32,8 @@ storage/sovereign_memory/
 Nexum-Core/
 storage/memory/
 storage/sovereign_memory/
+
+# Temp & Artifacts
+scratch/
+.pytest_cache/
+.claude/
