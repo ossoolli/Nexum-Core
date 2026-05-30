@@ -27,3 +27,8 @@ logs/
 Nexum-Core/
 storage/memory/
 storage/sovereign_memory/
+
+.env
+Nexum-Core/
+storage/memory/
+storage/sovereign_memory/
