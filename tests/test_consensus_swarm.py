@@ -118,7 +118,10 @@ class TestConsensusSwarm(unittest.TestCase):
         engine = ADKSwarmEngine()
         
         # If Agent/ADK package is active, check structure, otherwise verify simulation
-        from google.adk import Agent
+        try:
+            from google.adk import Agent
+        except ImportError:
+            Agent = None
         if Agent:
             self.assertIsNotNone(engine.sentinel_agent)
             self.assertEqual(engine.sentinel_agent.name, "sentinel_audit_agent")

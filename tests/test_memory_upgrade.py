@@ -1,10 +1,11 @@
 import sqlite3
 import pytest
 import os
+import tempfile
 from nexum.memory.store import SovereignMemoryStore
 
 def test_memory_persistence():
-    db_path = "/tmp/test_sovereign_memory.db"
+    db_path = os.path.join(tempfile.gettempdir(), "test_sovereign_memory.db")
     if os.path.exists(db_path):
         os.remove(db_path)
     
@@ -19,7 +20,7 @@ def test_memory_persistence():
         os.remove(db_path)
 
 def test_fts5_search():
-    db_path = "/tmp/test_fts5.db"
+    db_path = os.path.join(tempfile.gettempdir(), "test_fts5.db")
     if os.path.exists(db_path):
         os.remove(db_path)
         

@@ -3,6 +3,14 @@ core/env_config.py
 مركز المسارات الحقيقية على السيرفر
 """
 import os
+import sys
+
+# ضمان توفر مسار Git على الويندوز للعمليات التابعة
+if sys.platform == "win32":
+    git_path = "C:\\Program Files\\Git\\cmd"
+    if os.path.exists(git_path) and git_path not in os.environ.get("PATH", ""):
+        os.environ["PATH"] = git_path + os.pathsep + os.environ.get("PATH", "")
+
 import subprocess
 
 # ─── المسار الجذري للمشروع ───

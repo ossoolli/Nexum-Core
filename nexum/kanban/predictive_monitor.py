@@ -3,8 +3,12 @@ import re
 from nexum.kanban.orchestrator import KanbanOrchestrator
 
 class PredictiveSentinel:
-    def __init__(self, log_path="/home/madarmutaz/Nexum-Core/storage/logs/out.log", kanban_storage="/home/madarmutaz/Nexum-Core/storage/kanban/boards.json"):
-        self.log_path = log_path
+    def __init__(self, log_path=None, kanban_storage=None):
+        project_root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+        self.log_path = log_path or os.path.join(project_root, "storage", "logs", "out.log")
+        kanban_storage = kanban_storage or os.path.join(project_root, "storage", "kanban", "boards.json")
+        os.makedirs(os.path.dirname(self.log_path), exist_ok=True)
+        os.makedirs(os.path.dirname(kanban_storage), exist_ok=True)
         self.orchestrator = KanbanOrchestrator(storage_path=kanban_storage)
         self.board_id = self._get_or_create_board("System Maintenance")
     

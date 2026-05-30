@@ -1,12 +1,15 @@
 import sys
 import os
-sys.path.append('/home/madarmutaz/Nexum-Core')
+
+PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+if PROJECT_ROOT not in sys.path:
+    sys.path.append(PROJECT_ROOT)
 
 from core.protocols.engine import YAMLProtocolEngine
 
 def test_protocol_engine():
     engine = YAMLProtocolEngine()
-    protocol_path = '/home/madarmutaz/Nexum-Core/storage/protocols/example_dag.yaml'
+    protocol_path = os.path.join(PROJECT_ROOT, 'storage', 'protocols', 'example_dag.yaml')
     workflow = engine.load_protocol(protocol_path)
     
     results = engine.execute_workflow(workflow)

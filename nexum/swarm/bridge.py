@@ -7,8 +7,8 @@ class Bridge:
     Inter-agent dialogue bridge for Nexum-Core and Summarizer-Bot.
     Uses a file-based IPC queue for structured messaging.
     """
-    def __init__(self, bridge_path: str = "/home/madarmutaz/Nexum-Core/storage/bridge"):
-        self.bridge_path = bridge_path
+    def __init__(self, bridge_path: str = None):
+        self.bridge_path = bridge_path or os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))), "storage", "bridge")
         os.makedirs(self.bridge_path, exist_ok=True)
         self.inbox = os.path.join(self.bridge_path, "inbox.jsonl")
         self.outbox = os.path.join(self.bridge_path, "outbox.jsonl")

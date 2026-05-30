@@ -1,5 +1,5 @@
 steps:
   scan_disk:
-    command: "ls /tmp/Nexum-Core"
+    command: "git --version"
   log_status:
-    command: "echo 'Audit Scan Complete'"
+    command: "git status"

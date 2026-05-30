@@ -15,9 +15,9 @@ from typing import Any, Dict, List, Optional, Tuple, Union
 
 try:
     from nexum.config import config
-    DEFAULT_STORAGE_DIR = config.storage_dir if config else Path("/home/madarmutaz/Nexum-Core/storage")
+    DEFAULT_STORAGE_DIR = config.storage_dir if config else Path(__file__).resolve().parents[2] / "storage"
 except Exception:
-    DEFAULT_STORAGE_DIR = Path("/home/madarmutaz/Nexum-Core/storage")
+    DEFAULT_STORAGE_DIR = Path(__file__).resolve().parents[2] / "storage"
 
 logger = logging.getLogger("nexum.skills")
 

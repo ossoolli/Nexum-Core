@@ -3,7 +3,8 @@ import sys
 import dotenv
 
 # Load .env
-dotenv.load_dotenv("/home/madarmutaz/Nexum-Core/.env")
+PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+dotenv.load_dotenv(os.path.join(PROJECT_ROOT, ".env"))
 
 db_key = os.getenv("NEXUM_DB_ENCRYPTION_KEY")
 if db_key:
@@ -19,8 +20,8 @@ else:
 
 import json
 
-# Assuming /home/madarmutaz/.hermes/state.db is the target
-DB_PATH = "/home/madarmutaz/.hermes/state.db"
+# Assuming ~/.hermes/state.db is the target
+DB_PATH = os.path.join(os.path.expanduser("~"), ".hermes", "state.db")
 
 def recall_memory(query: str):
     """

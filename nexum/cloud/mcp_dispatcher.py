@@ -5,7 +5,8 @@ from core.memory.sovereign_memory import SovereignMemory
 class MCPDispatcher:
     def __init__(self):
         self.memory = SovereignMemory()
-        self.mcp_config_path = "/home/madarmutaz/Nexum-Core/storage/mcp-servers.json"
+        project_root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+        self.mcp_config_path = os.path.join(project_root, "storage", "mcp-servers.json")
         with open(self.mcp_config_path, "r") as f:
             self.servers = json.load(f).get("mcpServers", {})
 

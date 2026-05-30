@@ -10,12 +10,14 @@ import os
 import sys
 import unittest
 import time
+import shutil
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, BASE_DIR)
 
 from core.go_coordinator_bridge import GoCoordinatorBridge
 
+@unittest.skipIf(not shutil.which("go"), "Go compiler not found. Skipping live Go server tests.")
 class TestGoCoordinatorLive(unittest.TestCase):
     def setUp(self):
         # Start a bridge on a separate custom test port to avoid conflict with main port

@@ -4,8 +4,10 @@ import uuid
 from datetime import datetime
 
 class KanbanOrchestrator:
-    def __init__(self, storage_path="/home/madarmutaz/Nexum-Core/storage/kanban/boards.json"):
-        self.storage_path = storage_path
+    def __init__(self, storage_path=None):
+        project_root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+        self.storage_path = storage_path or os.path.join(project_root, "storage", "kanban", "boards.json")
+        os.makedirs(os.path.dirname(self.storage_path), exist_ok=True)
         self._load_data()
 
     def _load_data(self):

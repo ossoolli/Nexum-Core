@@ -8,7 +8,8 @@ from typing import Optional, List, Dict, Any
 from dotenv import load_dotenv
 
 # Load environment variables to ensure we have the DB encryption key
-load_dotenv(dotenv_path="/home/madarmutaz/Nexum-Core/.env", override=True)
+PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+load_dotenv(dotenv_path=os.path.join(PROJECT_ROOT, ".env"), override=True)
 
 db_key = os.getenv("NEXUM_DB_ENCRYPTION_KEY")
 if db_key:
@@ -23,8 +24,8 @@ else:
     _use_cipher = False
 
 class SovereignMemoryStore:
-    def __init__(self, db_path: str = "/home/madarmutaz/.hermes/state.db"):
-        self.db_path = db_path
+    def __init__(self, db_path: str = None):
+        self.db_path = db_path or os.path.join(os.path.expanduser("~"), ".hermes", "state.db")
         self.lock = threading.RLock()
         self._init_db()
 

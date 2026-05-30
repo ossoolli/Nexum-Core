@@ -18,6 +18,7 @@ import subprocess
 import tempfile
 import shutil
 from typing import Dict, Any, Tuple, List, Optional
+from core.env_config import BASE_DIR, PYTHON_BIN
 
 logger = logging.getLogger("nexum.sandbox")
 
@@ -198,7 +199,7 @@ class SandboxRuntime:
     """
     def __init__(self, use_gvisor: bool = False):
         self.use_gvisor = use_gvisor
-        self.workspace_dir = "/home/madarmutaz/Nexum-Core"
+        self.workspace_dir = BASE_DIR
         self.hmac_key = self._load_or_generate_hmac_key()
         self.warden = SecurityWarden(self.hmac_key)
         self.active_sandboxes = {}
@@ -410,8 +411,7 @@ class SandboxRuntime:
             
             try:
                 # تشغيل الكود في بايثون منفصل وبحدود أمان عالية (تم التحقق مسبقاً من الكلمات المفتاحية الخطيرة)
-                # استخدام مترجم بايثون الخاص بـ venv لضمان عزل الحزم
-                python_bin = "/home/madarmutaz/Nexum-Core/venv/bin/python3"
+                python_bin = PYTHON_BIN
                 if not os.path.exists(python_bin):
                     python_bin = "python3"
                 

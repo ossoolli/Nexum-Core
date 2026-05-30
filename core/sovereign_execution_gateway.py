@@ -8,6 +8,13 @@ core/sovereign_execution_gateway.py
 
 import os
 import sys
+
+# ضمان توفر مسار Git على الويندوز للعمليات التابعة
+if sys.platform == "win32":
+    git_path = "C:\\Program Files\\Git\\cmd"
+    if os.path.exists(git_path) and git_path not in os.environ.get("PATH", ""):
+        os.environ["PATH"] = git_path + os.pathsep + os.environ.get("PATH", "")
+
 import re
 import shlex
 import hmac
@@ -18,7 +25,7 @@ import subprocess
 from typing import Callable, List, Dict, Any, Optional
 
 # استيراد إعدادات المسارات
-from core.env_config import WORKSPACE_DIR, LOGS_DIR
+from core.env_config import WORKSPACE_DIR, LOGS_DIR, STORAGE_DIR
 
 # مفتاح التوقيع الرقمي لسجل العمليات الأمنية (يتم جلبه من البيئة أو توليده آلياً وحفظه)
 def _initialize_hmac_key() -> str:
@@ -28,7 +35,7 @@ def _initialize_hmac_key() -> str:
     if key and key.strip() != "" and key != INSECURE_DEFAULT:
         return key
 
-    key_file = "/home/madarmutaz/Nexum-Core/storage/.sovereign_key"
+    key_file = os.path.join(STORAGE_DIR, ".sovereign_key")
     if os.path.exists(key_file):
         try:
             with open(key_file, "r", encoding="utf-8") as f:

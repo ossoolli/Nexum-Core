@@ -188,13 +188,22 @@ class SovereignTerminalController:
                     self._execution_count += 1
 
             # تجزئة الأمر لتقليل الاعتماد على shell إذا كان ممكنًا
-            cmd_list = shlex.split(command)
-            proc = await asyncio.create_subprocess_exec(
-                *cmd_list,
-                stdout=asyncio.subprocess.PIPE,
-                stderr=asyncio.subprocess.PIPE,
-                cwd=effective_cwd,
-            )
+            import sys
+            if sys.platform == "win32":
+                proc = await asyncio.create_subprocess_exec(
+                    "cmd.exe", "/c", command,
+                    stdout=asyncio.subprocess.PIPE,
+                    stderr=asyncio.subprocess.PIPE,
+                    cwd=effective_cwd,
+                )
+            else:
+                cmd_list = shlex.split(command)
+                proc = await asyncio.create_subprocess_exec(
+                    *cmd_list,
+                    stdout=asyncio.subprocess.PIPE,
+                    stderr=asyncio.subprocess.PIPE,
+                    cwd=effective_cwd,
+                )
             try:
                 stdout, stderr = await asyncio.wait_for(proc.communicate(), timeout=effective_timeout)
             except asyncio.TimeoutError:
