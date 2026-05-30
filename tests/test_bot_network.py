@@ -3,7 +3,8 @@ import os
 import json
 
 def test_bridge_interaction():
-    bridge = Bridge(bridge_path="/home/madarmutaz/Nexum-Core/storage/test_bridge")
+    project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    bridge = Bridge(bridge_path=os.path.join(project_root, "storage", "test_bridge"))
     bridge.send_message("Nexum-Core", "Summarizer-Bot", "Please summarize current logs.", {"priority": "high"})
     
     messages = bridge.read_messages("Summarizer-Bot")

@@ -1,6 +1,7 @@
 import os
 import sys
-sys.path.insert(0, "/home/madarmutaz/Nexum-Core")
+PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
+sys.path.insert(0, PROJECT_ROOT)
 from dotenv import load_dotenv
 load_dotenv()
 from telebot import TeleBot
@@ -10,7 +11,7 @@ from nexum.cloud.agent_platform_connector import GoogleAgentPlatformConnector as
 # Setup
 bot_token = os.getenv("TELEGRAM_TOKEN") or os.getenv("TELEGRAM_BOT_TOKEN")
 bot = TeleBot(bot_token)
-manager = SovereignSkillsManager(skills_dir="/home/madarmutaz/Nexum-Core/storage/skills")
+manager = SovereignSkillsManager(skills_dir=os.path.join(PROJECT_ROOT, "storage", "skills"))
 connector = AgentPlatformConnector()
 
 # Load summary-config skill

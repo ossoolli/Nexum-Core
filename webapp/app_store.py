@@ -5,8 +5,9 @@ from core.tool_registry import tool_registry
 
 router = APIRouter(prefix="/apps")
 
-DISCOVERED_FILE = "/home/madarmutaz/Nexum-Core/storage/discovered_tools.json"
-PLUGINS_DIR = "/home/madarmutaz/Nexum-Core/plugins/active"
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+DISCOVERED_FILE = os.path.join(BASE_DIR, "storage", "discovered_tools.json")
+PLUGINS_DIR = os.path.join(BASE_DIR, "plugins", "active")
 
 @router.get("/")
 def list_installed_apps():

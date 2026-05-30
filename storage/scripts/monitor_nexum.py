@@ -7,7 +7,8 @@ import time
 from datetime import datetime
 
 # Inject Nexum root into path
-sys.path.insert(0, "/home/madarmutaz/Nexum-Core")
+PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+sys.path.insert(0, PROJECT_ROOT)
 
 def check_pm2_status():
     try:
@@ -35,7 +36,7 @@ def check_pm2_status():
 
 def test_gemini_vertex():
     # Set standard env variables
-    os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = "/home/madarmutaz/Nexum-Core/storage/gcp_key.json"
+    os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = os.path.join(PROJECT_ROOT, "storage", "gcp_key.json")
     os.environ["GOOGLE_CLOUD_PROJECT"] = "mytest-496209"
     os.environ["GOOGLE_CLOUD_LOCATION"] = "us-central1"
     os.environ["GOOGLE_GENAI_USE_VERTEXAI"] = "True"
@@ -86,7 +87,7 @@ def ping_nexum_api():
 
 def check_state_db_status():
     import sqlite3
-    db_path = "/home/madarmutaz/.hermes/state.db"
+    db_path = os.path.join(os.path.expanduser("~"), ".hermes", "state.db")
     
     if not os.path.exists(db_path):
         return {"status": "NOT FOUND", "size_mb": 0.0, "encrypted": "UNKNOWN", "integrity": "FAILED"}
@@ -107,7 +108,7 @@ def check_state_db_status():
             encrypted = "ENCRYPTED (AES-256 via SQLCipher)"
             try:
                 import dotenv
-                dotenv.load_dotenv("/home/madarmutaz/Nexum-Core/.env")
+                dotenv.load_dotenv(os.path.join(PROJECT_ROOT, ".env"))
                 db_key = os.getenv("NEXUM_DB_ENCRYPTION_KEY")
                 from pysqlcipher3 import dbapi2 as cipher_sqlite3
                 conn = cipher_sqlite3.connect(db_path)
@@ -166,12 +167,11 @@ def main():
     # 4. state.db Integrity and Encryption Check
     db_test = check_state_db_status()
     
-    # 5. Log Error Scan
     log_errors = {}
     logs_to_scan = {
-        "Core Error Log": "/home/madarmutaz/Nexum-Core/storage/logs/err.log",
-        "API Error Log": "/home/madarmutaz/Nexum-Core/storage/logs/api_err.log",
-        "Sentinel Log": "/home/madarmutaz/Nexum-Core/storage/logs/sentinel.log"
+        "Core Error Log": os.path.join(PROJECT_ROOT, "storage", "logs", "err.log"),
+        "API Error Log": os.path.join(PROJECT_ROOT, "storage", "logs", "api_err.log"),
+        "Sentinel Log": os.path.join(PROJECT_ROOT, "storage", "logs", "sentinel.log")
     }
     for name, path in logs_to_scan.items():
         errs = scan_errors(path)

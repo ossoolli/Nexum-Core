@@ -20,7 +20,8 @@ class MarketingAgent(BaseAgent):
             description="وكيل التسويق وصناعة المحتوى (Growth Hacker)",
             version="1.0"
         )
-        self.queue_file = "/home/madarmutaz/Nexum-Core/storage/content_queue.json"
+        base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+        self.queue_file = os.path.join(base_dir, "storage", "content_queue.json")
 
     def generate_campaign(self, topic: str, language: str = "ar") -> dict:
         """توليد حملة تسويقية متكاملة"""

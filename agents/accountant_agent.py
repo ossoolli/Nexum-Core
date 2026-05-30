@@ -1,6 +1,7 @@
 import os
 import json
 import logging
+from datetime import datetime
 from typing import Dict, Any
 from core.base_agent import BaseAgent
 from services.gemini_service import gemini_service
@@ -65,7 +66,7 @@ class AccountantAgent(BaseAgent):
             pdf.ln(10)
             
             pdf.set_font("Arial", 'B', 12)
-            pdf.cell(0, 10, f"Date: {os.popen('date').read().strip()}", ln=True)
+            pdf.cell(0, 10, f"Date: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}", ln=True)
             pdf.ln(5)
             
             # Transactions
@@ -82,7 +83,8 @@ class AccountantAgent(BaseAgent):
             for c in summary["clients"]:
                 pdf.cell(0, 8, f"{c['name']} ({c['company']}) - {c['email']}", ln=True)
             
-            report_path = f"/home/madarmutaz/Nexum-Core/storage/reports/weekly_{os.getpid()}.pdf"
+            base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+            report_path = os.path.join(base_dir, "storage", "reports", f"weekly_{os.getpid()}.pdf")
             os.makedirs(os.path.dirname(report_path), exist_ok=True)
             pdf.output(report_path)
             return report_path

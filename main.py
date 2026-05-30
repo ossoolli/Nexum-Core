@@ -79,8 +79,8 @@ initiative_engine = InitiativeEngine(
 from core.terminal_controller import terminal_controller
 
 # ─── 9. الحارس المستقل (Watchdog) ───
-from watchdog.monitor import Watchdog
-from watchdog.recovery import RecoveryManager
+from system_watchdog.monitor import Watchdog
+from system_watchdog.recovery import RecoveryManager
 
 # ─── 10. محرك الأسراب ومجلس الحكماء ───
 from swarm.engine import SwarmEngine
@@ -152,6 +152,15 @@ bot._admin_id = ADMIN_ID
 # [Start Gateway]
 # Note: This would typically be called after defining all handlers
 # gateway_manager.run_all()
+
+def broadcast(message_text: str):
+    """بث الرسائل الهامة للقناة المعرفة."""
+    channel_id = getattr(cfg, 'channel_id', None)
+    if channel_id:
+        try:
+            bot.send_message(channel_id, f"📢 <b>[System Broadcast]:</b>\n{message_text}", parse_mode="HTML")
+        except Exception as e:
+            print(f"[Broadcast Error] {e}")
 
 
 # ═══════════════════════════════════════════════════════
@@ -701,7 +710,11 @@ def handle_sentinel_status(message):
     import psutil
     cpu = psutil.cpu_percent()
     ram = psutil.virtual_memory().percent
-    disk = psutil.disk_usage("/").percent
+    import platform
+    if platform.system() == "Windows":
+        disk = psutil.disk_usage("C:\\").percent
+    else:
+        disk = psutil.disk_usage("/").percent
     
     status = (
         f"🛡️ **الحالة الحالية للحارس الرقابي (Sentinel):**\n\n"
@@ -1203,6 +1216,8 @@ def _handle_deploy_site(message, text):
     description = text.replace("انشر موقع", "").replace("deploy site", "").strip()
     
     res = deployment_hand.run({"name": name, "description": description, "bot": bot, "chat_id": message.chat.id})
+    if res.get("status") == "success":
+        broadcast(f"تم بنجاح نشر موقع جديد: {name}\nالوصف: {description}")
     return res
 
 def _handle_finance(message, text):
@@ -1226,6 +1241,7 @@ def _handle_orchestration(message, text):
             status = "✅" if r.get("status") == "success" else "❌"
             msg += f"- {status} Task: {str(r)[:100]}\n"
         bot.send_message(message.chat.id, msg, parse_mode="HTML")
+        broadcast(f"تم الانتهاء من مشروع: {goal[:50]}\nالحالة العامة: اكتملت المهام بنجاح.")
 
     try:
         loop = asyncio.get_event_loop()
@@ -1422,5 +1438,7 @@ if __name__ == "__main__":
     print("🔓 [Security] Forcing Open Mode for Development.")
     from core.terminal_controller import terminal_controller
     terminal_controller.lockdown_mode = False
+    
+    broadcast("NEXUM PRO v13.3 Core - تم التشغيل والأنظمة جاهزة للمهام المتزامنة.")
     
     bot.infinity_polling(timeout=60, long_polling_timeout=30)

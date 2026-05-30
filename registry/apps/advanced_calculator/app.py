@@ -1,7 +1,8 @@
 import os
 
 def save_result(result):
-    with open('/home/madarmutaz/Mutaz-dev/registry/apps/advanced_calculator/results.txt', 'a') as f:
+    base_dir = os.path.dirname(os.path.abspath(__file__))
+    with open(os.path.join(base_dir, 'results.txt'), 'a') as f:
         f.write(str(result) + '\n')
 
 def calculator():

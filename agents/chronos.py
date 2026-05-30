@@ -37,7 +37,8 @@ def get_system_health():
         import psutil
         cpu = psutil.cpu_percent(interval=1)
         mem = psutil.virtual_memory()
-        disk = psutil.disk_usage('/')
+        root_path = "C:\\" if os.name == 'nt' else '/'
+        disk = psutil.disk_usage(root_path)
         return {
             "cpu": cpu,
             "ram": mem.percent,
@@ -96,7 +97,7 @@ def run_tool_hunter():
 def run_marketing_publisher():
     """دورة النشر المجدول"""
     print("[Chronos] Running Marketing Publisher...")
-    queue_file = "/home/madarmutaz/Nexum-Core/storage/content_queue.json"
+    queue_file = os.path.join(BASE_DIR, "storage", "content_queue.json")
     if not os.path.exists(queue_file):
         return
         

@@ -1,4 +1,5 @@
 import os
+import json
 import logging
 import traceback
 from typing import Dict, Any, Optional
@@ -14,6 +15,7 @@ class SelfHealer:
     def __init__(self, bot=None, admin_id: int = None):
         self.bot = bot
         self.admin_id = admin_id
+        self.base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
     def handle_error(self, agent_name: str, error: Exception, context: str = ""):
         """معالجة الخطأ وطلب اقتراح إصلاح"""
@@ -56,7 +58,7 @@ class SelfHealer:
             self._save_suggestion(agent_name, suggestion)
 
     def _get_last_logs(self, agent_name: str) -> str:
-        log_path = f"/home/madarmutaz/Nexum-Core/storage/logs/agents/{agent_name}.log"
+        log_path = os.path.join(self.base_dir, "storage", "logs", "agents", f"{agent_name}.log")
         if os.path.exists(log_path):
             try:
                 with open(log_path, 'r') as f:
@@ -67,7 +69,7 @@ class SelfHealer:
         return "No logs found."
 
     def _save_suggestion(self, agent_name: str, code: str):
-        path = f"/home/madarmutaz/Nexum-Core/storage/self_healing_suggestions.json"
+        path = os.path.join(self.base_dir, "storage", "self_healing_suggestions.json")
         data = {}
         if os.path.exists(path):
             with open(path, 'r') as f:
@@ -79,7 +81,7 @@ class SelfHealer:
 
     def apply_fix(self, agent_name: str):
         """تطبيق الإصلاح المقترح (سيتم استدعاؤه من Callback)"""
-        path = f"/home/madarmutaz/Nexum-Core/storage/self_healing_suggestions.json"
+        path = os.path.join(self.base_dir, "storage", "self_healing_suggestions.json")
         if not os.path.exists(path): return False
         
         with open(path, 'r') as f:

@@ -6,13 +6,15 @@ import telebot
 from dotenv import load_dotenv
 
 # Ensure project path is imported
-sys.path.insert(0, "/home/madarmutaz/Nexum-Core")
+PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+sys.path.insert(0, PROJECT_ROOT)
 
 # Load environment
-load_dotenv("/home/madarmutaz/Nexum-Core/.env")
+load_dotenv(os.path.join(PROJECT_ROOT, ".env"))
 
 def run_health_check():
-    cmd = ["/home/madarmutaz/Nexum-Core/venv/bin/python3", "/home/madarmutaz/Nexum-Core/storage/scripts/monitor_nexum.py"]
+    python_exe = sys.executable
+    cmd = [python_exe, os.path.join(PROJECT_ROOT, "storage", "scripts", "monitor_nexum.py")]
     res = subprocess.run(cmd, capture_output=True, text=True)
     return res.stdout
 

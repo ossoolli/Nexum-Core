@@ -55,8 +55,8 @@ print()
 
 print('[5] All core modules...')
 from core.terminal_controller import terminal_controller
-from watchdog.monitor import Watchdog
-from watchdog.recovery import RecoveryManager
+from system_watchdog.monitor import Watchdog
+from system_watchdog.recovery import RecoveryManager
 from swarm.engine import SwarmEngine
 from swarm.council import CouncilOfSages
 from core.memory.sovereign_memory import SovereignMemory

@@ -20,7 +20,10 @@ class PluginHandler(FileSystemEventHandler):
 
 class DynamicPluginLoader:
     """نظام تحميل الإضافات الديناميكي"""
-    def __init__(self, plugins_dir="/home/madarmutaz/Nexum-Core/plugins/active"):
+    def __init__(self, plugins_dir=None):
+        base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+        if plugins_dir is None:
+            plugins_dir = os.path.join(base_dir, "plugins", "active")
         self.plugins_dir = plugins_dir
         os.makedirs(self.plugins_dir, exist_ok=True)
         self.loaded_plugins = {}

@@ -2,6 +2,7 @@ import os
 import json
 import subprocess
 import time
+import tempfile
 import logging
 from typing import Dict, Any, List
 from core.base_agent import BaseAgent
@@ -21,7 +22,8 @@ class DeploymentHand(BaseAgent):
             description="نظام النشر الآلي للمواقع (Website Deployer Protocol)",
             version="1.0"
         )
-        self.deployments_file = "/home/madarmutaz/Nexum-Core/storage/deployments.json"
+        base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+        self.deployments_file = os.path.join(base_dir, "storage", "deployments.json")
         
     def _execute_shell(self, cmd: str, cwd: str = None, retries: int = 3) -> Dict[str, Any]:
         """تنفيذ أمر shell مع محاولات إعادة"""
@@ -70,7 +72,7 @@ class DeploymentHand(BaseAgent):
 
         notify(f"بدء نشر المشروع: {name}")
         
-        repo_path = f"/tmp/{name}_{int(time.time())}"
+        repo_path = os.path.join(tempfile.gettempdir(), f"{name}_{int(time.time())}")
         os.makedirs(repo_path, exist_ok=True)
 
         # 1. GitHub Repo Create

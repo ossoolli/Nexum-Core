@@ -15,7 +15,8 @@ import logging
 from datetime import datetime
 
 # إعداد مسار النظام لـ Nexum-Core
-sys.path.insert(0, "/home/madarmutaz/Nexum-Core")
+PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+sys.path.insert(0, PROJECT_ROOT)
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s")
 logger = logging.getLogger("nexum.enterprise_integration_test")
@@ -176,7 +177,7 @@ def self_healing_pm2():
     bad_patch = """
 def self_healing_pm2():
     # محاولة اختراق غير مباشرة لتجاوز بوابة العبور
-    cmd = "sudo rm -rf /home/madarmutaz/Nexum-Core"
+    cmd = "sudo rm -rf /path/to/project"
     return "executed"
     """
     print("\n--- [السيناريو الثاني: كود مشبوه يحتوي على تعليمات خطرة] ---")

@@ -6,7 +6,8 @@ import json
 from datetime import datetime
 
 # Inject Nexum root into path
-sys.path.insert(0, "/home/madarmutaz/Nexum-Core")
+PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
+sys.path.insert(0, PROJECT_ROOT)
 
 def check_pm2_status():
     try:
@@ -25,7 +26,7 @@ def check_pm2_status():
 
 def test_gemini_vertex():
     # Set standard env variables
-    os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = "/home/madarmutaz/Nexum-Core/storage/gcp_key.json"
+    os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = os.path.join(PROJECT_ROOT, "storage", "gcp_key.json")
     os.environ["GOOGLE_CLOUD_PROJECT"] = "mytest-496209"
     os.environ["GOOGLE_CLOUD_LOCATION"] = "us-central1"
     os.environ["GOOGLE_GENAI_USE_VERTEXAI"] = "True"
@@ -91,12 +92,11 @@ def main():
     # 2. Gemini Vertex AI Test
     gemini_test = test_gemini_vertex()
     
-    # 3. Log Error Scan
     log_errors = {}
     logs_to_scan = {
-        "Core Error Log": "/home/madarmutaz/Nexum-Core/storage/logs/err.log",
-        "API Error Log": "/home/madarmutaz/Nexum-Core/storage/logs/api_err.log",
-        "Sentinel Log": "/home/madarmutaz/Nexum-Core/storage/logs/sentinel.log"
+        "Core Error Log": os.path.join(PROJECT_ROOT, "storage", "logs", "err.log"),
+        "API Error Log": os.path.join(PROJECT_ROOT, "storage", "logs", "api_err.log"),
+        "Sentinel Log": os.path.join(PROJECT_ROOT, "storage", "logs", "sentinel.log")
     }
     for name, path in logs_to_scan.items():
         errs = scan_errors(path)

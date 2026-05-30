@@ -14,6 +14,11 @@ load_dotenv(dotenv_path=os.path.join(PROJECT_ROOT, ".env"), override=True)
 import sqlite3
 
 db_key = os.getenv("NEXUM_DB_ENCRYPTION_KEY")
+if db_key:
+    db_key = db_key.strip("'\"")
+    import re
+    db_key = re.sub(r'[^a-fA-F0-9]', '', db_key)
+
 _use_cipher = False
 cipher_sqlite3 = None
 

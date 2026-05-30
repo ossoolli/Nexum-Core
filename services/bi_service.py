@@ -7,8 +7,40 @@ from typing import List, Dict, Any
 logger = logging.getLogger(__name__)
 
 class BIService:
-    def __init__(self, db_path="/home/madarmutaz/Nexum-Core/storage/nexum_business.db"):
+    def __init__(self, db_path=None):
+        base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+        if db_path is None:
+            db_path = os.path.join(base_dir, "storage", "nexum_business.db")
         self.db_path = db_path
+        os.makedirs(os.path.dirname(self.db_path), exist_ok=True)
+        self._init_db()
+
+    def _init_db(self):
+        conn = self._get_connection()
+        cursor = conn.cursor()
+        cursor.execute('''
+            CREATE TABLE IF NOT EXISTS transactions (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                date TEXT,
+                type TEXT,
+                amount REAL,
+                currency TEXT,
+                description TEXT,
+                category TEXT
+            )
+        ''')
+        cursor.execute('''
+            CREATE TABLE IF NOT EXISTS clients (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                name TEXT,
+                email TEXT,
+                phone TEXT,
+                company TEXT,
+                status TEXT
+            )
+        ''')
+        conn.commit()
+        conn.close()
 
     def _get_connection(self):
         return sqlite3.connect(self.db_path)

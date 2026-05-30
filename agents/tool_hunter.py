@@ -19,7 +19,8 @@ class ToolHunterAgent(BaseAgent):
             description="وكيل البحث عن الأدوات (Self-Growth Agent)",
             version="1.0"
         )
-        self.discovered_file = "/home/madarmutaz/Nexum-Core/storage/discovered_tools.json"
+        base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+        self.discovered_file = os.path.join(base_dir, "storage", "discovered_tools.json")
         self.github_token = os.getenv("GITHUB_TOKEN")
 
     def search_mcp_servers(self) -> list:

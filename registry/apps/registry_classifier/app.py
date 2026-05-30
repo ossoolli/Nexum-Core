@@ -21,4 +21,8 @@ def classify_registry_files(source_dir, target_base_dir):
 
 if __name__ == '__main__':
     print('Starting Registry File Classification...')
-    classify_registry_files('/tmp/registry_source', '/home/madarmutaz/Mutaz-dev/registry/data/classified')
+    base_dir = os.path.dirname(os.path.abspath(__file__))
+    source = os.path.join(base_dir, 'registry_source')
+    target = os.path.join(base_dir, 'classified')
+    os.makedirs(source, exist_ok=True)
+    classify_registry_files(source, target)

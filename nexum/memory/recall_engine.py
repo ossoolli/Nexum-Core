@@ -8,6 +8,11 @@ dotenv.load_dotenv(os.path.join(PROJECT_ROOT, ".env"))
 
 db_key = os.getenv("NEXUM_DB_ENCRYPTION_KEY")
 if db_key:
+    db_key = db_key.strip("'\"")
+    import re
+    db_key = re.sub(r'[^a-fA-F0-9]', '', db_key)
+
+if db_key:
     try:
         from pysqlcipher3 import dbapi2 as sqlite3
         _use_cipher = True

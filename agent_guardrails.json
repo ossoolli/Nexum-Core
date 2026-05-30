@@ -5,7 +5,7 @@
   "forbidden_scopes": ["delete_database", "change_iam_roles", "disable_pm2_clusters"],
   "require_human_approval": {
     "terminal_commands": ["rm -rf", "pm2 delete", "chmod 777"],
-    "file_modifications": ["/home/madarmutaz/Nexum-Core/nexum-core.py", "nexum-core.py", "c:\\Users\\madar\\Documents\\nexum\\nexum-core.py"]
+    "file_modifications": ["nexum-core.py", "c:\\Users\\madar\\Documents\\nexum\\nexum-core.py"]
   },
   "max_memory_limit_mb": 512
 }
