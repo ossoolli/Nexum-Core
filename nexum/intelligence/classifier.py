@@ -11,6 +11,7 @@ class Intent(str, Enum):
     EXECUTE   = "execute"
     CHAT      = "chat"
     
+    FINANCE   = "finance"
     # ─── Google Cloud Intents ───
     CLOUD_STORAGE   = "cloud_storage"    # "ارفع ملف لـ Storage"
     CLOUD_BIGQUERY  = "cloud_bigquery"   # "اعمل query على BigQuery"
@@ -33,7 +34,7 @@ _KEYWORD_MAP = {
     ],
     Intent.DEPLOY: [
         'ارفع', 'انشر', 'deploy', 'push', 'sync', 'git', 'نشر',
-        'مزامنة', 'رفع', 'تحديث الكود'
+        'مزامنة', 'رفع', 'تحديث الكود', 'انشر موقع', 'deploy site'
     ],
     Intent.BROADCAST: [
         'بث', 'broadcast', 'ارسل للقناة', 'انشر للكل', 'قنواتي'
@@ -44,8 +45,9 @@ _KEYWORD_MAP = {
     Intent.CLOUD_STORAGE:  ["storage", "باكت", "bucket", "ارفع ملف", "حمّل ملف", "gcs"],
     Intent.CLOUD_BIGQUERY: ["bigquery", "query", "جدول", "dataset", "sql", "استعلام"],
     Intent.CLOUD_COMPUTE:  ["vm", "instance", "سيرفر", "شغل جهاز", "أوقف جهاز", "compute"],
-    Intent.CLOUD_MONITOR:  ["logs", "سجلات", "monitoring", "تنبيه", "alert", "أداء"],
+    Intent.CLOUD_MONITOR:  ["logs", "sجلات", "monitoring", "تنبيه", "alert", "أداء"],
     Intent.CLOUD_AI:       ["vertex", "model", "تدريب", "vertex ai", "aiplatform"],
+    Intent.FINANCE:        ["أضف دخل", "أضف مصاريف", "حسابات", "ربح", "دخل", "مصروف", "معاملة مالي", "accountant"],
 }
 
 class LocalClassifier:

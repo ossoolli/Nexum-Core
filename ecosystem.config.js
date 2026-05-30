@@ -40,6 +40,18 @@ module.exports = {
       log_date_format: 'YYYY-MM-DD HH:mm:ss Z',
       error_file: 'storage/logs/sentinel.log',
       out_file: 'storage/logs/sentinel.log'
+    },
+    {
+      name: 'nexum-chronos',
+      script: 'agents/chronos.py',
+      interpreter: 'python3',
+      watch: false,
+      env: {
+        PYTHONUNBUFFERED: '1'
+      },
+      log_date_format: 'YYYY-MM-DD HH:mm:ss Z',
+      error_file: 'storage/logs/chronos_err.log',
+      out_file: 'storage/logs/chronos_out.log'
     }
   ]
 };

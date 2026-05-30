@@ -349,5 +349,73 @@
         },
         "status": "active",
         "created_at": "2026-05-30T12:45:37.165955"
+    },
+    "system_code_editor": {
+        "agent_id": "system_code_editor",
+        "name": "system_code_editor",
+        "role": "Generated Agent",
+        "capabilities": [
+            "run"
+        ],
+        "tools": [],
+        "protocols": [],
+        "restrictions": [],
+        "awareness": {
+            "last_event_seen": null,
+            "current_memory_context": null
+        },
+        "status": "active",
+        "created_at": "2026-05-30T13:16:18.592241"
+    },
+    "hermes_agent_core_capability": {
+        "agent_id": "hermes_agent_core_capability",
+        "name": "hermes_agent_core_capability",
+        "role": "Generated Agent",
+        "capabilities": [
+            "run"
+        ],
+        "tools": [],
+        "protocols": [],
+        "restrictions": [],
+        "awareness": {
+            "last_event_seen": null,
+            "current_memory_context": null
+        },
+        "status": "active",
+        "created_at": "2026-05-30T13:32:11.756443"
+    },
+    "dynamic_system_monitor": {
+        "agent_id": "dynamic_system_monitor",
+        "name": "dynamic_system_monitor",
+        "role": "Generated Agent",
+        "capabilities": [
+            "run"
+        ],
+        "tools": [],
+        "protocols": [],
+        "restrictions": [],
+        "awareness": {
+            "last_event_seen": null,
+            "current_memory_context": null
+        },
+        "status": "active",
+        "created_at": "2026-05-30T13:48:10.284489"
+    },
+    "live_system_discovery_and_monitoring_agent": {
+        "agent_id": "live_system_discovery_and_monitoring_agent",
+        "name": "live_system_discovery_and_monitoring_agent",
+        "role": "Generated Agent",
+        "capabilities": [
+            "run"
+        ],
+        "tools": [],
+        "protocols": [],
+        "restrictions": [],
+        "awareness": {
+            "last_event_seen": null,
+            "current_memory_context": null
+        },
+        "status": "active",
+        "created_at": "2026-05-30T14:03:41.301530"
     }
 }

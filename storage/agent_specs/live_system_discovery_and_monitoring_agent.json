@@ -1,0 +1,23 @@
+{
+  "name": "live_system_discovery_and_monitoring_agent",
+  "class_name": "LiveSystemDiscoveryAndMonitoringAgentAgent",
+  "description": "وكيل سيادي مستقل مولد تلقائياً للقيام بـ: Proactively discover, onboard, and continuously monitor user-defined live operational systems or processes (like 'Mutaz live') within the user's ecosystem, providing real-time status, incident detection, and error reporting without requiring explicit, step-by-step configuration for initial awareness.",
+  "tools": [
+    "search_web",
+    "fetch_webpage"
+  ],
+  "triggers": [
+    "every_hour"
+  ],
+  "methods": [
+    "run",
+    "on_trigger",
+    "report"
+  ],
+  "schedule": {
+    "interval": "hourly"
+  },
+  "created_at": "2026-05-30T14:03:24.915151",
+  "status": "BUILT",
+  "path": "/home/madarmutaz/Nexum-Core/agents/generated/live_system_discovery_and_monitoring_agent_agent.py"
+}

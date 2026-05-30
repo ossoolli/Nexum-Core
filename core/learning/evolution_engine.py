@@ -45,7 +45,7 @@ class SovereignEvolutionEngine:
             pass
         logger.info(f"[Evolution] {message}")
 
-    def run_diagnostics_and_evolve(self, admin_id: int) -> dict:
+    async def run_diagnostics_and_evolve(self, admin_id: int) -> dict:
         """تشغيل دورة الفحص الشاملة والتطوير الذاتي"""
         self.log_evolution("Starting autonomous diagnostics and evolution cycle...")
 
@@ -94,7 +94,7 @@ class SovereignEvolutionEngine:
                 tasks = kanban.list_tasks(board_id)
                 for task in tasks:
                     if task.get("status") == "done":
-                        skill_path = asyncio.run(self.curator.distill_task(task))
+                        skill_path = await self.curator.distill_task(task)
                         if skill_path:
                             report["distilled_skills"].append(skill_path)
                             self.log_evolution(f"Distilled new skill: {skill_path}")
@@ -105,7 +105,7 @@ class SovereignEvolutionEngine:
         try:
             import asyncio
             from core.learning.prompt_compiler import prompt_compiler
-            asyncio.run(prompt_compiler.compile_all())
+            await prompt_compiler.compile_all()
             self.log_evolution("Prompt compilation and optimization cycle completed.")
         except Exception as e:
             self.log_evolution(f"Prompt compilation error: {e}", level="ERROR")

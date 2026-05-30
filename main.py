@@ -99,7 +99,19 @@ try:
 except ImportError:
     pass
 
-# ─── 11. الوكلاء والأدوات المساعدة ───
+# ─── 11. وكلاء متخصصون ───
+try:
+    from agents.deployment_hand import deployment_hand
+    from agents.accountant_agent import accountant_agent
+    from agents.marketing_agent import marketing_agent
+    from core.orchestrator import orchestrator
+    from core.self_healer import self_healer
+except ImportError:
+    deployment_hand = None
+    accountant_agent = None
+    marketing_agent = None
+
+# ─── تحميل الإعدادات ───
 try:
     from core.executive_agent import executive_agent
 except ImportError:
@@ -1124,6 +1136,22 @@ def handle_universal(message):
             bot.reply_to(message, "Cloud agent not available.")
         return
 
+    # ─── أوامر النشر (Deploy Site) ───
+    if intent_result and Intent and intent_result.intent == Intent.DEPLOY:
+        if "انشر موقع" in text or "deploy site" in text.lower():
+            _handle_deploy_site(message, text)
+            return
+
+    # ─── أوامر المالية (Finance) ───
+    if intent_result and Intent and intent_result.intent == Intent.FINANCE:
+        _handle_finance(message, text)
+        return
+
+    # ─── أوامر التنسيق (Orchestration) ───
+    if text and text.startswith("نفذ مشروع"):
+        _handle_orchestration(message, text)
+        return
+
     # ─── أوامر التنفيذ (Execute) ───
     if intent_result and Intent and intent_result.intent == Intent.EXECUTE:
         _handle_execute(message, text)
@@ -1157,6 +1185,53 @@ def _handle_cloud(message, text):
     except Exception as e:
         bot.reply_to(message, f"Cloud error: {e}")
 
+
+def _handle_deploy_site(message, text):
+    """معالجة أوامر نشر المواقع آلياً."""
+    if not deployment_hand:
+        bot.reply_to(message, "DeploymentHand agent is not available.")
+        return
+
+    bot.reply_to(message, "<b>NEXUM DeploymentHand</b> starting mission...", parse_mode="HTML")
+    
+    # استخراج البيانات الأساسية (تبسيط: الاسم هو أول كلمة بعد الأمر)
+    parts = text.split()
+    name = "site_" + str(int(time.time()))
+    if len(parts) > 2:
+        name = parts[2]
+    
+    description = text.replace("انشر موقع", "").replace("deploy site", "").strip()
+    
+    res = deployment_hand.run({"name": name, "description": description, "bot": bot, "chat_id": message.chat.id})
+    return res
+
+def _handle_finance(message, text):
+    """معالجة الأوامر المالية."""
+    if not accountant_agent:
+        bot.reply_to(message, "Accountant agent not available.")
+        return
+    
+    res = accountant_agent.run({"text": text})
+    bot.reply_to(message, res.get("message", "Processed."))
+
+def _handle_orchestration(message, text):
+    """تفويض مهمة معقدة للمنسق."""
+    goal = text.replace("نفذ مشروع", "").strip()
+    bot.reply_to(message, f"🎯 <b>Master Orchestrator</b> decomposing goal: {goal[:50]}...", parse_mode="HTML")
+    
+    async def run_task():
+        res = await orchestrator.delegate_task(goal)
+        msg = f"🏁 <b>Project Completed:</b> {goal[:30]}\n"
+        for r in res.get("results", []):
+            status = "✅" if r.get("status") == "success" else "❌"
+            msg += f"- {status} Task: {str(r)[:100]}\n"
+        bot.send_message(message.chat.id, msg, parse_mode="HTML")
+
+    try:
+        loop = asyncio.get_event_loop()
+        loop.create_task(run_task())
+    except Exception as e:
+        bot.reply_to(message, f"Orchestration error: {e}")
 
 def _handle_execute(message, text):
     """معالجة أوامر التنفيذ مع تقييم السلوك والتسجيل."""

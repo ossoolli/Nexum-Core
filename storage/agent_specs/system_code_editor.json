@@ -1,0 +1,23 @@
+{
+  "name": "system_code_editor",
+  "class_name": "SystemCodeEditorAgent",
+  "description": "وكيل سيادي مستقل مولد تلقائياً للقيام بـ: Directly modify and update system configuration or source code files based on specified logic or provided code snippets, executing changes in-place rather than generating a script for manual execution. This includes tasks like opening specific files, parsing their content, inserting/replacing code blocks, and saving the modified files.",
+  "tools": [
+    "search_web",
+    "fetch_webpage"
+  ],
+  "triggers": [
+    "every_hour"
+  ],
+  "methods": [
+    "run",
+    "on_trigger",
+    "report"
+  ],
+  "schedule": {
+    "interval": "hourly"
+  },
+  "created_at": "2026-05-30T13:15:56.146798",
+  "status": "BUILT",
+  "path": "/home/madarmutaz/Nexum-Core/agents/generated/system_code_editor_agent.py"
+}

@@ -62,3 +62,20 @@ All features and automation pipelines MUST inherit and utilize these established
 - [ملف مواصفات وقيود الحماية](file:///c:/Users/madar/Documents/nexum/agent_guardrails.json)
 
 النظام الآن في حالة تشغيل كاملة ومثالية (Active & Live) ومتصل بخوادم البث المباشر.
+## 🚀 Nexum-Core v12.0 Expansion Features
+
+### 🏛️ Phase 4: Business Intelligence
+- **AccountantAgent**: Financial transaction processing via NLP.
+- **BIService**: SQLite-backed accounting with weekly PDF reports.
+- **Weekly Reports**: Automated PDF generation and delivery (Telegram/Email).
+
+### 🌌 Phase 5: Master Orchestration
+- **MasterOrchestrator**: Parallel task delegation across specialized agents.
+- **Self-Healing Engine**: Proactive error detection and recovery via Gemini.
+- **Nexum App Store**: Web UI and API for managing and installing new tools/plugins.
+
+### 🛠️ New Commands
+- `انشر موقع [اسم] [وصف]`: Launch a new website on GitHub Pages.
+- `أضف دخل [مبلغ] من [سبب]`: Record financial income.
+- `أضف مصروف [مبلغ] لـ [سبب]`: Record financial expense.
+- `نفذ مشروع [وصف]`: Delegate complex multi-step tasks to the Orchestrator.

@@ -75,6 +75,10 @@ except ImportError:
     init_inspection_system = None
     _INSPECTION_AVAILABLE = False
 
+try:
+    from webapp.app_store import router as app_store_router
+except ImportError:
+    app_store_router = None
 
 # ═══════════════════════════════════════
 # Pydantic Models
@@ -123,6 +127,10 @@ app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_methods=["*"], all
 
 @app.on_event("startup")
 async def startup_event():
+    # ─── تسجيل المتاجر ───
+    if app_store_router:
+        app.include_router(app_store_router)
+    
     try:
         from core.system_tools import register_all_system_tools
         register_all_system_tools()

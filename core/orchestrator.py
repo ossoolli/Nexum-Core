@@ -1,125 +1,91 @@
-"""
-🔱 NEXUM Flow Orchestrator — المنسق المركزي
-=============================================
-يدير تنفيذ المهام عبر الـ Execution Graph ويبث النتائج للمستخدم والقناة.
-"""
-import threading
-import time
-import uuid
-from typing import Dict, Any, Optional
+import logging
+import asyncio
+from typing import Dict, Any, List
+from core.base_agent import AgentStatus
 
-from core.execution_graph import ExecutionGraph, TaskNode
+logger = logging.getLogger(__name__)
 
+class MasterOrchestrator:
+    """
+    MasterOrchestrator — التنسيق السيادي
+    المسؤول عن تقسيم المهام الكبيرة وتفويضها لوكلاء متخصصين.
+    """
+    def __init__(self, agents_registry: Dict[str, Any] = None):
+        self.registry = agents_registry or {}
+        self.loop = asyncio.get_event_loop()
 
-class FlowOrchestrator:
-    def __init__(self):
-        self.active_graphs: Dict[str, ExecutionGraph] = {}
-        self._lock = threading.Lock()
-        self._bot = None
-        self._admin_id = None
-        self._channel_id = None
-        self.planner = None
+    def register_agent(self, name: str, agent_instance: Any):
+        self.registry[name] = agent_instance
 
-        # بدء المجدول في الخلفية
-        self._scheduler = threading.Thread(target=self._run_scheduler, daemon=True)
-        self._scheduler.start()
-
-    def set_planner(self, planner):
-        """ربط المخطط الذكي"""
-        self.planner = planner
-
-    def set_bot(self, bot, admin_id, channel_id=None):
-        """ربط بوت تيليجرام للإشعارات والبث"""
-        self._bot = bot
-        self._admin_id = str(admin_id)
-        self._channel_id = channel_id
-
-    def _notify(self, msg: str, to_channel: bool = True):
-        """إرسال إشعار للمستخدم وللقناة"""
-        if not self._bot:
-            return
+    async def delegate_task(self, goal: str, context: dict = None) -> dict:
+        """
+        تقسيم الهدف وتفويضه
+        """
+        logger.info(f"Delegating master goal: {goal}")
+        
+        # 1. التخطيط (عبر Gemini)
+        # سيقوم Gemini بتقسيم المهمة لخطوات: {'subtasks': [{'agent': 'deployment', 'task': '...'}, ...]}
+        # للتبسيط هنا سنحاكي التقسيم أو نطلب من Gemini مباشرة
+        
+        from services.gemini_service import gemini_service
+        prompt = f"""
+        أنت المايسترو لنظام Nexum-Core. قم بتقسيم الهدف التالي لمهام فرعية متوازية.
+        الهدف: {goal}
+        
+        الوكلاء المتاحون:
+        - deployment: لنشر المواقع
+        - content: لتوليد المحتوى التسويقي
+        - finance: لتسجيل العمليات المالية
+        - tools: للبحث عن أدوات
+        
+        أعد JSON يحتوي على قائمة 'tasks' بحيث كل مهمة لها: 'agent' و 'input'.
+        """
+        
+        response, _ = gemini_service.ask(prompt)
         try:
-            if self._admin_id:
-                self._bot.send_message(self._admin_id, msg, parse_mode="Markdown")
-        except Exception as e:
-            print(f"[Orchestrator] Admin notify error: {e}")
+            import json, re
+            json_match = re.search(r'\{.*\}', response, re.DOTALL)
+            plan = json.loads(json_match.group())
+            tasks = plan.get("tasks", [])
+        except:
+            return {"status": "error", "message": "Failed to generate plan"}
 
-        if to_channel and self._channel_id:
-            try:
-                self._bot.send_message(self._channel_id, msg, parse_mode="Markdown")
-            except Exception as e:
-                print(f"[Orchestrator] Channel broadcast error: {e}")
+        # 2. التنفيذ المتوازي
+        coroutines = []
+        for t in tasks:
+            agent_name = t.get("agent")
+            agent_input = t.get("input", {})
+            agent = self.registry.get(agent_name)
+            
+            if agent:
+                # تحويل التشغيل المتزامن لـ coroutine
+                coroutines.append(self._run_agent_async(agent, agent_input))
+        
+        results = await asyncio.gather(*coroutines)
+        
+        return {
+            "status": "completed",
+            "goal": goal,
+            "results": results
+        }
 
-    # ─── تنفيذ هدف جديد ───
-    def execute_goal(self, goal: str) -> Dict[str, Any]:
-        if not self.planner:
-            raise Exception("Planner not initialized.")
-
-        protocol_id = f"proto_{uuid.uuid4().hex[:8]}"
-
-        try:
-            graph = self.planner.generate_execution_graph(goal, protocol_id)
-        except Exception as e:
-            raise Exception(f"Planning failed: {str(e)}")
-
-        with self._lock:
-            self.active_graphs[protocol_id] = graph
-
-        return {"protocol_id": protocol_id, "status": "Executing"}
-
-    # ─── تنفيذ مهمة واحدة ───
-    def _execute_task(self, graph: ExecutionGraph, task: TaskNode):
-        task.status = "RUNNING"
-
-        from core.tool_registry import tool_registry
-
-        try:
-            result = tool_registry.execute_tool(task.action, task.params)
-            task.status = "COMPLETED"
-            task.result = result
-
-            # إرسال النتيجة
-            result_preview = str(result)[:800]
-            self._notify(
-                f"✅ **مهمة مكتملة**\n"
-                f"🧬 `{graph.protocol_id}`\n"
-                f"🛠️ `{task.action}`\n"
-                f"📊 {result_preview}"
-            )
-
-            # مزامنة Git إذا كانت العملية كتابة ملف
-            if task.action in ("write_file", "run_host_terminal"):
-                try:
-                    from core.git_bot import auto_sync
-                    auto_sync()
-                except Exception:
-                    pass
-
-        except Exception as e:
-            task.status = "FAILED"
-            task.error = str(e)
-            self._notify(f"❌ **فشل المهمة**\n🛠️ `{task.action}`\n`{str(e)}`")
-
-    # ─── المجدول (Scheduler Loop) ───
-    def _run_scheduler(self):
-        while True:
-            graphs_to_process = []
-            with self._lock:
-                graphs_to_process = list(self.active_graphs.values())
-
-            for graph in graphs_to_process:
-                executable = graph.get_executable_nodes()
-                for task in executable:
-                    t = threading.Thread(target=self._execute_task, args=(graph, task))
-                    t.start()
-
-                # تنظيف: حذف الرسوم البيانية المكتملة
-                if graph.is_completed() or graph.is_failed():
-                    with self._lock:
-                        self.active_graphs.pop(graph.protocol_id, None)
-
-            time.sleep(1)
-
+    async def _run_agent_async(self, agent: Any, input_data: dict) -> dict:
+        """تشغيل الوكيل في Thread pool لمنع حظر Loop"""
+        return await self.loop.run_in_executor(None, agent.run, input_data)
 
 # Singleton
-orchestrator = FlowOrchestrator()
+orchestrator = MasterOrchestrator()
+
+# Initialize registry
+try:
+    from agents.deployment_hand import deployment_hand
+    from agents.marketing_agent import marketing_agent
+    from agents.accountant_agent import accountant_agent
+    from agents.tool_hunter import tool_hunter
+    
+    orchestrator.register_agent("deployment", deployment_hand)
+    orchestrator.register_agent("content", marketing_agent)
+    orchestrator.register_agent("finance", accountant_agent)
+    orchestrator.register_agent("tools", tool_hunter)
+except ImportError:
+    pass

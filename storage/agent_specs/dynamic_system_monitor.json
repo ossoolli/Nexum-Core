@@ -1,0 +1,23 @@
+{
+  "name": "dynamic_system_monitor",
+  "class_name": "DynamicSystemMonitorAgent",
+  "description": "وكيل سيادي مستقل مولد تلقائياً للقيام بـ: Proactively discover, onboard, and continuously monitor the health and operational status of new or undefined services, processes, or external entities within or relevant to the NEXUM PRO environment, and automatically identify and report anomalies or issues.",
+  "tools": [
+    "search_web",
+    "fetch_webpage"
+  ],
+  "triggers": [
+    "every_hour"
+  ],
+  "methods": [
+    "run",
+    "on_trigger",
+    "report"
+  ],
+  "schedule": {
+    "interval": "hourly"
+  },
+  "created_at": "2026-05-30T13:47:36.515039",
+  "status": "BUILT",
+  "path": "/home/madarmutaz/Nexum-Core/agents/generated/dynamic_system_monitor_agent.py"
+}

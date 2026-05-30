@@ -1,0 +1,23 @@
+{
+  "name": "hermes_agent_core_capability",
+  "class_name": "HermesAgentCoreCapabilityAgent",
+  "description": "وكيل سيادي مستقل مولد تلقائياً للقيام بـ: Ability to intelligently parse, complete (if necessary), and integrate complex or new function logic provided as high-level programming language code snippets (e.g., Python functions) into existing source files by generating precise and executable modification commands (e.g., advanced `sed` patterns, dedicated code generation/insertion tools, or direct file manipulation logic within a script) as requested for the AI fallback mechanism.",
+  "tools": [
+    "search_web",
+    "fetch_webpage"
+  ],
+  "triggers": [
+    "every_hour"
+  ],
+  "methods": [
+    "run",
+    "on_trigger",
+    "report"
+  ],
+  "schedule": {
+    "interval": "hourly"
+  },
+  "created_at": "2026-05-30T13:31:42.262907",
+  "status": "BUILT",
+  "path": "/home/madarmutaz/Nexum-Core/agents/generated/hermes_agent_core_capability_agent.py"
+}

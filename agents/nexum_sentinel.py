@@ -82,7 +82,7 @@ class NexumSentinel:
                 logger.info("🧹 Performing autonomous refactoring...")
                 # evolution_engine doesn't have refactor_dirty_code, 
                 # but it has logic for evolution, let's trigger diagnostics
-                self.evolution_engine.run_diagnostics_and_evolve(admin_id=1)
+                await self.evolution_engine.run_diagnostics_and_evolve(admin_id=1)
                 
                 # 4. Run Predictive Monitor
                 self.predictive_sentinel.analyze_logs()
