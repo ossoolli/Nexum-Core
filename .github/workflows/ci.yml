@@ -21,6 +21,13 @@ jobs:
         run: |
           pip install -r requirements.txt pytest pydantic-settings
           
+      - name: Setup Mock Storage for Nexum Core (Hermes Auto-Fix)
+        run: |
+          mkdir -p storage/memory storage/sovereign_memory agents/generated docs
+          [[ ! -f storage/agent_registry.json ]] && echo "{}" > storage/agent_registry.json
+          [[ ! -f storage/memory/context.json ]] && echo "[]" > storage/memory/context.json
+          [[ ! -f storage/sovereign_memory/evolution_history.json ]] && echo "[]" > storage/sovereign_memory/evolution_history.json
+
       - name: Run tests
         run: pytest tests/ -v
         
